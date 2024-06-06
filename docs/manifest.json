@@ -1,0 +1,16 @@
+{
+  "id": "https://text.whyolet.com/",
+  "start_url": ".",
+  "name": "Whyolet Text",
+  "short_name": "Whyolet Text",
+  "display": "standalone",
+  "background_color": "#639",
+  "theme_color": "#639",
+  "icons": [
+    {
+      "src": "text.png",
+      "type": "image/png",
+      "sizes": "32x32"
+    }
+  ]
+}
