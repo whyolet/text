@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -eu
+
+for icon_name in Icon Icon-maskable
+do
+  for pixels in 192 512
+  do
+    inkscape \
+      -w $pixels \
+      -h $pixels \
+      -o $icon_name-$pixels.png \
+      $icon_name.svg
+  done
+done

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"
+>
+<!-- Docs: https://developer.mozilla.org/en-US/docs/Web/SVG/Element -->
+<!--
+  Android maskable icon:
+  1. Replace white background with your special background.
+  2. Scale foreground down until it is cropped OK on https://maskable.app/
+
+  But in our case, white IS our special background,
+  cutting through the violet foreground circle.
+
+  So while icon.svg is 16x16, icon_maskable.svg is 20x20 with 2 pixels padding.
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  version="1.1"
+  viewBox="0 0 20 20"
+>
+  <rect
+    x="0"
+    y="0"
+    width="20"
+    height="20"
+    fill="#FFF"
+    stroke="none"
+  />
+  <circle
+    cx="10"
+    cy="10"
+    r="7"
+    fill="#639"
+    stroke="none"
+  />
+  <path
+    fill="none"
+    stroke="#FFF"
+    stroke-width="2"
+    d="M2,6 H18 M10,6 V18"
+  />
+</svg>
