@@ -4,7 +4,7 @@
   "name": "Whyolet Text",
   "short_name": "Whyolet Text",
   "display": "standalone",
-  "background_color": "#639",
+  "background_color": "#FFF",
   "theme_color": "#639",
   "icons": [
     {
