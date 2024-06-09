@@ -1,0 +1,57 @@
+html,
+body,
+textarea {
+  margin: 0;
+  border: 0;
+  padding: 0;
+
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+
+  background-color: #639;
+  color: #CBF;
+
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 1.2rem;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.margin,
+.main {
+  display: flex;
+  min-width: 2rem;
+  min-height: 2rem;
+}
+
+.margin {
+  flex: 0 1;
+}
+
+.main {
+  flex: 1 0;
+}
+
+.tools {
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+textarea {
+  display: block;  /* Avoid scrollbar and visible background */
+  outline: 0;  /* Avoid outline on focus */
+  resize: none;
+}
+
+textarea::selection {
+  background-color: #CBF;
+  color: #639;
+}
