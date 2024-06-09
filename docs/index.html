@@ -1,50 +1,80 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, interactive-widget=resizes-content" />
-<meta name="theme-color" content="#639" />
-<title>Whyolet Text</title>
-<link rel="icon" href="icons/Icon-512.png" />
-<link rel="manifest" href="manifest.json" />
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#639" />
+    <title>Whyolet Text</title>
+    <link rel="icon" href="icons/Icon-512.png" />
+    <link rel="manifest" href="manifest.json" />
 
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 
-<style>
-html,
-body,
-textarea {
-  margin: 0;
-  border: 0;
-  padding: 0;
+    <link href="style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="column">
 
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;  
-}
+      <div class="margin">
+        <div class="margin tools">
+          <span class="material-icons">
+            menu
+          </span>
+        </div>
+        <div class="main tools">
+          <span class="material-icons">
+            undo
+          </span>
+          <span class="material-icons">
+            redo
+          </span>
+        </div>
+        <div class="margin tools">
+          <span class="material-icons">
+            search
+          </span>
+        </div>
+      </div>
 
-textarea {
-  display: block;  /* Avoid scrollbar and visible `body` */
-  resize: none;
-  padding: 1em;
-  outline: 0;  /* Avoid black outline on focus */
+      <div class="main">
+        <div class="margin"></div>
+        <div class="main">
+          <textarea>Hello</textarea>
+        </div>
+        <div class="margin tools column">
+          <span class="material-icons">
+            arrow_upward
+          </span>
+          <span class="material-icons">
+            arrow_downward
+          </span>
+        </div>
+      </div>
 
-  background-color: #639;
-  color: #CBF;
+      <div class="margin">
+        <div class="margin tools">
+          <span class="material-icons">
+            help_outline
+          </span>
+        </div>
+        <div class="main tools">
+          <span class="material-icons">
+            clear
+          </span>
+          <span class="material-icons">
+            remove
+          </span>
+        </div>
+        <div class="margin tools">
+          <span class="material-icons">
+            tag
+          </span>
+        </div>
+      </div>
 
-  font-family: "Ubuntu", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-  font-size: 120%;
-}
-
-textarea::selection {
-  background-color: #CBF;
-  color: #639;
-}
-</style>
-</head>
-<body><textarea>Hello</textarea></body>
+    </div>
+  </body>
 </html>
