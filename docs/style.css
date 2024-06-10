@@ -43,15 +43,17 @@ textarea {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  color: #CBF9;
 }
 
 textarea {
   display: block;  /* Avoid scrollbar and visible background */
   outline: 0;  /* Avoid outline on focus */
   resize: none;
+  scrollbar-color: #CBF3 #639;
 }
 
 textarea::selection {
-  background-color: #CBF;
+  background-color: #CBF9;
   color: #639;
 }
