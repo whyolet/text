@@ -31,6 +31,10 @@ textarea {
   min-height: 2rem;
 }
 
+.double {
+  min-width: 4rem;
+}
+
 .margin {
   flex: 0 1;
 }
