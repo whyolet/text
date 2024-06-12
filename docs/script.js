@@ -1,20 +1,23 @@
 (() => {
 
-  window.addEventListener("error", (e) => {
-    window.location.assign(
+  addEventListener("error", (e) => {
+    const banner = "Error! Please help to fix it by writing a line how it happened and/or sending this info";
+
+    location.assign(
       "mailto:support@whyolet.com" +
       "?subject=Whyolet%20Text" +
       "&body=" +
-      encodeURIComponent([
-        "Error! Please help to fix it by writing a line how it happened and/or sending this info:",
-        "",
-        e.message || "",
-        (e.filename || "") + ":" +
-        (e.lineno || "") + ":" +
-        (e.colno || ""),
-        "",
-        e.error && e.error.stack || "",
-      ].join("\n"))
+      encodeURIComponent(
+        `${banner}:
+
+${e.message || ""}
+${e.filename || ""}:${e.lineno || ""}:${e.colno || ""}
+
+${e.error && e.error.stack || ""}
+
+${banner} above.
+Thank you!`
+      )
     ); 
   });
 
