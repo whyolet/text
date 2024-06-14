@@ -77,19 +77,29 @@ Thank you!`
       }
 
        db.transaction(pageStore).objectStore(pageStore).get(tag).onsuccess = (event) => {
-        page = event.target.result || {tag, text: ""};
+        page = event.target.result || {tag};
+        if (!page.text) page.text = "";
+        if (!page.sel1) page.sel1 = 0;
+        if (!page.sel2) page.sel2 = 0;
+
         tagSpan.textContent = tag;
         ta.value = page.text;
         ta.readOnly = false;
         ta.focus();
-        ta.setSelectionRange(0, 0);
+        ta.setSelectionRange(page.sel1, page.sel2);
       };
     });
-  
-    ta.addEventListener("input", (event) => {
+
+    const save = () => {
+      if (!page) return;
       page.text = ta.value;
+      page.sel1 = ta.selectionStart;
+      page.sel2 = ta.selectionEnd;
       db.transaction(pageStore, "readwrite").objectStore(pageStore).put(page);
-    });
+    };
+
+    ta.addEventListener("input", save);
+    ta.addEventListener("select", save);
   };
 
   if (document.readyState === "loading") {
