@@ -100,6 +100,7 @@ Thank you!`
 
     ta.addEventListener("input", save);
     ta.addEventListener("select", save);
+    document.addEventListener("selectionchange", save);
   };
 
   if (document.readyState === "loading") {
