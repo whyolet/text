@@ -76,7 +76,11 @@ Thank you!`
         tag = tag.slice(1);
       }
 
-       db.transaction(pageStore).objectStore(pageStore).get(tag).onsuccess = (event) => {
+      db
+      .transaction(pageStore)
+      .objectStore(pageStore)
+      .get(tag)
+      .onsuccess = (event) => {
         page = event.target.result || {tag};
         if (!page.text) page.text = "";
         if (!page.sel1) page.sel1 = 0;
@@ -95,7 +99,11 @@ Thank you!`
       page.text = ta.value;
       page.sel1 = ta.selectionStart;
       page.sel2 = ta.selectionEnd;
-      db.transaction(pageStore, "readwrite").objectStore(pageStore).put(page);
+
+      db
+      .transaction(pageStore, "readwrite")
+      .objectStore(pageStore)
+      .put(page);
     };
 
     ta.addEventListener("input", save);
