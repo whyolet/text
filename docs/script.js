@@ -25,7 +25,9 @@ Thank you!`
 
   const main = () => {
     const ta = elem("ta"); // TextArea
-    let db;
+    const tagSpan = elem("tag");
+    const pageStore = "page";
+    let db, page;
 
     const onDbError = (event) => {
       throw event.target.error;
@@ -54,7 +56,7 @@ Thank you!`
       const oldVersion = event.oldVersion;
 
       if (!oldVersion) {
-        db.createObjectStore("page", {
+        db.createObjectStore(pageStore, {
           keyPath: "tag"
         });
       }
@@ -65,11 +67,29 @@ Thank you!`
       db.onerror = onDbError;
       db.onversionchange = upgradeAppVersion;
 
-      // "Loading..." is finished:
-      ta.value = "";
-      ta.readOnly = false;
-      ta.focus();
+      location.replace("#draft");
     };
+
+    addEventListener("hashchange", (event) => {
+      let tag = location.hash;
+      if (tag.charAt(0) === "#") {
+        tag = tag.slice(1);
+      }
+
+       db.transaction(pageStore).objectStore(pageStore).get(tag).onsuccess = (event) => {
+        page = event.target.result || {tag, text: ""};
+        tagSpan.textContent = tag;
+        ta.value = page.text;
+        ta.readOnly = false;
+        ta.focus();
+        ta.setSelectionRange(0, 0);
+      };
+    });
+  
+    ta.addEventListener("input", (event) => {
+      page.text = ta.value;
+      db.transaction(pageStore, "readwrite").objectStore(pageStore).put(page);
+    });
   };
 
   if (document.readyState === "loading") {
