@@ -11,6 +11,7 @@ textarea {
 
   background-color: #639;
   color: #CBF;
+  -webkit-tap-highlight-color: transparent;
 
   font-family: "Ubuntu", sans-serif;
   font-weight: 400;
@@ -53,6 +54,12 @@ textarea {
 .material-icons {
   cursor: pointer;
   user-select: none;
+}
+
+.material-icons:active {
+  background-color: #CBF9;
+  color: #639;
+  border-radius: 2rem;
 }
 
 textarea {
