@@ -1,5 +1,4 @@
 (() => {
-
   addEventListener("error", (event) => {
     const banner = "Error! Please help to fix it by writing a line how it happened and/or sending this info";
 
@@ -67,10 +66,13 @@ Thank you!`
       db.onerror = onDbError;
       db.onversionchange = upgradeAppVersion;
 
-      location.replace("#draft");
+      const hash = "#draft";
+      if (location.hash === hash) {
+        onHashChange();
+      } else location.replace(hash);
     };
 
-    addEventListener("hashchange", (event) => {
+    const onHashChange = (event) => {
       let tag = location.hash;
       if (tag.charAt(0) === "#") {
         tag = tag.slice(1);
@@ -97,7 +99,9 @@ Thank you!`
         ta.focus();
         ta.setSelectionRange(page.sel1, page.sel2);
       };
-    });
+    };
+
+    addEventListener("hashchange", onHashChange);
 
     const ui2model = () => {
       page.text = ta.value;
@@ -162,7 +166,6 @@ Thank you!`
     });
   };
 
-  if (document.readyState === "loading") {
+  if (document.readyState === "complete") return main();
     document.addEventListener("DOMContentLoaded", main);
-  } else main();
 })();
