@@ -25,13 +25,9 @@ Thank you!`
 
   const main = () => {
     const ta = elem("ta"); // TextArea
-    const tagSpan = elem("tag");
+    const tagHeader = elem("tag");
     const pageStore = "page";
     let db, page;
-
-    const onDbError = (event) => {
-      throw event.target.error;
-    };
 
     const upgradeAppVersion = () => {
       ta.readOnly = true;
@@ -39,6 +35,10 @@ Thank you!`
       setTimeout(() => {
         location.reload();
       }, 1000);
+    };
+
+    const onDbError = (event) => {
+      throw event.target.error;
     };
 
     const openingDb = indexedDB.open("WhyoletText", 1);
@@ -81,12 +81,17 @@ Thank you!`
       .objectStore(pageStore)
       .get(tag)
       .onsuccess = (event) => {
-        page = event.target.result || {tag};
-        if (!page.text) page.text = "";
-        if (!page.sel1) page.sel1 = 0;
-        if (!page.sel2) page.sel2 = 0;
+        page = Object.assign(
+          {
+            tag,
+            text: "",
+            sel1: 0,
+            sel2: 0,
+          },
+          event.target.result,
+        );
 
-        tagSpan.textContent = tag;
+        tagHeader.textContent = tag;
         ta.value = page.text;
         ta.readOnly = false;
         ta.focus();
@@ -94,11 +99,15 @@ Thank you!`
       };
     });
 
-    const save = () => {
-      if (!page) return;
+    const ui2model = () => {
       page.text = ta.value;
       page.sel1 = ta.selectionStart;
       page.sel2 = ta.selectionEnd;
+    };
+
+    const ui2db = () => {
+      if (!page) return;
+      ui2model();
 
       db
       .transaction(pageStore, "readwrite")
@@ -106,9 +115,46 @@ Thank you!`
       .put(page);
     };
 
-    ta.addEventListener("input", save);
-    ta.addEventListener("select", save);
-    document.addEventListener("selectionchange", save);
+    ta.addEventListener("input", ui2db);
+    ta.addEventListener("select", ui2db);
+    document.addEventListener("selectionchange", ui2db);
+
+    const toast = (line) => {
+      tagHeader.textContent = line;
+      setTimeout(() => {
+        tagHeader.textContent = page ? page.tag : "";
+      }, 2000);
+      ta.focus();
+    };
+
+    const isTag = (charIndex) => /\S/.test(page.text.charAt(charIndex));
+
+    elem("hash").addEventListener("click", () => {
+      if (!page) return;
+      ui2model();
+
+      let i = page.sel1;
+      if (
+        isTag(i) ||
+        i > 0 && isTag(i - 1)
+      ) {
+        while (i > 0 && isTag(i - 1)) i--;
+      } else return toast("Click a word first!");
+      const start = i;
+
+      while (i < page.text.length && isTag(i)) i++;
+      let tag = page.text.slice(start, i + 1);
+
+      if (tag.charAt(0) === "#") {
+        while (tag.charAt(0) === "#") tag = tag.slice(1);
+      } else {
+        ta.setRangeText("#", start, start);
+        ui2db();
+      }
+
+      location.hash = tag;
+      ta.focus();
+    });
   };
 
   if (document.readyState === "loading") {
