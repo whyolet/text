@@ -155,6 +155,11 @@ Thank you!`
       location.hash = tag;
       ta.focus();
     });
+
+    elem("back").addEventListener("click", () => {
+      history.back();
+      ta.focus();
+    });
   };
 
   if (document.readyState === "loading") {
