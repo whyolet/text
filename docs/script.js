@@ -143,7 +143,7 @@ Thank you!`
       const start = i;
 
       while (i < page.text.length && isTag(i)) i++;
-      let tag = page.text.slice(start, i + 1);
+      let tag = page.text.slice(start, i);
 
       if (tag.charAt(0) === "#") {
         while (tag.charAt(0) === "#") tag = tag.slice(1);
