@@ -50,6 +50,11 @@ textarea {
   color: #CBF9;
 }
 
+.material-icons {
+  cursor: pointer;
+  user-select: none;
+}
+
 textarea {
   display: block;  /* Avoid scrollbar and visible background */
   outline: 0;  /* Avoid outline on focus */
