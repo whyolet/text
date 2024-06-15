@@ -103,15 +103,66 @@ Thank you!`
 
     addEventListener("hashchange", onHashChange);
 
-    const ui2model = () => {
-      page.text = ta.value;
-      page.sel1 = ta.selectionStart;
-      page.sel2 = ta.selectionEnd;
+    const uiToModel = () => {
+      const next = {
+        text: ta.value,
+        sel1: ta.selectionStart,
+        sel2: ta.selectionEnd,
+      };
+
+      if (
+        page.text === next.text &&
+        page.sel1 === next.sel1 &&
+        page.sel2 === next.sel2
+      ) return;
+
+      const op = {
+        tag: page.tag,
+
+        // prev:
+        p1: page.sel1,
+        p2: page.sel2,
+
+        // next:
+        n1: next.sel1,
+        n2: next.sel2,
+
+        // text:
+        at: null,
+      };
+
+      if (page.text !== next.text) {
+        let head = 0, tail = 0;
+        const minLength = Math.min(
+          page.text.length,
+          next.text.length,
+        );
+
+        while (
+          head < minLength &&
+          page.text.charAt(head) ==
+          next.text.charAt(head)
+        ) head++;
+
+        while (
+          tail < minLength - head &&
+          page.text.charAt(page.text.length - 1 - tail) ==
+          next.text.charAt(next.text.length - 1 - tail)
+        ) tail++;
+
+        op.at = head;
+        op.del = page.text.slice(head, page.text.length - tail);
+        op.ins = next.text.slice(head, next.text.length - tail);
+      }
+      
+      // TODO: Save id++ [op] to db.
+
+      Object.assign(page, next);
     };
 
-    const ui2db = () => {
+    const uiToDb = () => {
       if (!page) return;
-      ui2model();
+      uiToModel();
 
       db
       .transaction(pageStore, "readwrite")
@@ -119,9 +170,9 @@ Thank you!`
       .put(page);
     };
 
-    ta.addEventListener("input", ui2db);
-    ta.addEventListener("select", ui2db);
-    document.addEventListener("selectionchange", ui2db);
+    ta.addEventListener("input", uiToDb);
+    ta.addEventListener("select", uiToDb);
+    document.addEventListener("selectionchange", uiToDb);
 
     const toast = (line) => {
       tagHeader.textContent = line;
@@ -135,7 +186,7 @@ Thank you!`
 
     elem("hash").addEventListener("click", () => {
       if (!page) return;
-      ui2model();
+      uiToModel();
 
       let i = page.sel1;
       if (
@@ -153,7 +204,7 @@ Thank you!`
         while (tag.charAt(0) === "#") tag = tag.slice(1);
       } else {
         ta.setRangeText("#", start, start);
-        ui2db();
+        uiToDb();
       }
 
       location.hash = tag;
