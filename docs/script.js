@@ -26,6 +26,7 @@ Thank you!`
     const ta = elem("ta"); // TextArea
     const tagHeader = elem("tag");
     const pageStore = "page";
+    const opStore = "op";
     let db, page;
 
     const upgradeAppVersion = () => {
@@ -40,7 +41,7 @@ Thank you!`
       throw event.target.error;
     };
 
-    const openingDb = indexedDB.open("WhyoletText", 1);
+    const openingDb = indexedDB.open("WhyoletText", 2);
 
     openingDb.onerror = (event) => {
       const error = event.target.error;
@@ -52,11 +53,18 @@ Thank you!`
     openingDb.onupgradeneeded = (event) => {
       db = event.target.result;
       db.onerror = onDbError;
-      const oldVersion = event.oldVersion;
+      const oldVersion = event.oldVersion || 0;
 
-      if (!oldVersion) {
+      if (oldVersion < 1) {
         db.createObjectStore(pageStore, {
           keyPath: "tag"
+        });
+      }
+      
+      if (oldVersion < 2) {
+        db.createObjectStore(opStore, {
+          keyPath: "id",
+          autoIncrement: true,
         });
       }
     }
@@ -103,7 +111,9 @@ Thank you!`
 
     addEventListener("hashchange", onHashChange);
 
-    const uiToModel = () => {
+    const save = () => {
+      if (!page) return;
+
       const next = {
         text: ta.value,
         sel1: ta.selectionStart,
@@ -154,25 +164,17 @@ Thank you!`
         op.del = page.text.slice(head, page.text.length - tail);
         op.ins = next.text.slice(head, next.text.length - tail);
       }
-      
-      // TODO: Save id++ [op] to db.
 
       Object.assign(page, next);
+
+      const txn = db.transaction([opStore, pageStore], "readwrite");
+      txn.objectStore(opStore).add(op);
+      txn.objectStore(pageStore).put(page);
     };
 
-    const uiToDb = () => {
-      if (!page) return;
-      uiToModel();
-
-      db
-      .transaction(pageStore, "readwrite")
-      .objectStore(pageStore)
-      .put(page);
-    };
-
-    ta.addEventListener("input", uiToDb);
-    ta.addEventListener("select", uiToDb);
-    document.addEventListener("selectionchange", uiToDb);
+    ta.addEventListener("input", save);
+    ta.addEventListener("select", save);
+    document.addEventListener("selectionchange", save);
 
     const toast = (line) => {
       tagHeader.textContent = line;
@@ -186,7 +188,6 @@ Thank you!`
 
     elem("hash").addEventListener("click", () => {
       if (!page) return;
-      uiToModel();
 
       let i = page.sel1;
       if (
@@ -204,7 +205,7 @@ Thank you!`
         while (tag.charAt(0) === "#") tag = tag.slice(1);
       } else {
         ta.setRangeText("#", start, start);
-        uiToDb();
+        save();
       }
 
       location.hash = tag;
