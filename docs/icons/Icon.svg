@@ -26,7 +26,12 @@
   <path
     fill="none"
     stroke="#FFF"
-    stroke-width="2"
-    d="M0,4 H16 M8,4 V16"
+    stroke-width="1"
+    d="
+M0.5,5.5 H15.5
+M0.5,10.5 H15.5
+M5.5,0.5 V15.5
+M10.5,0.5 V15.5
+    "
   />
 </svg>
