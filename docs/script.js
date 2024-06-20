@@ -20,18 +20,23 @@ Thank you!`
     ); 
   });
 
-  const elem = (id) => document.getElementById(id);
-
   const main = () => {
+    const elem = (id) => {
+      const result = document.getElementById(id);
+      result.on = result.addEventListener;
+      result.onSavedClick = (onSaved) => result.on("click", () => saved(onSaved));
+      return result;
+    };
+
     const ta = elem("ta"); // TextArea
     const tagHeader = elem("tag");
     const pageStore = "page";
     const opStore = "op";
     let db, page;
 
-    const upgradeAppVersion = () => {
+    const updateAppVersion = () => {
       ta.readOnly = true;
-      ta.value = "Upgrading app version...";
+      tagHeader.textContent = "Update available...";
       setTimeout(() => {
         location.reload();
       }, 1000);
@@ -46,7 +51,7 @@ Thank you!`
     openingDb.onerror = (event) => {
       const error = event.target.error;
       if (error.name === "VersionError") {
-        upgradeAppVersion();
+        updateAppVersion();
       } else throw error;
     };
 
@@ -72,7 +77,7 @@ Thank you!`
     openingDb.onsuccess = (event) => {
       db = event.target.result;
       db.onerror = onDbError;
-      db.onversionchange = upgradeAppVersion;
+      db.onversionchange = updateAppVersion;
 
       const hash = "#draft";
       if (location.hash === hash) {
@@ -82,7 +87,7 @@ Thank you!`
 
     const onHashChange = (event) => {
       let tag = location.hash;
-      if (tag.charAt(0) === "#") {
+      while (tag.charAt(0) === "#") {
         tag = tag.slice(1);
       }
 
@@ -111,7 +116,9 @@ Thank you!`
 
     addEventListener("hashchange", onHashChange);
 
-    const save = () => {
+    ta.on("input", () => save(false));
+
+    const save = (anyChange, onSaved) => {
       if (!page) return;
 
       const next = {
@@ -121,10 +128,13 @@ Thank you!`
       };
 
       if (
-        page.text === next.text &&
-        page.sel1 === next.sel1 &&
-        page.sel2 === next.sel2
-      ) return;
+        page.text === next.text && (
+          anyChange
+          ? page.sel1 === next.sel1 &&
+            page.sel2 === next.sel2
+          : true
+        )
+      ) return onSaved && onSaved();
 
       const op = {
         tag: page.tag,
@@ -166,36 +176,30 @@ Thank you!`
       }
 
       Object.assign(page, next);
+      const opGroup = {ops: [op]};
 
       const txn = db.transaction([opStore, pageStore], "readwrite");
-      txn.objectStore(opStore).add(op);
+      txn.objectStore(opStore).add(opGroup);
       txn.objectStore(pageStore).put(page);
+      txn.oncomplete = onSaved;
     };
 
-    ta.addEventListener("input", save);
-    ta.addEventListener("select", save);
-    document.addEventListener("selectionchange", save);
-
-    const toast = (line) => {
-      tagHeader.textContent = line;
-      setTimeout(() => {
-        tagHeader.textContent = page ? page.tag : "";
-      }, 2000);
+    // All button click handlers should be wrapped with `saved()`.
+    const saved = (onSaved) => {
       ta.focus();
+      if (!page) return;
+      save(true, onSaved);
     };
 
-    const isTag = (charIndex) => /\S/.test(page.text.charAt(charIndex));
-
-    elem("hash").addEventListener("click", () => {
-      if (!page) return;
-
+    elem("hash").onSavedClick(() => {
       let i = page.sel1;
-      if (
+
+      if (!(
         isTag(i) ||
         i > 0 && isTag(i - 1)
-      ) {
-        while (i > 0 && isTag(i - 1)) i--;
-      } else return toast("Click a word first!");
+      )) return toast("Click a word first!");
+      
+      while (i > 0 && isTag(i - 1)) i--;
       const start = i;
 
       while (i < page.text.length && isTag(i)) i++;
@@ -205,19 +209,27 @@ Thank you!`
         while (tag.charAt(0) === "#") tag = tag.slice(1);
       } else {
         ta.setRangeText("#", start, start);
-        save();
       }
 
-      location.hash = tag;
-      ta.focus();
+      save(true, () => {
+        location.hash = tag;
+      });
     });
 
-    elem("back").addEventListener("click", () => {
+    const isTag = (charIndex) => /\S/.test(page.text.charAt(charIndex));
+
+    const toast = (line) => {
+      tagHeader.textContent = line;
+      setTimeout(() => {
+        tagHeader.textContent = page ? page.tag : "";
+      }, 2000);
+    };
+
+    elem("back").onSavedClick(() => {
       history.back();
-      ta.focus();
     });
   };
 
   if (document.readyState === "complete") return main();
-    document.addEventListener("DOMContentLoaded", main);
+  document.addEventListener("DOMContentLoaded", main);
 })();
