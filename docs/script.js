@@ -248,7 +248,7 @@ Thank you!`
     };
 
     getEl("back").onSavedClick(() => {
-      history.back();
+      if (history.length > 1) history.back();
     });
   };
 
