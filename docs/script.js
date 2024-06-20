@@ -21,15 +21,36 @@ Thank you!`
   });
 
   const main = () => {
-    const elem = (id) => {
-      const result = document.getElementById(id);
-      result.on = result.addEventListener;
-      result.onSavedClick = (onSaved) => result.on("click", () => saved(onSaved));
-      return result;
+
+    const getEl = (id) => {
+      const el = document.getElementById(id);
+      el.on = el.addEventListener;
+
+      el.onSavedClick = (onSaved) => {
+        const handle = () => saved(onSaved);
+        el.on("click", handle);
+ 
+        let timer;
+        const millis = 500;
+        const cancel = () => {
+          if (timer) clearInterval(timer);
+        };
+        
+        el.on("touchstart", () => {
+          cancel();
+          timer = setInterval(handle, millis);
+        });
+
+        el.on("touchcancel", cancel);
+        el.on("touchmove", cancel);
+        el.on("touchend", cancel);
+      };
+
+      return el;
     };
 
-    const ta = elem("ta"); // TextArea
-    const tagHeader = elem("tag");
+    const ta = getEl("ta"); // TextArea
+    const tagHeader = getEl("tag");
     const pageStore = "page";
     const opStore = "op";
     let db, page;
@@ -191,7 +212,7 @@ Thank you!`
       save(true, onSaved);
     };
 
-    elem("hash").onSavedClick(() => {
+    getEl("hash").onSavedClick(() => {
       let i = page.sel1;
 
       if (!(
@@ -225,7 +246,7 @@ Thank you!`
       }, 2000);
     };
 
-    elem("back").onSavedClick(() => {
+    getEl("back").onSavedClick(() => {
       history.back();
     });
   };
