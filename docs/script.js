@@ -32,7 +32,9 @@ Thank you!`
  
         let timer;
         const millis = 500;
+
         const cancel = () => {
+          ta.focus();
           if (timer) clearInterval(timer);
         };
         
@@ -205,7 +207,6 @@ Thank you!`
       txn.oncomplete = onSaved;
     };
 
-    // All button click handlers should be wrapped with `saved()`.
     const saved = (onSaved) => {
       ta.focus();
       if (!page) return;
