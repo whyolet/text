@@ -51,6 +51,10 @@ textarea {
   color: #CBF9;
 }
 
+#tag {
+  font-weight: bolder;
+}
+
 .material-icons {
   cursor: pointer;
   user-select: none;
@@ -69,6 +73,7 @@ textarea {
   scrollbar-color: #CBF3 #639;
 }
 
+#tag::selection,
 textarea::selection {
   background-color: #CBF9;
   color: #639;
