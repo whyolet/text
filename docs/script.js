@@ -55,7 +55,7 @@ Thank you!`
     const tagHeader = getEl("tag");
     const pageStore = "page";
     const opStore = "op";
-    let db, page;
+    let db, page, depth = 0;
 
     const updateAppVersion = () => {
       ta.readOnly = true;
@@ -235,6 +235,7 @@ Thank you!`
 
       save(true, () => {
         location.hash = tag;
+        depth++;
       });
     });
 
@@ -248,7 +249,10 @@ Thank you!`
     };
 
     getEl("back").onSavedClick(() => {
-      if (history.length > 1) history.back();
+      if (depth > 0) {
+        depth--;
+        history.back();
+      } else toast("No way back!");
     });
   };
 
