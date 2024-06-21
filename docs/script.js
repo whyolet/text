@@ -1,4 +1,7 @@
 (() => {
+
+  /// error
+
   addEventListener("error", (event) => {
     const banner = "Error! Please help to fix it by writing a line how it happened and/or sending this info";
 
@@ -20,7 +23,11 @@ Thank you!`
     ); 
   });
 
+  /// main
+
   const main = () => {
+
+    /// getEl, onSavedClick
 
     const getEl = (id) => {
       const el = document.getElementById(id);
@@ -51,11 +58,23 @@ Thank you!`
       return el;
     };
 
+    /// elements, toast
+
     const ta = getEl("ta"); // TextArea
     const tagHeader = getEl("tag");
+    
+    const toast = (line) => {
+      tagHeader.textContent = line;
+      setTimeout(() => {
+        tagHeader.textContent = page ? page.tag : "";
+      }, 2000);
+    };
+
+    /// db
+
+    let db, page, depth = 0;
     const pageStore = "page";
     const opStore = "op";
-    let db, page, depth = 0;
 
     const updateAppVersion = () => {
       ta.readOnly = true;
@@ -107,6 +126,8 @@ Thank you!`
         onHashChange();
       } else location.replace(hash);
     };
+    
+    /// onHashChange
 
     const onHashChange = (event) => {
       let tag = location.hash;
@@ -138,6 +159,8 @@ Thank you!`
     };
 
     addEventListener("hashchange", onHashChange);
+
+    /// input, save, saved
 
     ta.on("input", () => save(false));
 
@@ -213,6 +236,8 @@ Thank you!`
       save(true, onSaved);
     };
 
+    /// hash
+
     getEl("hash").onSavedClick(() => {
       let i = page.sel1;
 
@@ -241,12 +266,7 @@ Thank you!`
 
     const isTag = (charIndex) => /\S/.test(page.text.charAt(charIndex));
 
-    const toast = (line) => {
-      tagHeader.textContent = line;
-      setTimeout(() => {
-        tagHeader.textContent = page ? page.tag : "";
-      }, 2000);
-    };
+    /// back
 
     getEl("back").onSavedClick(() => {
       if (depth > 0) {
@@ -254,6 +274,8 @@ Thank you!`
         history.back();
       } else toast("No way back!");
     });
+
+    /// call main
   };
 
   if (document.readyState === "complete") return main();
