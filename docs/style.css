@@ -1,3 +1,10 @@
+:root {
+  --text: #CBF;
+  --tool: #CBF9;
+  --scroll: #CBF3;
+  --back: #639;
+}
+
 html,
 body,
 textarea {
@@ -9,8 +16,8 @@ textarea {
   width: 100%;
   height: 100%;
 
-  background-color: #639;
-  color: #CBF;
+  color: var(--text);
+  background-color: var(--back);
   -webkit-tap-highlight-color: transparent;
 
   font-family: "Ubuntu", sans-serif;
@@ -48,7 +55,7 @@ textarea {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  color: #CBF9;
+  color: var(--tool);
 }
 
 #tag {
@@ -61,8 +68,8 @@ textarea {
 }
 
 .material-icons:active {
-  background-color: #CBF9;
-  color: #639;
+  color: var(--back);
+  background-color: var(--tool);
   border-radius: 2rem;
 }
 
@@ -70,11 +77,11 @@ textarea {
   display: block;  /* Avoid scrollbar and visible background */
   outline: 0;  /* Avoid outline on focus */
   resize: none;
-  scrollbar-color: #CBF3 #639;
+  scrollbar-color: var(--scroll) var(--back);
 }
 
 #tag::selection,
 textarea::selection {
-  background-color: #CBF9;
-  color: #639;
+  color: var(--back);
+  background-color: var(--tool);
 }
