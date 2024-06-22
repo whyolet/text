@@ -23,6 +23,12 @@ Thank you!`
     ); 
   });
 
+  /// toHash, fromHash
+  
+  const toHash = (tag) => "#" + encodeURIComponent(tag.replace(/^#+/, ""));
+
+  const fromHash = (hash) => decodeURIComponent(hash.replace(/^#+/, ""));
+
   /// main
 
   const main = () => {
@@ -121,7 +127,7 @@ Thank you!`
       db.onerror = onDbError;
       db.onversionchange = updateAppVersion;
 
-      const hash = "#draft";
+      const hash = toHash("draft");
       if (location.hash === hash) {
         onHashChange();
       } else location.replace(hash);
@@ -130,10 +136,7 @@ Thank you!`
     /// onHashChange
 
     const onHashChange = (event) => {
-      let tag = location.hash;
-      while (tag.charAt(0) === "#") {
-        tag = tag.slice(1);
-      }
+      const tag = fromHash(location.hash);
 
       db
       .transaction(pageStore)
@@ -250,16 +253,14 @@ Thank you!`
       const start = i;
 
       while (i < page.text.length && isTag(i)) i++;
-      let tag = page.text.slice(start, i);
+      const tag = page.text.slice(start, i);
 
-      if (tag.charAt(0) === "#") {
-        while (tag.charAt(0) === "#") tag = tag.slice(1);
-      } else {
+      if (tag.charAt(0) !== "#") {
         ta.setRangeText("#", start, start);
       }
 
       save(true, () => {
-        location.hash = tag;
+        location.hash = toHash(tag);
         depth++;
       });
     });
