@@ -149,6 +149,7 @@ Thank you!`
             text: "",
             sel1: 0,
             sel2: 0,
+            scro: 0,
           },
           event.target.result,
         );
@@ -158,6 +159,7 @@ Thank you!`
         ta.readOnly = false;
         ta.focus();
         ta.setSelectionRange(page.sel1, page.sel2);
+        ta.scrollTop = page.scro;
       };
     };
 
@@ -174,13 +176,15 @@ Thank you!`
         text: ta.value,
         sel1: ta.selectionStart,
         sel2: ta.selectionEnd,
+        scro: ta.scrollTop,
       };
 
       if (
         page.text === next.text && (
           anyChange
           ? page.sel1 === next.sel1 &&
-            page.sel2 === next.sel2
+            page.sel2 === next.sel2 &&
+            page.scro === next.scro
           : true
         )
       ) return onSaved && onSaved();
@@ -191,10 +195,12 @@ Thank you!`
         // prev:
         p1: page.sel1,
         p2: page.sel2,
+        ps: page.scro,
 
         // next:
         n1: next.sel1,
         n2: next.sel2,
+        ns: next.scro,
 
         // text:
         at: null,
