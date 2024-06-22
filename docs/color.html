@@ -1,0 +1,18 @@
+<div id="result"></div>
+
+<script>
+  const ratio = 0.6;
+  
+  const lerp = (a, b) => (
+    (a + (b - a) * ratio)
+    .toString(16)
+    .slice(0, 2)
+    .toUpperCase()
+  );
+  
+  document.getElementById("result").textContent = (
+    lerp(0x66, 0xCC) +
+    lerp(0x33, 0xBB) +
+    lerp(0x99, 0xFF)
+  );
+</script>
