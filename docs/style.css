@@ -1,8 +1,8 @@
 :root {
-  --text: #CBF;
-  --tool: #CBF9;
-  --scroll: #CBF3;
-  --back: #639;
+  --text: #CBF; /* 1 */
+  --tool: #A384D6; /* 0.6 */
+  --scroll: #7A4EAD; /* 0.2 */
+  --back: #639; /* 0 */
 }
 
 html,
