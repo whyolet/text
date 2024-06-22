@@ -1,7 +1,9 @@
-<div id="result"></div>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, interactive-widget=resizes-content" />
+
+<h1 id="result"></h1>
 
 <script>
-  const ratio = 0.6;
+  const ratio = 0.75;
   
   const lerp = (a, b) => (
     Math.round(a + (b - a) * ratio)
@@ -10,8 +12,8 @@
   );
   
   document.getElementById("result").textContent = (
-    lerp(0x66, 0xCC) +
-    lerp(0x33, 0xBB) +
+    lerp(0x66, 0xFF) +
+    lerp(0x33, 0xFF) +
     lerp(0x99, 0xFF)
   );
 </script>
