@@ -4,9 +4,8 @@
   const ratio = 0.6;
   
   const lerp = (a, b) => (
-    (a + (b - a) * ratio)
+    Math.round(a + (b - a) * ratio)
     .toString(16)
-    .slice(0, 2)
     .toUpperCase()
   );
   
