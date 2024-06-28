@@ -59,7 +59,7 @@ textarea {
   color: var(--tool);
 }
 
-#tag {
+#header {
   font-weight: bolder;
 }
 
@@ -81,7 +81,7 @@ textarea {
   scrollbar-color: var(--scroll) var(--back);
 }
 
-#tag::selection,
+#header::selection,
 textarea::selection {
   color: var(--back);
   background-color: var(--tool);

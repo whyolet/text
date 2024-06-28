@@ -23,42 +23,70 @@ Thank you!`
     ); 
   });
 
-  /// toHash, fromHash
+  /// toHash, toTag
   
   const toHash = (tag) => "#" + encodeURIComponent(tag.replace(/^#+/, ""));
 
-  const fromHash = (hash) => decodeURIComponent(hash.replace(/^#+/, ""));
+  const toTag = (hash) => decodeURIComponent(hash.replace(/^#+/, ""));
 
   /// main
 
   const main = () => {
 
-    /// getEl, onSavedClick
+    /// getEl, on, onClick, onSavedClick
 
     const getEl = (id) => {
       const el = document.getElementById(id);
       el.on = el.addEventListener;
 
-      el.onSavedClick = (onSaved) => {
-        const handle = () => saved(onSaved);
-        el.on("click", handle);
- 
+      el.onClick = (onClick) => {
+        // `.onClick()` should always be used instead of `.on("click")`
+        // because it also focuses the textarea and auto-repeats clicks on long click.
+
+        const onFocusedClick = () => {
+          ta.focus();
+          onClick();
+        };
+
+        el.on("click", onFocusedClick);
+
         let timer;
         const millis = 500;
 
-        const cancel = () => {
+        const dedup = (event) => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        };
+
+        const start = (event) => {
+          stop(event);
+          timer = setInterval(onFocusedClick, millis);
+        };
+
+        const stop = (event) => {
+          dedup(event);
           ta.focus();
           if (timer) clearInterval(timer);
         };
         
-        el.on("touchstart", () => {
-          cancel();
-          timer = setInterval(handle, millis);
-        });
+        el.on("touchstart", start);
+        el.on("mousedown", start);
 
-        el.on("touchcancel", cancel);
-        el.on("touchmove", cancel);
-        el.on("touchend", cancel);
+        el.on("touchcancel", stop);
+        el.on("mouseleave", stop);
+
+        el.on("touchmove", stop);
+        el.on("mousemove", stop);
+
+        el.on("touchend", stop);
+        el.on("mouseup", stop);
+      };
+
+      el.onSavedClick = (onSaved) => {
+        // `onSavedClick` should always be used instead of `onClick`
+        // unless there is a special reason to avoid it, e.g. see `undo`.
+
+        el.onClick(() => save(onSaved));
       };
 
       return el;
@@ -67,24 +95,36 @@ Thank you!`
     /// elements, toast
 
     const ta = getEl("ta"); // TextArea
-    const tagHeader = getEl("tag");
+    const header = getEl("header");
     
     const toast = (line) => {
-      tagHeader.textContent = line;
+      header.textContent = line;
       setTimeout(() => {
-        tagHeader.textContent = page ? page.tag : "";
+        header.textContent = current.page ? current.page.tag : "";
       }, 2000);
     };
 
     /// db
 
-    let db, page, depth = 0;
-    const pageStore = "page";
-    const opStore = "op";
+    let db, depth = 0;
+
+    const stores = {
+      conf: "conf",
+      op: "op",
+      page: "page",
+    };
+
+    const current = {
+      page: null,
+    };
+
+    const conf = {
+      undoneOpId: "undoneOpId",
+    };
 
     const updateAppVersion = () => {
       ta.readOnly = true;
-      tagHeader.textContent = "Update available...";
+      header.textContent = "Update available...";
       setTimeout(() => {
         location.reload();
       }, 1000);
@@ -94,7 +134,7 @@ Thank you!`
       throw event.target.error;
     };
 
-    const openingDb = indexedDB.open("WhyoletText", 2);
+    const openingDb = indexedDB.open("WhyoletText", 3);
 
     openingDb.onerror = (event) => {
       const error = event.target.error;
@@ -109,16 +149,20 @@ Thank you!`
       const oldVersion = event.oldVersion || 0;
 
       if (oldVersion < 1) {
-        db.createObjectStore(pageStore, {
+        db.createObjectStore(stores.page, {
           keyPath: "tag"
         });
       }
       
       if (oldVersion < 2) {
-        db.createObjectStore(opStore, {
+        db.createObjectStore(stores.op, {
           keyPath: "id",
           autoIncrement: true,
         });
+      }
+
+      if (oldVersion < 3) {
+        db.createObjectStore(stores.conf);
       }
     }
 
@@ -132,18 +176,35 @@ Thank you!`
         onHashChange();
       } else location.replace(hash);
     };
-    
+
     /// onHashChange
 
     const onHashChange = (event) => {
-      const tag = fromHash(location.hash);
+      const tag = toTag(location.hash);
 
+      getPage(tag, (page) => {
+        current.page = page;
+
+        header.textContent = tag;
+        ta.value = page.text;
+        ta.readOnly = false;
+        ta.focus();
+        ta.setSelectionRange(page.sel1, page.sel2);
+        ta.scrollTop = page.scro;
+      });
+    };
+
+    addEventListener("hashchange", onHashChange);
+
+    /// getPage
+
+    const getPage = (tag, onGotPage) => {
       db
-      .transaction(pageStore)
-      .objectStore(pageStore)
+      .transaction(stores.page)
+      .objectStore(stores.page)
       .get(tag)
       .onsuccess = (event) => {
-        page = Object.assign(
+        const page = Object.assign(
           {
             tag,
             text: "",
@@ -153,25 +214,25 @@ Thank you!`
           },
           event.target.result,
         );
-
-        tagHeader.textContent = tag;
-        ta.value = page.text;
-        ta.readOnly = false;
-        ta.focus();
-        ta.setSelectionRange(page.sel1, page.sel2);
-        ta.scrollTop = page.scro;
+        onGotPage(page);
       };
     };
 
-    addEventListener("hashchange", onHashChange);
+    /// input, save
 
-    /// input, save, saved
+    let inputTimerId;
 
-    ta.on("input", () => save(false));
+    ta.on("input", () => {
+      if (inputTimerId) clearTimeout(inputTimerId);
+      inputTimerId = setTimeout(save, 1000);
+      // To group quickly typed characters to one `op`,
+      // and to give `ta.scrollTop` time to change.
+    });
 
-    const save = (anyChange, onSaved) => {
-      if (!page) return;
+    const save = (onSaved) => {
+      if (!current.page) return;
 
+      const page = current.page;
       const next = {
         text: ta.value,
         sel1: ta.selectionStart,
@@ -180,15 +241,30 @@ Thank you!`
       };
 
       if (
-        page.text === next.text && (
-          anyChange
-          ? page.sel1 === next.sel1 &&
-            page.sel2 === next.sel2 &&
-            page.scro === next.scro
-          : true
-        )
-      ) return onSaved && onSaved();
+        page.text === next.text &&
+        page.sel1 === next.sel1 &&
+        page.sel2 === next.sel2 &&
+        page.scro === next.scro
+      ) return onSaved && onSaved(page);
 
+      getUndoneOpId((undoneOpId) => {
+        if (undoneOpId) {
+          onInputWhileUndone(undoneOpId, doSave);
+        } else doSave();
+      });
+
+      const doSave = () => {
+        const op = createOp(page, next);
+        Object.assign(page, next);
+
+        const txn = db.transaction([stores.op, stores.page], "readwrite");
+        txn.objectStore(stores.op).add(op);
+        txn.objectStore(stores.page).put(page);
+        if (onSaved) txn.oncomplete = () => onSaved(page);
+      };
+    };
+
+    const createOp = (page, next) => {
       const op = {
         tag: page.tag,
 
@@ -230,24 +306,13 @@ Thank you!`
         op.ins = next.text.slice(head, next.text.length - tail);
       }
 
-      Object.assign(page, next);
-      const opGroup = {ops: [op]};
-
-      const txn = db.transaction([opStore, pageStore], "readwrite");
-      txn.objectStore(opStore).add(opGroup);
-      txn.objectStore(pageStore).put(page);
-      txn.oncomplete = onSaved;
-    };
-
-    const saved = (onSaved) => {
-      ta.focus();
-      if (!page) return;
-      save(true, onSaved);
+      return op;
     };
 
     /// hash
 
-    getEl("hash").onSavedClick(() => {
+    getEl("hash").onSavedClick((page) => {
+      const isTag = (charIndex) => /\S/.test(page.text.charAt(charIndex));
       let i = page.sel1;
 
       if (!(
@@ -265,13 +330,13 @@ Thank you!`
         ta.setRangeText("#", start, start);
       }
 
-      save(true, () => {
-        location.hash = toHash(tag);
+      save(() => {
+        const hash = toHash(tag);
+        if (location.hash === hash) return;
+        location.hash = hash;
         depth++;
       });
     });
-
-    const isTag = (charIndex) => /\S/.test(page.text.charAt(charIndex));
 
     /// back
 
@@ -279,8 +344,177 @@ Thank you!`
       if (depth > 0) {
         depth--;
         history.back();
-      } else toast("No way back!");
+      } else toast("Click # first!");
     });
+
+    /// undo
+
+    const getUndoneOpId = (onGotUndoneOpId) => {
+      db
+      .transaction(stores.conf)
+      .objectStore(stores.conf)
+      .get(conf.undoneOpId)
+      .onsuccess = (event) => {
+        const undoneOpId = event.target.result;
+        onGotUndoneOpId(undoneOpId);
+      };
+    };
+
+    getEl("undo").onClick(() => {
+      // `undo` should not use `onSavedClick` because:
+      // imagine the `save` detects a diff (especially of `scrollTop`),
+      // so `onInputWhileUndone` may add multiple `ops`,
+      // then `doSave` adds a new `op` with that diff for sure,
+      // and then `undo` applies undo for this new op.
+      // User observes no visual change at all, unexpectedly,
+      // so they keep clicking `undo` without any visual result,
+      // just growing oplog silently.
+
+      getUndoneOpId((undoneOpId) => {
+        const query = IDBKeyRange
+        .upperBound(undoneOpId || Infinity, true);
+
+        db
+        .transaction(stores.op)
+        .objectStore(stores.op)
+        .openCursor(query, "prev")
+        .onsuccess = onOpToUndo;
+      });
+    });
+
+    const onOpToUndo = (event) => {
+      const cursor = event.target.result;
+      if (!cursor) return toast("This is the oldest!");
+
+      const op = cursor.value;
+
+      getPage(op.tag, (page) => {
+        if (op.at !== null) page.text = (
+          page.text.slice(0, op.at) +
+          op.del +
+          page.text.slice(op.at + op.ins.length)
+        );
+
+        page.sel1 = op.p1;
+        page.sel2 = op.p2;
+        page.scro = op.ps;
+
+        saveAndShowPage(page, op.id);
+      });
+    };
+
+    const saveAndShowPage = (page, undoneOpId) => {
+      const txn = db.transaction([stores.page, stores.conf], "readwrite");
+      txn.objectStore(stores.page).put(page);
+      txn.objectStore(stores.conf).put(undoneOpId, conf.undoneOpId);
+
+      txn.oncomplete = () => {
+        const hash = toHash(page.tag);
+        if (location.hash === hash) {
+          onHashChange();
+        } else location.hash = hash;
+      }
+    };
+
+    /// input while undone
+
+    const onInputWhileUndone = (undoneOpId, onComplete) => {
+      const ops = [];
+      const query = IDBKeyRange.lowerBound(undoneOpId);
+
+      db
+      .transaction(stores.op)
+      .objectStore(stores.op)
+      .openCursor(query, "next")
+      .onsuccess = (event) => {
+        const cursor = event.target.result;
+
+        if (cursor) {
+          const op = cursor.value;
+          ops.push(op);
+          cursor.continue();
+
+        } else {
+          const txn = db.transaction([stores.op, stores.conf], "readwrite");
+          const opStore = txn.objectStore(stores.op);
+
+          ops.reverse();
+          for (const op of ops) {
+            const undoneOp = {
+              tag: op.tag,
+
+              // prev:
+              p1: op.n1,
+              p2: op.n2,
+              ps: op.ns,
+
+              // next:
+              n1: op.p1,
+              n2: op.p2,
+              ns: op.ps,
+
+              // text:
+              at: op.at,
+            };
+
+            if (op.at !== null) {
+              undoneOp.del = op.ins;
+              undoneOp.ins = op.del;
+            }
+
+            opStore.add(undoneOp);
+          }
+
+          txn.objectStore(stores.conf).put(null, conf.undoneOpId);
+          txn.oncomplete = onComplete;
+        }
+      };
+    };
+
+    /// redo
+
+    getEl("redo").onClick(() => {
+      // `redo` should not use `onSavedClick`
+      // for a similar reason `undo` has.
+
+      getUndoneOpId((undoneOpId) => {
+        if (!undoneOpId) return toast("This is the newest!");
+
+        db
+        .transaction(stores.op)
+        .objectStore(stores.op)
+        .get(undoneOpId)
+        .onsuccess = onOpToRedo;
+      });
+    });
+
+    const onOpToRedo = (event) => {
+      const op = event.target.result;
+
+      getPage(op.tag, (page) => {
+        if (op.at !== null) page.text = (
+          page.text.slice(0, op.at) +
+          op.ins +
+          page.text.slice(op.at + op.del.length)
+        );
+
+        page.sel1 = op.n1;
+        page.sel2 = op.n2;
+        page.scro = op.ns;
+
+        const query = IDBKeyRange.lowerBound(op.id, true);
+
+        db
+        .transaction(stores.op)
+        .objectStore(stores.op)
+        .openCursor(query, "next")
+        .onsuccess = (event) => {
+          const cursor = event.target.result;
+          const nextOpId = cursor ? cursor.value.id : null;
+          saveAndShowPage(page, nextOpId);
+        };
+      });
+    };
 
     /// call main
   };
