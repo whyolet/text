@@ -99,10 +99,9 @@ Thank you!`
     };
 
     ta.on("blur", () => {
-      ta.focus();
       setTimeout(() => {
         ta.focus();
-      });
+      }, 10);
     });
 
     /// db
