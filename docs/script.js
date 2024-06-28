@@ -98,12 +98,6 @@ Thank you!`
       }, 2000);
     };
 
-    ta.on("blur", () => {
-      setTimeout(() => {
-        ta.focus();
-      }, 10);
-    });
-
     /// db
 
     let db, depth = 0;
