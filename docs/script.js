@@ -53,18 +53,12 @@ Thank you!`
         let timer;
         const millis = 500;
 
-        const dedup = (event) => {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-        };
-
         const start = (event) => {
           stop(event);
           timer = setInterval(onFocusedClick, millis);
         };
 
         const stop = (event) => {
-          dedup(event);
           ta.focus();
           if (timer) clearInterval(timer);
         };
