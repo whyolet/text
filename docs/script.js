@@ -33,34 +33,37 @@ Thank you!`
 
   const main = () => {
 
-    /// getEl, on, onClick, onSavedClick
+    /// getEl, on, onSavedClick, onTextSavedClick, saveTimerId
+    
+    let saveTimerId;
 
     const getEl = (id) => {
       const el = document.getElementById(id);
       el.on = el.addEventListener;
+      el.onSavedClick = (onSaved) => onSavedClick(false, onSaved);
+      el.onSavedTextClick = (onSaved) => onSavedClick(true, onSaved);
 
-      el.onClick = (onClick) => {
-        // `.onClick()` should always be used instead of `.on("click")`
-        // because it also focuses the textarea and auto-repeats clicks on long click.
+      const onSavedClick = (compareTextOnly, onSaved) => {
 
-        const onFocusedClick = () => {
+        const onClick = () => {
           ta.focus();
-          onClick();
+          if (saveTimerId) clearTimeout(saveTimerId);
+          save(compareTextOnly, onSaved)
         };
 
-        el.on("click", onFocusedClick);
+        el.on("click", onClick);
 
-        let timer;
+        let clickTimer;
         const millis = 500;
 
         const start = (event) => {
           stop(event);
-          timer = setInterval(onFocusedClick, millis);
+          clickTimer = setInterval(onClick, millis);
         };
 
         const stop = (event) => {
           ta.focus();
-          if (timer) clearInterval(timer);
+          if (clickTimer) clearInterval(clickTimer);
         };
         
         el.on("touchstart", start);
@@ -74,13 +77,6 @@ Thank you!`
 
         el.on("touchend", stop);
         el.on("mouseup", stop);
-      };
-
-      el.onSavedClick = (onSaved) => {
-        // `onSavedClick` should always be used instead of `onClick`
-        // unless there is a special reason to avoid it, e.g. see `undo`.
-
-        el.onClick(() => save(onSaved));
       };
 
       return el;
@@ -214,16 +210,14 @@ Thank you!`
 
     /// input, save
 
-    let inputTimerId;
-
     ta.on("input", () => {
-      if (inputTimerId) clearTimeout(inputTimerId);
-      inputTimerId = setTimeout(save, 1000);
+      if (saveTimerId) clearTimeout(saveTimerId);
+      saveTimerId = setTimeout(save, 1000);
       // To group quickly typed characters to one `op`,
       // and to give `ta.scrollTop` time to change.
     });
 
-    const save = (onSaved) => {
+    const save = (compareTextOnly, onSaved) => {
       if (!current.page) return;
 
       const page = current.page;
@@ -235,10 +229,13 @@ Thank you!`
       };
 
       if (
-        page.text === next.text &&
-        page.sel1 === next.sel1 &&
-        page.sel2 === next.sel2 &&
-        page.scro === next.scro
+        page.text === next.text && (
+          compareTextOnly || (
+            page.sel1 === next.sel1 &&
+            page.sel2 === next.sel2 &&
+            page.scro === next.scro
+          )
+        )
       ) return onSaved && onSaved(page);
 
       getUndoneOpId((undoneOpId) => {
@@ -324,7 +321,7 @@ Thank you!`
         ta.setRangeText("#", start, start);
       }
 
-      save(() => {
+      save(false, () => {
         const hash = toHash(tag);
         if (location.hash === hash) return;
         location.hash = hash;
@@ -354,11 +351,11 @@ Thank you!`
       };
     };
 
-    getEl("undo").onClick(() => {
+    getEl("undo"). onSavedTextClick(() => {
       // `undo` should not use `onSavedClick` because:
-      // imagine the `save` detects a diff (especially of `scrollTop`),
+      // imagine the `save` detects a diff of `scrollTop` or cursor,
       // so `onInputWhileUndone` may add multiple `ops`,
-      // then `doSave` adds a new `op` with that diff for sure,
+      // then `doSave` adds a new `op` with that diff,
       // and then `undo` applies undo for this new op.
       // User observes no visual change at all, unexpectedly,
       // so they keep clicking `undo` without any visual result,
@@ -467,7 +464,7 @@ Thank you!`
 
     /// redo
 
-    getEl("redo").onClick(() => {
+    getEl("redo").onSavedTextClick(() => {
       // `redo` should not use `onSavedClick`
       // for a similar reason `undo` has.
 
