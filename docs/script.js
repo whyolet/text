@@ -72,8 +72,10 @@ Thank you!`
         el.on("touchcancel", stop);
         el.on("mouseleave", stop);
 
-        el.on("touchmove", stop);
-        el.on("mousemove", stop);
+        // `move` events are fired after soft keyboard reopens on `focus`,
+        // so we don't use them to avoid stopping auto-clicks.
+        // el.on("touchmove", stop);
+        // el.on("mousemove", stop);
 
         el.on("touchend", stop);
         el.on("mouseup", stop);
@@ -82,11 +84,13 @@ Thank you!`
       return el;
     };
 
-    /// elements, toast
+    /// elements
 
     const ta = getEl("ta"); // TextArea
     const header = getEl("header");
-    
+
+    /// toast
+
     const toast = (line) => {
       header.textContent = line;
       setTimeout(() => {
