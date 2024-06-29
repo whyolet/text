@@ -90,10 +90,13 @@ Thank you!`
     const header = getEl("header");
 
     /// toast
+    
+    let toastTimerId;
 
     const toast = (line) => {
       header.textContent = line;
-      setTimeout(() => {
+      if (toastTimerId) clearTimeout(toastTimerId);
+      toastTimerId = setTimeout(() => {
         header.textContent = current.page ? current.page.tag : "";
       }, 2000);
     };
@@ -255,7 +258,10 @@ Thank you!`
         const txn = db.transaction([stores.op, stores.page], "readwrite");
         txn.objectStore(stores.op).add(op);
         txn.objectStore(stores.page).put(page);
-        if (onSaved) txn.oncomplete = () => onSaved(page);
+        txn.oncomplete = () => {
+          if (onSaved) onSaved(page);
+          trimOps();
+        };
       };
     };
 
@@ -461,7 +467,10 @@ Thank you!`
           }
 
           txn.objectStore(stores.conf).put(null, conf.undoneOpId);
-          txn.oncomplete = onComplete;
+          txn.oncomplete = () => {
+            onComplete();
+            trimOps();
+          };
         }
       };
     };
@@ -502,13 +511,63 @@ Thank you!`
         db
         .transaction(stores.op)
         .objectStore(stores.op)
-        .openCursor(query, "next")
+        .openKeyCursor(query, "next")
         .onsuccess = (event) => {
           const cursor = event.target.result;
-          const nextOpId = cursor ? cursor.value.id : null;
+          const nextOpId = cursor ? cursor.key : null;
           saveAndShowPage(page, nextOpId);
         };
       });
+    };
+
+    /// trimOps
+
+    const maxOps = 1000;
+
+    const trimOps = () => {
+      setTimeout(() => {
+        db
+        .transaction(stores.op)
+        .objectStore(stores.op)
+        .count()
+        .onsuccess = (event) => {
+          const totalOps = event.target.result;
+          if (totalOps <= maxOps) return;
+
+          getMaxOpIdToTrim(totalOps - maxOps);
+        };
+      }, 2000);
+    };
+
+    const getMaxOpIdToTrim = (numOps) => {
+      const query = IDBKeyRange.lowerBound(0);
+
+      db
+      .transaction(stores.op)
+      .objectStore(stores.op)
+      .openKeyCursor(query, "next")
+      .onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (!cursor) return;
+
+        if (numOps > 1) {
+          numOps--;
+          cursor.continue();
+          return;
+        }
+        
+        const maxOpIdToTrim = cursor.key;
+        doTrimOps(maxOpIdToTrim);
+      };
+    };
+
+    const doTrimOps = (maxOpIdToTrim) => {
+      const query = IDBKeyRange.upperBound(maxOpIdToTrim);
+  
+      db
+      .transaction(stores.op, "readwrite")
+      .objectStore(stores.op)
+      .delete(query);
     };
 
     /// call main
