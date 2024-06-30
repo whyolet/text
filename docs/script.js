@@ -227,6 +227,8 @@ Thank you!`
     const save = (compareTextOnly, onSaved) => {
       if (!current.page) return;
 
+      if (saveTimerId) clearTimeout(saveTimerId);
+
       const page = current.page;
       const next = {
         text: ta.value,
@@ -313,7 +315,6 @@ Thank you!`
     /// hash
 
     getEl("hash").onSavedClick((page) => {
-      const isTag = (charIndex) => /\S/.test(page.text.charAt(charIndex));
       let i = page.sel1;
 
       if (!(
@@ -338,6 +339,10 @@ Thank you!`
         depth++;
       });
     });
+
+    const isTag = (charIndex) => /\S/.test(charAt(charIndex));
+
+    const charAt = (charIndex) => current.page.text.charAt(charIndex);
 
     /// back
 
@@ -569,6 +574,108 @@ Thank you!`
       .objectStore(stores.op)
       .delete(query);
     };
+
+    /// up, down
+
+    getEl("up").onSavedClick((page) => {
+      ensureTextEndsWithNewline();
+      const prevStart = getPrevLineStartIndex(page.sel1);
+      const thisStart = getThisLineStartIndex(page.sel1);
+      const nextStart = getNextLineStartIndex(page.sel2);
+
+      const prevLine = page.text.slice(prevStart, thisStart);
+      const thisLine = page.text.slice(thisStart, nextStart);
+
+      ta.setRangeText(thisLine + prevLine, prevStart, nextStart);
+      ta.setSelectionRange(prevStart, prevStart + decreaseByNewline(thisLine.length));
+      save();
+    });
+
+    getEl("down").onSavedClick((page) => {
+      ensureTextEndsWithNewline();
+      const thisStart = getThisLineStartIndex(page.sel1);
+      const nextStart = getNextLineStartIndex(page.sel2);
+      const nextNextStart = getNextLineStartIndex(nextStart);
+
+      const thisLine = page.text.slice(thisStart, nextStart);
+      const nextLine = page.text.slice(nextStart, nextNextStart);
+
+      ta.setRangeText(nextLine + thisLine, thisStart, nextNextStart);
+      const newThisStart = thisStart + nextLine.length;
+      ta.setSelectionRange(newThisStart, newThisStart + decreaseByNewline(thisLine.length));
+      save();
+    });
+
+    const getPrevLineStartIndex = (charIndex) => {
+      let i = getThisLineStartIndex(charIndex);
+      i = decreaseByNewline(i);
+      return getThisLineStartIndex(i);
+    };
+
+    const getThisLineStartIndex = (charIndex) => {
+      let i = charIndex;
+
+      while (
+        i > 0 &&
+        !isNewline(i - 1)
+      ) i--;
+
+      return i;
+    };
+
+    const getNextLineStartIndex = (charIndex) => {
+      let i = charIndex;
+      const length = current.page.text.length;
+
+      while (
+        i < length &&
+        !isNewline(i)
+      ) i++;
+
+      if (
+        i <= length - 2 &&
+        charAt(i) === "\r" &&
+        charAt(i + 1) === "\n"
+      ) {
+        i += 2;
+      } else if (
+        i <= length - 1 &&
+        charAt(i) === "\n"
+      ) {
+        i++;
+      }
+
+      return i;
+    };
+    
+    const decreaseByNewline = (charIndex) => {
+      let i = charIndex;
+      if (
+        i >= 2 &&
+        charAt(i - 2) === "\r" &&
+        charAt(i - 1) === "\n"
+      ) {
+        i -= 2;
+      } else if (
+        i >= 1 &&
+        charAt(i - 1) === "\n"
+      ) {
+        i--;
+      }
+      return i;
+    };
+
+    const ensureTextEndsWithNewline = () => {
+      const page = current.page;
+      if (!page.text) return;
+
+      const newline = page.text.includes("\r\n") ? "\r\n" : "\n";
+      if (page.text.endsWith(newline)) return;
+
+      page.text += newline;
+    };
+    
+    const isNewline = (charIndex) => /[\r\n]/.test(charAt(charIndex));
 
     /// call main
   };
