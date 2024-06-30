@@ -582,12 +582,14 @@ Thank you!`
       const prevStart = getPrevLineStartIndex(page.sel1);
       const thisStart = getThisLineStartIndex(page.sel1);
       const nextStart = getNextLineStartIndex(page.sel2);
+      const thisStop = decreaseByNewline(nextStart);
+      const thisLength = thisStop - thisStart;
 
       const prevLine = page.text.slice(prevStart, thisStart);
       const thisLine = page.text.slice(thisStart, nextStart);
 
       ta.setRangeText(thisLine + prevLine, prevStart, nextStart);
-      ta.setSelectionRange(prevStart, prevStart + decreaseByNewline(thisLine.length));
+      ta.setSelectionRange(prevStart, prevStart + thisLength);
       save();
     });
 
@@ -595,6 +597,8 @@ Thank you!`
       ensureTextEndsWithNewline();
       const thisStart = getThisLineStartIndex(page.sel1);
       const nextStart = getNextLineStartIndex(page.sel2);
+      const thisStop = decreaseByNewline(nextStart);
+      const thisLength = thisStop - thisStart;
       const nextNextStart = getNextLineStartIndex(nextStart);
 
       const thisLine = page.text.slice(thisStart, nextStart);
@@ -602,7 +606,7 @@ Thank you!`
 
       ta.setRangeText(nextLine + thisLine, thisStart, nextNextStart);
       const newThisStart = thisStart + nextLine.length;
-      ta.setSelectionRange(newThisStart, newThisStart + decreaseByNewline(thisLine.length));
+      ta.setSelectionRange(newThisStart, newThisStart + thisLength);
       save();
     });
 
