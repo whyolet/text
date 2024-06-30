@@ -651,7 +651,7 @@ Thank you!`
 
       return i;
     };
-    
+
     const decreaseByNewline = (charIndex) => {
       let i = charIndex;
       if (
@@ -678,7 +678,7 @@ Thank you!`
 
       page.text += newline;
     };
-    
+
     const isNewline = (charIndex) => /[\r\n]/.test(charAt(charIndex));
 
     /// call main
