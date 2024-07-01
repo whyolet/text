@@ -1,3 +1,4 @@
+"use strict";
 (() => {
 
   /// error
@@ -113,6 +114,7 @@ Thank you!`
 
     const current = {
       page: null,
+      textLength: 0, // for `autoindent`
     };
 
     const conf = {
@@ -218,6 +220,7 @@ Thank you!`
     /// input, save
 
     ta.on("input", () => {
+      autoindent();
       if (saveTimerId) clearTimeout(saveTimerId);
       saveTimerId = setTimeout(save, 1000);
       // To group quickly typed characters to one `op`,
@@ -680,6 +683,36 @@ Thank you!`
     };
 
     const isNewline = (charIndex) => /[\r\n]/.test(charAt(charIndex));
+
+    /// autoindent
+
+    const autoindent = () => {
+      // It is called before debounced `save`, so `page` is outdated and we should not update it to keep the diff for `save`.
+
+      const text = ta.value;
+      if (current.textLength >= text.length) {
+        current.textLength = text.length;
+        return;
+      }
+      current.textLength = text.length;
+
+      const i = ta.selectionStart;
+      if (
+        i !== ta.selectionEnd ||
+        i === 0 ||
+        !/[\r\n]/.test(text.charAt(i - 1))
+      ) return;
+
+      const head = text.slice(0, i);
+      const groups = /([^\r\n]*)([\r\n]*)$/.exec(head);
+      const notEmpty = groups[1];
+      const indent = /^[\t ]*/.exec(notEmpty)[0];
+      if (notEmpty === indent) {
+        ta.setRangeText(groups[2] + indent, i - groups[0].length, i, "end");
+      } else {
+        ta.setRangeText(indent, i, i, "end");
+      }
+    };
 
     /// call main
   };
