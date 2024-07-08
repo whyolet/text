@@ -41,6 +41,7 @@ Thank you!`
     const getEl = (id) => {
       const el = document.getElementById(id);
       el.on = el.addEventListener;
+      el.onClick = (onClick) => el.on("click", onClick);
       el.onSavedClick = (onSaved) => onSavedClick(false, onSaved);
       el.onSavedTextClick = (onSaved) => onSavedClick(true, onSaved);
 
@@ -52,7 +53,7 @@ Thank you!`
           save(compareTextOnly, onSaved)
         };
 
-        el.on("click", onClick);
+        el.onClick(onClick);
 
         let clickTimer;
         const millis = 500;
@@ -114,11 +115,13 @@ Thank you!`
 
     const current = {
       page: null,
+      fontSize: 100,
       textLength: 0, // for `autoindent`
     };
 
     const conf = {
       undoneOpId: "undoneOpId",
+      fontSize: "fontSize",
     };
 
     const updateAppVersion = () => {
@@ -169,6 +172,7 @@ Thank you!`
       db = event.target.result;
       db.onerror = onDbError;
       db.onversionchange = updateAppVersion;
+      getFontSize();
 
       const hash = toHash("draft");
       if (location.hash === hash) {
@@ -577,6 +581,46 @@ Thank you!`
       .objectStore(stores.op)
       .delete(query);
     };
+
+    /// getFontSize, setFontSize
+
+    const getFontSize = () => {
+      db
+      .transaction(stores.conf)
+      .objectStore(stores.conf)
+      .get(conf.fontSize)
+      .onsuccess = (event) => {
+        current.fontSize = event.target.result || current.fontSize;
+        ta.style.fontSize = `${current.fontSize}%`;
+      };
+    };
+
+    const setFontSize = () => {
+      let newFontSize = prompt(
+        "Font size in %",
+        current.fontSize,
+      );
+      if (!newFontSize) return;
+
+      newFontSize = parseInt(newFontSize, 10);
+      const min = 10, max = 1000;
+      if (
+        newFontSize < min ||
+        newFontSize > max
+      ) return toast(`From ${min}% to ${max}%`);
+
+      const txn = db.transaction(stores.conf, "readwrite");
+      txn.objectStore(stores.conf).put(newFontSize, conf.fontSize);
+      txn.oncomplete = () => {
+        current.fontSize = newFontSize;
+        ta.style.fontSize = `${newFontSize}%`;
+      };
+    };
+
+    getEl("menu").onClick(() => {
+      // TODO
+      setFontSize();
+    });
 
     /// up, down
 
