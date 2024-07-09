@@ -618,8 +618,21 @@ Thank you!`
     };
 
     getEl("menu").onClick(() => {
-      // TODO
+      // TODO: Move to menu.
       setFontSize();
+    });
+
+    /// download
+
+    getEl("download").onSavedClick((page) => {
+      // TODO: Move to menu.
+      const a = document.createElement("a");
+      a.href = "data:application/octet-stream;charset=utf-8," + encodeURIComponent(page.text);
+      a.download = page.tag;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     });
 
     /// up, down
@@ -757,6 +770,16 @@ Thank you!`
         ta.setRangeText(indent, i, i, "end");
       }
     };
+
+    /// indent, dedent
+
+    getEl("indent").onSavedClick((page) => {
+      toast("TODO");
+    });
+
+    getEl("dedent").onSavedClick((page) => {
+      toast("TODO");
+    });
 
     /// call main
   };
