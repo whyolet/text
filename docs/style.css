@@ -27,6 +27,13 @@ textarea {
   font-size: 1.2rem;
 }
 
+textarea {
+  display: block;  /* Avoid scrollbar and visible background */
+  outline: 0;  /* Avoid outline on focus */
+  resize: none;
+  scrollbar-color: var(--scroll) var(--back);
+}
+
 .column {
   display: flex;
   flex-direction: column;
@@ -74,15 +81,7 @@ textarea {
   border-radius: 2rem;
 }
 
-textarea {
-  display: block;  /* Avoid scrollbar and visible background */
-  outline: 0;  /* Avoid outline on focus */
-  resize: none;
-  scrollbar-color: var(--scroll) var(--back);
-}
-
-#header::selection,
-textarea::selection {
+::selection {
   color: var(--back);
   background-color: var(--tool);
 }
