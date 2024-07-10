@@ -115,13 +115,13 @@ Thank you!`
 
     const current = {
       page: null,
-      fontSize: 100,
+      zoom: 100,
       textLength: 0, // for `autoindent`
     };
 
     const conf = {
       undoneOpId: "undoneOpId",
-      fontSize: "fontSize",
+      zoom: "zoom",
     };
 
     const updateAppVersion = () => {
@@ -172,7 +172,7 @@ Thank you!`
       db = event.target.result;
       db.onerror = onDbError;
       db.onversionchange = updateAppVersion;
-      getFontSize();
+      getZoom();
 
       const hash = toHash("draft");
       if (location.hash === hash) {
@@ -582,45 +582,100 @@ Thank you!`
       .delete(query);
     };
 
-    /// getFontSize, setFontSize
+    /// zoom
 
-    const getFontSize = () => {
+    const minZoom = 10, maxZoom = 1000;
+
+    const getZoom = () => {
       db
       .transaction(stores.conf)
       .objectStore(stores.conf)
-      .get(conf.fontSize)
+      .get(conf.zoom)
       .onsuccess = (event) => {
-        current.fontSize = event.target.result || current.fontSize;
-        ta.style.fontSize = `${current.fontSize}%`;
+        current.zoom = event.target.result || current.zoom;
+        ta.style.fontSize = `${current.zoom}%`;
       };
     };
 
-    const setFontSize = () => {
-      let newFontSize = prompt(
-        "Font size in %",
-        current.fontSize,
-      );
-      if (!newFontSize) return;
+    const setZoom = () => {
+      let newZoom = prompt("Zoom %", current.zoom);
+      if (!newZoom) return;
 
-      newFontSize = parseInt(newFontSize, 10);
-      const min = 10, max = 1000;
+      newZoom = parseInt(newZoom, 10);
       if (
-        newFontSize < min ||
-        newFontSize > max
-      ) return toast(`From ${min}% to ${max}%`);
+        newZoom < minZoom ||
+        newZoom > maxZoom
+      ) return toast(`From ${minZoom}% to ${maxZoom}%`);
 
+      saveZoom(newZoom);
+    };
+
+    const saveZoom = (newZoom) => {
       const txn = db.transaction(stores.conf, "readwrite");
-      txn.objectStore(stores.conf).put(newFontSize, conf.fontSize);
+      txn.objectStore(stores.conf).put(newZoom, conf.zoom);
       txn.oncomplete = () => {
-        current.fontSize = newFontSize;
-        ta.style.fontSize = `${newFontSize}%`;
+        current.zoom = newZoom;
+        ta.style.fontSize = `${newZoom}%`;
+        toast(`${current.zoom}%`);
       };
     };
 
     getEl("menu").onClick(() => {
-      // TODO: Move to menu.
-      setFontSize();
+      // TODO: Move to menu as
+      // "🤏 Zoom: {input number}%"
+      // "{input range}"
+      setZoom();
     });
+
+    const fingersByIds = new Map();
+    let distance = 0;
+
+    ta.on("pointerdown", (event) => {
+      if (!fingersByIds.has(event.pointerId)) {
+        distance = 0; // New finger? Reset diff!
+      }
+      fingersByIds.set(event.pointerId, event);
+    });
+
+    ta.on("pointermove", (event) => {
+      fingersByIds.set(event.pointerId, event);
+      if (fingersByIds.size < 2) return;
+
+      let newDistance = 0;
+      let fingers = Array.from(fingersByIds.values());
+      for (let i = 0; i < fingers.length; i++) {
+        for (let j = i + 1; j < fingers.length; j++) {
+          const fi = fingers[i], fj = fingers[j];
+          const dx = Math.abs(fi.clientX - fj.clientX);
+          const dy = Math.abs(fi.clientY - fj.clientY);
+          newDistance += dx * dx + dy * dy;
+        }
+      }
+      if (newDistance === distance) return;
+
+      if (!distance) {
+        // Init diff.
+        distance = newDistance;
+        return;
+      }
+
+      let dZoom = 0;
+      if (newDistance > distance && current.zoom < maxZoom) dZoom = 1;
+      if (newDistance < distance && current.zoom > minZoom) dZoom = -1;
+      if (!dZoom) return;
+
+      distance = newDistance;
+      if (current.zoom > 100) dZoom *= Math.round(current.zoom / 100);
+      saveZoom(Math.min(maxZoom, current.zoom + dZoom));
+    });
+
+    const onFingerCancel = (event) => {
+      fingersByIds.delete(event.pointerId);
+    };
+
+    for (const action of ["cancel", "leave", "out", "up"]) {
+      ta.on(`pointer${action}`, onFingerCancel);
+    }
 
     /// download
 
