@@ -585,6 +585,7 @@ Thank you!`
     /// zoom
 
     const minZoom = 10, maxZoom = 1000;
+    let saveZoomTimerId;
 
     const getZoom = () => {
       db
@@ -611,13 +612,19 @@ Thank you!`
     };
 
     const saveZoom = (newZoom) => {
-      const txn = db.transaction(stores.conf, "readwrite");
-      txn.objectStore(stores.conf).put(newZoom, conf.zoom);
-      txn.oncomplete = () => {
-        current.zoom = newZoom;
-        ta.style.fontSize = `${newZoom}%`;
-        toast(`${current.zoom}%`);
-      };
+      current.zoom = newZoom;
+      ta.style.fontSize = `${current.zoom}%`;
+      toast(`${current.zoom}%`);
+        
+      if (saveZoomTimerId) clearTimeout(saveZoomTimerId);
+      saveZoomTimerId = setTimeout(doSaveZoom, 100);
+    };
+
+    const doSaveZoom = () => {
+      db
+      .transaction(stores.conf, "readwrite")
+      .objectStore(stores.conf)
+      .put(current.zoom, conf.zoom);
     };
 
     getEl("menu").onClick(() => {
