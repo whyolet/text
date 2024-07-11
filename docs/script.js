@@ -704,7 +704,10 @@ Thank you!`
     /// delete
 
     getEl("delete").onSavedClick((page) => {
-      toast("TODO");
+      const thisStart = getThisLineStartIndex(page.sel1);
+      const nextStart = getNextLineStartIndex(page.sel2);
+      ta.setRangeText("", thisStart, nextStart, "start");
+      save();
     });
 
     /// strike
