@@ -703,12 +703,14 @@ Thank you!`
 
     /// delete
 
-    getEl("delete").onSavedClick((page) => {
+    const doDelete = (page) => {
       const thisStart = getThisLineStartIndex(page.sel1);
       const nextStart = getNextLineStartIndex(page.sel2);
       ta.setRangeText("", thisStart, nextStart, "start");
       save();
-    });
+    };
+
+    getEl("delete").onSavedClick(doDelete);
 
     /// strike
 
@@ -771,6 +773,7 @@ Thank you!`
     /// gestures: zoom, TODO: delete, strike
 
     const fingersByIds = new Map();
+    let singleFinger;
     let distance = 0;
 
     ta.on("pointerdown", (event) => {
@@ -778,6 +781,7 @@ Thank you!`
         distance = 0; // New finger? Reset diff!
       }
       fingersByIds.set(event.pointerId, event);
+      singleFinger = (fingersByIds.size === 1) ? event : null;
     });
 
     ta.on("pointermove", (event) => {
@@ -813,7 +817,27 @@ Thank you!`
     });
 
     const onFingerCancel = (event) => {
-      fingersByIds.delete(event.pointerId);
+
+      if (
+        !fingersByIds.delete(event.pointerId) ||
+        !current.page ||
+        !singleFinger ||
+        singleFinger.pointerId !== event.pointerId 
+      ) return;
+
+      const dx = event.clientX - singleFinger.clientX;
+      const dy = event.clientY - singleFinger.clientY;
+
+      const minDx = Math.max(
+        ta.clientWidth / 2,
+        Math.abs(dy * 2),
+      );
+
+      if (Math.abs(dx) < minDx) return;
+
+      if (dx < 0) save(false, (page) => {
+        doDelete(page);
+      });
     };
 
     for (const action of ["cancel", "leave", "out", "up"]) {
