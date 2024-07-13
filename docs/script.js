@@ -835,8 +835,9 @@ Thank you!`
 
       if (Math.abs(dx) < minDx) return;
 
-      if (dx < 0) save(false, (page) => {
-        doDelete(page);
+      save(false, (page) => {
+        if (dx < 0) doDelete(page);
+        else toast("TODO");
       });
     };
 
