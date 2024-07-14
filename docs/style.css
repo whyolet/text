@@ -14,7 +14,7 @@
   src:
     local("Ubuntu Light"),
     local("Ubuntu-Light"),
-    url("Ubuntu-Light.ttf") format("truetype");
+    url("fonts/Ubuntu-Light.ttf") format("truetype");
 }
 
 @font-face {
@@ -25,7 +25,7 @@
   src:
     local("Ubuntu Bold"),
     local("Ubuntu-Bold"),
-    url("Ubuntu-Bold.ttf") format("truetype");
+    url("fonts/Ubuntu-Bold.ttf") format("truetype");
 }
 
 @font-face {
@@ -36,7 +36,7 @@
   src:
     local("Material Icons"),
     local("MaterialIcons-Regular"),
-    url("MaterialIcons-Regular.woff2") format('woff2');
+    url("fonts/MaterialIcons-Regular.woff2") format('woff2');
 }
 
 html,
