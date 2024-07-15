@@ -829,7 +829,7 @@ Thank you!`
       const dy = event.clientY - singleFinger.clientY;
 
       const minDx = Math.max(
-        ta.clientWidth / 2,
+        ta.clientWidth / 3,
         Math.abs(dy * 2),
       );
 
