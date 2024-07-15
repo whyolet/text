@@ -29,14 +29,14 @@
 }
 
 @font-face {
-  font-family: "Material Icons";
+  font-family: "Material Symbols Outlined";
   font-style: normal;
-  font-weight: 400;
   font-display: block;
   src:
-    local("Material Icons"),
-    local("MaterialIcons-Regular"),
-    url("fonts/MaterialIcons-Regular.woff2") format('woff2');
+    local("Material Symbols Outlined"),
+    local("MaterialSymbols-Outlined"),
+    url("fonts/MaterialSymbolsOutlined.woff2") format("woff2"),
+    url("fonts/MaterialSymbolsOutlined.ttf") format("truetype");
 }
 
 html,
@@ -60,27 +60,6 @@ textarea {
   font-size: 1.2rem;
 
   touch-action: pan-y;
-}
-
-.material-icons {
-  font-family: "Material Icons";
-  font-style: normal;
-  font-weight: 400;
-
-  font-size: 24px;
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
-
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-font-smoothing: antialiased;
-  -webkit-font-feature-settings: "liga";
-  font-feature-settings: "liga";
-  text-rendering: optimizeLegibility;
 }
 
 textarea {
@@ -126,12 +105,27 @@ textarea {
   font-weight: 700;
 }
 
-.material-icons {
+.icon {
   cursor: pointer;
   user-select: none;
+
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  /* Let's inherit `font-weight` from text. */
+  font-size: 24px;
+  font-variation-settings: "opsz" 24, "GRAD" -25; /* Dark Mode */
+
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  text-rendering: optimizeLegibility;
 }
 
-.material-icons:active {
+.icon:active {
   color: var(--back);
   background-color: var(--tool);
   border-radius: 2rem;
