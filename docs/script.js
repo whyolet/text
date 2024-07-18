@@ -894,7 +894,15 @@ Thank you!`
     /// find, replace
 
     getEl("find").onSavedClick((page) => {
-      toast("TODO soon");
+      toast("TODO 2");
+    });
+
+    /// debug sw.js
+
+    addEventListener("message", (event) => {
+      setTimeout(() => {
+        toast(event.data);
+      }, 500);
     });
 
     /// call main
