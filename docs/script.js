@@ -24,6 +24,12 @@ Thank you!`
     ); 
   });
 
+  /// serviceWorker
+
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js");
+  }
+
   /// toHash, toTag
   
   const toHash = (tag) => "#" + encodeURIComponent(tag.replace(/^#+/, ""));
