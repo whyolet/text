@@ -28,10 +28,12 @@
   });
 
   addEventListener("activate", (event) => {
+    postMessage("act");
     event.waitUntil(clients.claim());
   });
 
   addEventListener("fetch", (event) => {
+    postMessage("fetch");
     event.respondWith(cacheResponse(event.request));
   });
 
