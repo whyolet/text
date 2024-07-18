@@ -36,7 +36,9 @@
   });
 
   const cacheResponse = async (request) => {
-    const responsePromise = fetch(request)
+    const responsePromise = fetch(request, {
+      cache: "no-cache",
+    })
     .then(async (response) => {
       if (response.ok) {
         const cache = await caches.open(cacheName);
