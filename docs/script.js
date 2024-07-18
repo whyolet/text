@@ -27,18 +27,7 @@ Thank you!`
   /// serviceWorker
 
   if ("serviceWorker" in navigator) {
-    navigator
-    .serviceWorker
-    .register("./sw.js")
-    .then((reg) => {
-      setTimeout(() => {
-        alert("debug ok " + JSON.stringify(reg));
-      }, 2000);
-    }, (error) => {
-      setTimeout(() => {
-        alert("debug error " + JSON.stringify(error));
-      }, 2000);
-    });
+    navigator.serviceWorker.register("./sw.js");
   }
 
   /// toHash, toTag
@@ -905,15 +894,7 @@ Thank you!`
     /// find, replace
 
     getEl("find").onSavedClick((page) => {
-      toast("TODO 3");
-    });
-
-    /// debug sw.js
-
-    addEventListener("message", (event) => {
-      setTimeout(() => {
-        toast(event.data);
-      }, 500);
+      toast("TODO soon");
     });
 
     /// call main
