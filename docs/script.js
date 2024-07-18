@@ -894,7 +894,7 @@ Thank you!`
     /// find, replace
 
     getEl("find").onSavedClick((page) => {
-      toast("TODO");
+      toast("TODO soon");
     });
 
     /// call main
