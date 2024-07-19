@@ -17,6 +17,8 @@
     "/fonts/Ubuntu-Light.woff2",
   ];
 
+  const moreStatic = ["png", "ttf", "woff2"];
+
   const precache = async () => {
     const cache = await caches.open(cacheName);
     return cache.addAll(precached);
@@ -36,8 +38,13 @@
   });
 
   const cacheResponse = async (request) => {
+    const url = request.url;
+    const cacheMode = moreStatic.some(
+      (ext) => url.endsWith(ext)
+    ) ? "default" : "no-cache";
+
     const responsePromise = fetch(request, {
-      cache: "no-cache",
+      cache: cacheMode
     })
     .then(async (response) => {
       if (response.ok) {
