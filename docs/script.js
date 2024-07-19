@@ -193,6 +193,7 @@ Thank you!`
 
       getPage(tag, (page) => {
         current.page = page;
+        current.textLength = page.text.length;
 
         header.textContent = tag;
         ta.value = page.text;
@@ -249,6 +250,7 @@ Thank you!`
         sel2: ta.selectionEnd,
         scro: ta.scrollTop,
       };
+      current.textLength = next.text.length;
 
       if (
         page.text === next.text && (
@@ -879,6 +881,7 @@ Thank you!`
       } else {
         ta.setRangeText(indent, i, i, "end");
       }
+      current.textLength = ta.value.length;
     };
 
     /// indent, dedent
