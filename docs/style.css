@@ -2,7 +2,7 @@
   --white:  #FFFFFF; /* 1.00 */
   --text:   #D9CCE6; /* 0.75 */
   --tool:   #B399CC; /* 0.50 */
-  --scroll: #8C66B3; /* 0.25 */
+  --hint: #8C66B3; /* 0.25 */
   --back:   #663399; /* 0.00 */
 }
 
@@ -43,6 +43,7 @@
 
 html,
 body,
+input,
 textarea {
   margin: 0;
   border: 0;
@@ -59,16 +60,21 @@ textarea {
   font-family: "Ubuntu", sans-serif;
   font-style: normal;
   font-weight: 300;
-  font-size: 1.2rem;
+  font-size: 1rem;
 
   touch-action: pan-y;
 }
 
+input,
 textarea {
   display: block;  /* Avoid scrollbar and visible background */
   outline: 0;  /* Avoid outline on focus */
   resize: none;
-  scrollbar-color: var(--scroll) var(--back);
+  scrollbar-color: var(--hint) var(--back);
+}
+
+input::placeholder {
+  color: var(--hint);
 }
 
 .column {
@@ -105,6 +111,7 @@ textarea {
 
 #header {
   font-weight: 700;
+  font-size: 1.2rem;
 }
 
 .icon {
@@ -136,4 +143,8 @@ textarea {
 ::selection {
   color: var(--back);
   background-color: var(--tool);
+}
+
+.hidden {
+  display: none;
 }
