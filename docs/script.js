@@ -928,12 +928,38 @@ Thank you!`
     });
 
     getEl("find-prev").onSavedClick((page) => {
-      toast("TODO");
+      doFind(page, false);
     });
 
     getEl("find-next").onSavedClick((page) => {
-      toast("TODO");
+      doFind(page, true);
     });
+
+    const doFind = (page, forward) => {
+      const what = findWhat.value.toLowerCase();
+      if (!what) {
+        findWhat.focus();
+        return toast("Find what?");
+      }
+
+      const where = page.text.toLowerCase();
+  
+      const start = forward
+        ? page.sel2 + 1
+        : page.sel1 - 1;
+      if (
+        start < 0 ||
+        start >= where.length
+      ) return toast("Not found!");
+  
+      const found = forward
+        ? where.indexOf(what, start)
+        : where.lastIndexOf(what, start);
+      if (found === -1) return toast("Not found!");
+
+      ta.setSelectionRange(found, found + what.length);
+      save();
+    };
 
     getEl("replace").onSavedClick((page) => {
       toast("TODO");
