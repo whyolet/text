@@ -97,6 +97,22 @@ Thank you!`
     const ta = getEl("ta"); // TextArea
     const header = getEl("header");
 
+    const find = getEl("find");
+    const findTools = getEl("find-tools");
+    const findWhat = getEl("find-what");
+    const replaceWith = getEl("replace-with");
+    const findClose = getEl("find-close");
+
+    /// hide, show
+
+    const hide = (el) => {
+      el.classList.add("hidden");
+    };
+
+    const show = (el) => {
+      el.classList.remove("hidden");
+    };
+
     /// toast
     
     let toastTimerId;
@@ -896,8 +912,31 @@ Thank you!`
 
     /// find, replace
 
-    getEl("find").onSavedClick((page) => {
-      toast("TODO 4");
+    find.onClick((page) => {
+      show(findTools);
+      hide(find);
+      show(findClose);
+      findWhat.focus();
+    });
+
+    findClose.onClick((page) => {
+      hide(findTools);
+      findWhat.value = replaceWith.value = "";
+      hide(findClose);
+      show(find);
+      ta.focus();
+    });
+
+    getEl("find-prev").onSavedClick((page) => {
+      toast("TODO");
+    });
+
+    getEl("find-next").onSavedClick((page) => {
+      toast("TODO");
+    });
+
+    getEl("replace").onSavedClick((page) => {
+      toast("TODO");
     });
 
     /// call main
