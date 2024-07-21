@@ -133,6 +133,15 @@ Thank you!`
       }, 2000);
     };
 
+    /// reservedTags
+
+    const reservedTags = {
+      prefix: "--",
+      findAll: "--find-all",
+      help: "--help",
+      menu: "--menu",
+    };
+
     /// db
 
     let db, depth = 0;
@@ -214,6 +223,16 @@ Thank you!`
 
     const onHashChange = (event) => {
       const tag = toTag(location.hash);
+
+      if (tag == reservedTags.findAll) return showFindAll();
+      if (!isHidden(findAllRow)) hideFindAll();
+
+      if (tag.startsWith(reservedTags.prefix)) {
+        alert(`Please don't use tags starting with "${reservedTags.prefix}"`);
+        depth--;
+        history.back();
+        return;
+      };
 
       getPage(tag, (page) => {
         current.page = page;
@@ -927,17 +946,17 @@ Thank you!`
       findWhat.focus();
     });
 
-    const closeFindReplace = () => {
+    findClose.onClick(() => {
+      hideFindReplace();
+      ta.focus();
+    });
+
+    const hideFindReplace = () => {
       hide(findReplaceRow);
       findWhat.value = replaceWith.value = "";
       hide(findClose);
       show(findReplace);
     };
-
-    findClose.onClick(() => {
-      closeFindReplace();
-      ta.focus();
-    });
 
     getEl("find-prev").onSavedClick((page) => {
       doFind(page, false);
@@ -982,16 +1001,24 @@ Thank you!`
     /// find-all
 
     findAll.onClick(() => {
-      closeFindReplace();
+      location.hash = reservedTags.findAll;
+    });
+
+    const showFindAll = () => {
+      hideFindReplace();
       hide(topRow);
       hide(mainRow);
       hide(bottomRow);
       show(findAllRow);
       show(findResultsRow);
       findAllWhat.focus();
-    });
+    };
 
     findAllClose.onClick(() => {
+      history.back();
+    });
+
+    const hideFindAll = () => {
       hide(findAllRow);
       hide(findResultsRow);
       findAllWhat.value = "";
@@ -999,7 +1026,7 @@ Thank you!`
       show(mainRow);
       show(bottomRow);
       ta.focus();
-    });
+    };
 
     /// call main
   };
