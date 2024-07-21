@@ -1005,6 +1005,7 @@ Thank you!`
     });
 
     const showFindAll = () => {
+      findAllWhat.value = findWhat.value;
       hideFindReplace();
       hide(topRow);
       hide(mainRow);
