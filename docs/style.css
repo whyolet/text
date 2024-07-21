@@ -114,6 +114,14 @@ input::placeholder {
   font-size: 1.2rem;
 }
 
+#find-all-what {
+  margin-left: 0.5rem;
+}
+
+#find-results-row {
+  padding: 0.5rem;
+}
+
 .icon {
   cursor: pointer;
   user-select: none;
