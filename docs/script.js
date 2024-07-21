@@ -97,21 +97,29 @@ Thank you!`
     const ta = getEl("ta"); // TextArea
     const header = getEl("header");
 
-    const find = getEl("find");
-    const findTools = getEl("find-tools");
-    const findWhat = getEl("find-what");
-    const replaceWith = getEl("replace-with");
+    const findReplace = getEl("find-replace");
+    const findAll = getEl("find-all");
     const findClose = getEl("find-close");
 
-    /// hide, show
+    const findReplaceRow = getEl("find-replace-row");
+    const findWhat = getEl("find-what");
+    const replaceWith = getEl("replace-with");
 
-    const hide = (el) => {
-      el.classList.add("hidden");
-    };
+    const findAllRow = getEl("find-all-row");
+    const findAllWhat = getEl("find-all-what");
+    const findAllClose = getEl("find-all-close");
+    const findResultsRow = getEl("find-results-row");
 
-    const show = (el) => {
-      el.classList.remove("hidden");
-    };
+    const topRow = getEl("top-row");
+    const mainRow = getEl("main-row");
+    const bottomRow = getEl("bottom-row");
+
+    /// hide, show, isHidden
+
+    const hidden = "hidden";
+    const hide = (el) => el.classList.add(hidden);
+    const show = (el) => el.classList.remove(hidden);
+    const isHidden = (el) => el.classList.contains(hidden);
 
     /// toast
     
@@ -910,20 +918,24 @@ Thank you!`
       toast("TODO");
     });
 
-    /// find, replace
+    /// find-replace
 
-    find.onClick((page) => {
-      show(findTools);
-      hide(find);
+    findReplace.onClick(() => {
+      show(findReplaceRow);
+      hide(findReplace);
       show(findClose);
       findWhat.focus();
     });
 
-    findClose.onClick((page) => {
-      hide(findTools);
+    const closeFindReplace = () => {
+      hide(findReplaceRow);
       findWhat.value = replaceWith.value = "";
       hide(findClose);
-      show(find);
+      show(findReplace);
+    };
+
+    findClose.onClick(() => {
+      closeFindReplace();
       ta.focus();
     });
 
@@ -965,6 +977,28 @@ Thank you!`
       ta.setRangeText(replaceWith.value, page.sel1, page.sel2, "select");
       save();
       // Do not auto find next or prev: to verify replacement.
+    });
+
+    /// find-all
+
+    findAll.onClick(() => {
+      closeFindReplace();
+      hide(topRow);
+      hide(mainRow);
+      hide(bottomRow);
+      show(findAllRow);
+      show(findResultsRow);
+      findAllWhat.focus();
+    });
+
+    findAllClose.onClick(() => {
+      hide(findAllRow);
+      hide(findResultsRow);
+      findAllWhat.value = "";
+      show(topRow);
+      show(mainRow);
+      show(bottomRow);
+      ta.focus();
     });
 
     /// call main
