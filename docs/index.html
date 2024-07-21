@@ -28,7 +28,7 @@
   <body>
     <div class="column">
 
-      <div id="find-tools" class="hidden margin">
+      <div id="find-replace-row" class="hidden margin">
         <div class="margin tools">
           <span id="find-prev" class="icon">chevron_backward</span>
         </div>
@@ -42,7 +42,20 @@
         </div>
       </div>
 
-      <div class="margin">
+      <div id="find-all-row" class="hidden margin">
+        <div class="main tools">
+          <input id="find-all-what" placeholder="Find..." />
+        </div>
+        <div class="margin tools">
+           <span id="find-all-close" class="icon">search_off</span>
+        </div>
+      </div>
+
+      <div id="find-results-row" class="hidden main">
+        TODO
+      </div>
+
+      <div id="top-row" class="margin">
         <div class="margin tools">
           <span id="menu" class="icon">menu</span>
         </div>
@@ -50,13 +63,14 @@
           <span id="header">WhyoletText</span>
           <span id="download" class="icon">download</span>
         </div>
-        <div class="margin tools">
-          <span id="find" class="icon">search</span>
+        <div class="double margin tools">
+          <span id="find-replace" class="icon">find_replace</span>
           <span id="find-close" class="hidden icon">search_off</span>
+          <span id="find-all" class="icon">manage_search</span>
         </div>
       </div>
 
-      <div class="main">
+      <div id="main-row" class="main">
         <div class="margin tools column">
           <span id="hash" class="icon">tag</span>
           <span id="back" class="icon">arrow_back</span>
@@ -70,7 +84,7 @@
         </div>
       </div>
 
-      <div class="margin">
+      <div id="bottom-row" class="margin">
         <div class="double margin tools">
           <span id="delete" class="icon">backspace</span>
           <span id="strike" class="icon">remove</span>
