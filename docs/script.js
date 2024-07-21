@@ -962,7 +962,9 @@ Thank you!`
     };
 
     getEl("replace").onSavedClick((page) => {
-      toast("TODO");
+      ta.setRangeText(replaceWith.value, page.sel1, page.sel2, "select");
+      save();
+      // Do not auto find next or prev: to verify replacement.
     });
 
     /// call main
