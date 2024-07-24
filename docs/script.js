@@ -40,12 +40,44 @@ Thank you!`
 
   const main = () => {
 
-    /// getEl, on, onSavedClick, onTextSavedClick, saveTimerId
+    /// o - bullet point in a tree of elements
+
+    const o = function(tag, attrs /* , kids */) {
+      const el = document.createElement(tag);
+
+      if (typeof attrs === "string") {
+        el.className = attrs;
+      } else for (const key in attrs) {
+        const val = attrs[key];
+        if (val !== null) el.setAttribute(key, val);
+      }
+
+      for (let i = 2; i < arguments.length; i++) {
+        const kid = arguments[i];
+        if (kid !== null) el.appendChild(
+          (typeof kid === "string")
+          ? document.createTextNode(kid)
+          : kid
+        );
+      }
+
+      return el;
+    };
+
+    /// on, onClick
+
+    const on = (el, eventName, handler) => el.addEventListener(eventName, handler);
+
+    const onClick = (el, handler) => on(el, "click", handler);
+
+    /// getEl, saveTimerId
     
     let saveTimerId;
 
     const getEl = (id) => {
       const el = document.getElementById(id);
+
+      // TODO: replace `el.on*` with `on(el`
       el.on = el.addEventListener;
       el.onClick = (onClick) => el.on("click", onClick);
       el.onSavedClick = (onSaved) => onSavedClick(false, onSaved);
@@ -154,8 +186,9 @@ Thank you!`
 
     const current = {
       page: null,
-      zoom: 100,
+      pages: [], // for `find-all`
       textLength: 0, // for `autoindent`
+      zoom: 100,
     };
 
     const conf = {
@@ -786,7 +819,17 @@ Thank you!`
     };
 
     const setZoom = () => {
-      let newZoom = prompt("Zoom %", current.zoom);
+      // TODO: Move to a separate menu row.
+      const text = ta.value;
+      const cursor = ta.selectionStart;
+      let line = 1, total = 1, i = -1;
+      while ((i = text.indexOf("\n", i + 1)) !== -1) {
+        total++;
+        if (i < cursor) line++;
+      }
+      const lineNumbers = `Line ${line}/${total}`;
+
+      let newZoom = prompt(`${lineNumbers}\nZoom %`, current.zoom);
       if (!newZoom) return;
 
       newZoom = parseInt(newZoom, 10);
@@ -1006,6 +1049,7 @@ Thank you!`
 
     const showFindAll = () => {
       findAllWhat.value = findWhat.value;
+      findResultsRow.textContent = "";
       hideFindReplace();
       hide(topRow);
       hide(mainRow);
@@ -1013,7 +1057,65 @@ Thank you!`
       show(findAllRow);
       show(findResultsRow);
       findAllWhat.focus();
+
+      db
+      .transaction(stores.page)
+      .objectStore(stores.page)
+      .getAll()
+      .onsuccess = onGotPages;
     };
+
+    const onGotPages = (event) => {
+      if (isHidden(findAllRow)) return;
+  
+      current.pages = event.target.result;
+      for (const page of current.pages) {
+        page.lowerTag = page.tag.toLowerCase();
+        page.lowerText = page.text.toLowerCase();
+      }
+
+      doFindAll();
+    };
+
+    const doFindAll = () => {
+      return; // TODO
+      const what = findAllWhat.value.toLowerCase();
+      findResultsRow.textContent = "";
+
+      if (what === "") {
+        // TODO
+        return;
+      }
+
+      for (const page of current.pages) {
+        const tagIndex = page.lowerTag.indexOf(what);
+        const textIndex = page.lowerText.indexOf(what);
+        if (tagIndex === -1 && textIndex === -1) continue;
+
+        let line = "", found = 0, i = textIndex;
+        if (i !== -1) {
+          let head = page.text.slice(0, i);
+          let tail = page.text.slice(i);
+          head = /[^\n]$/.exec(head)[0];
+          tail = /^[^\r\n]/.exec(tail)[0];
+          line = head + tail;
+        }
+        while (i !== -1) {
+          found++;
+          i = page.lowerText.indexOf(what, i + 1);
+        }
+        if (found > 1) line += ` (+${found - 1})`;
+
+        findResultsRow.appendChild(
+          o("div", "result",
+            o("span", "tag", page.tag),
+            found ? o("span", "text", line) : null,
+          ),
+        );
+      }
+    };
+
+    findAllWhat.on("input", doFindAll);
 
     findAllClose.onClick(() => {
       history.back();
@@ -1023,6 +1125,7 @@ Thank you!`
       hide(findAllRow);
       hide(findResultsRow);
       findAllWhat.value = "";
+      current.pages = [];
       show(topRow);
       show(mainRow);
       show(bottomRow);
