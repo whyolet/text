@@ -1078,7 +1078,6 @@ Thank you!`
     };
 
     const doFindAll = () => {
-      return; // TODO
       const what = findAllWhat.value.toLowerCase();
       findResultsRow.textContent = "";
 
@@ -1096,8 +1095,8 @@ Thank you!`
         if (i !== -1) {
           let head = page.text.slice(0, i);
           let tail = page.text.slice(i);
-          head = /[^\n]$/.exec(head)[0];
-          tail = /^[^\r\n]/.exec(tail)[0];
+          head = /[^\n]*$/.exec(head)[0];
+          tail = /^[^\r\n]*/.exec(tail)[0];
           line = head + tail;
         }
         while (i !== -1) {
