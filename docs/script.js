@@ -55,7 +55,7 @@ Thank you!`
       for (let i = 2; i < arguments.length; i++) {
         const kid = arguments[i];
         if (kid !== null) el.appendChild(
-          (typeof kid === "string")
+          typeof kid === "string"
           ? document.createTextNode(kid)
           : kid
         );
@@ -875,7 +875,11 @@ Thank you!`
         distance = 0; // New finger? Reset diff!
       }
       fingersByIds.set(event.pointerId, event);
-      singleFinger = (fingersByIds.size === 1) ? event : null;
+      singleFinger = (
+        fingersByIds.size === 1
+        ? event
+        : null
+      );
     });
 
     ta.on("pointermove", (event) => {
@@ -1103,18 +1107,25 @@ Thank you!`
           found++;
           i = page.lowerText.indexOf(what, i + 1);
         }
-        if (found > 1) line += ` (+${found - 1})`;
 
-        findResultsRow.appendChild(
+        const result = (
           o("div", "result",
             o("span", "tag", page.tag),
             found ? o("span", "text", line) : null,
-          ),
+            found > 1 ? o("span", "more", `(+${found - 1})`) : null,
+          )
         );
+        onClick(result, onResultClick);
+        findResultsRow.appendChild(result);
       }
     };
 
     findAllWhat.on("input", doFindAll);
+
+    const onResultClick = (event) => {
+      const tag = event.currentTarget.children[0]. textContent;
+      alert(tag);
+    };
 
     findAllClose.onClick(() => {
       history.back();
