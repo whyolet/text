@@ -116,15 +116,23 @@ input::placeholder {
   color: var(--tool);
 }
 
-#find-all-what {
-  margin-left: 0.5rem;
+.more {
+  color: var(--hint);
 }
 
-#find-results-row > .result {
-  margin: 0 0.5rem;
+#find-replace-row,
+#find-all-row,
+.result {
+  border-bottom: 0.5px solid var(--hint);
 }
 
-#find-results-row > .result > .text {
+.result {
+  padding: 0.25rem 0.5rem;
+}
+
+#find-all-row,
+.text,
+.more {
   padding-left: 0.5rem;
 }
 
@@ -148,15 +156,16 @@ input::placeholder {
   text-rendering: optimizeLegibility;
 }
 
-.icon:active {
-  color: var(--back);
-  background-color: var(--tool);
-  border-radius: 2rem;
-}
-
+.icon:active,
+.result:active,
+.result:active > .tag,
 ::selection {
   color: var(--back);
   background-color: var(--tool);
+}
+
+.icon:active {
+  border-radius: 2rem;
 }
 
 .hidden {
