@@ -282,7 +282,6 @@ Thank you!`
           showFindReplaceRow({skipFocus: true});
           doFind(page, 0, true);
         } else {
-          ta.focus();
           ta.setSelectionRange(page.sel1, page.sel2);
           ta.scrollTop = page.scro;
         }
@@ -873,7 +872,7 @@ Thank you!`
       setZoom();
     });
 
-    /// gestures: zoom, TODO: delete, strike
+    /// gestures: zoom, delete, strike
 
     const fingersByIds = new Map();
     let singleFinger;
@@ -1141,6 +1140,11 @@ Thank you!`
       if (kids.length > 1) {
         current.findWhatOnGotPage = findAllWhat.value;
       }
+
+      // We need `ta.focus()` for auto-scroll of `ta` to selection that will be set by `findWhatOnGotPage`.
+      // However `ta.focus()` has no effect when called in `onHashChange`.
+      // So we call `hideFindAll` to show and focus `ta` here in click handler:
+      hideFindAll();
       location.hash = toHash(tag);
     };
 
@@ -1158,6 +1162,10 @@ Thank you!`
       show(bottomRow);
       ta.focus();
     };
+
+    /// auto-focus
+
+    if (!isHidden(mainRow)) ta.focus();
 
     /// call main
   };
