@@ -136,10 +136,13 @@ input::placeholder {
   padding-left: 0.5rem;
 }
 
-.icon {
+.icon,
+.result:active {
   cursor: pointer;
   user-select: none;
+}
 
+.icon {
   font-family: "Material Symbols Outlined";
   font-style: normal;
   /* Let's inherit `font-weight` from text. */
