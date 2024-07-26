@@ -185,6 +185,7 @@ Thank you!`
     };
 
     const current = {
+      findWhatOnGotPage: "",
       page: null,
       pages: [], // for `find-all`
       textLength: 0, // for `autoindent`
@@ -274,9 +275,17 @@ Thank you!`
         header.textContent = tag;
         ta.value = page.text;
         ta.readOnly = false;
-        ta.focus();
-        ta.setSelectionRange(page.sel1, page.sel2);
-        ta.scrollTop = page.scro;
+
+        if (current.findWhatOnGotPage) {
+          findWhat.value = current.findWhatOnGotPage;
+          current.findWhatOnGotPage = "";
+          showFindReplaceRow({skipFocus: true});
+          doFind(page, 0, true);
+        } else {
+          ta.focus();
+          ta.setSelectionRange(page.sel1, page.sel2);
+          ta.scrollTop = page.scro;
+        }
       });
     };
 
@@ -987,11 +996,18 @@ Thank you!`
     /// find-replace
 
     findReplace.onClick(() => {
+      showFindReplaceRow();
+    });
+
+    const showFindReplaceRow = (options) => {
       show(findReplaceRow);
       hide(findReplace);
       show(findClose);
-      findWhat.focus();
-    });
+      if (
+        !options ||
+        !options.skipFocus
+      ) findWhat.focus();
+    };
 
     findClose.onClick(() => {
       hideFindReplace();
@@ -1006,14 +1022,14 @@ Thank you!`
     };
 
     getEl("find-prev").onSavedClick((page) => {
-      doFind(page, false);
+      doFind(page, page.sel1 - 1, false);
     });
 
     getEl("find-next").onSavedClick((page) => {
-      doFind(page, true);
+      doFind(page, page.sel2, true);
     });
 
-    const doFind = (page, forward) => {
+    const doFind = (page, start, forward) => {
       const what = findWhat.value.toLowerCase();
       if (!what) {
         findWhat.focus();
@@ -1022,9 +1038,6 @@ Thank you!`
 
       const where = page.text.toLowerCase();
   
-      const start = forward
-        ? page.sel2 + 1
-        : page.sel1 - 1;
       if (
         start < 0 ||
         start >= where.length
@@ -1048,7 +1061,7 @@ Thank you!`
     /// find-all
 
     findAll.onClick(() => {
-      location.hash = reservedTags.findAll;
+      location.hash = toHash(reservedTags.findAll);
     });
 
     const showFindAll = () => {
@@ -1123,8 +1136,12 @@ Thank you!`
     findAllWhat.on("input", doFindAll);
 
     const onResultClick = (event) => {
-      const tag = event.currentTarget.children[0]. textContent;
-      alert(tag);
+      const kids = event.currentTarget.children;
+      const tag = kids[0]. textContent;
+      if (kids.length > 1) {
+        current.findWhatOnGotPage = findAllWhat.value;
+      }
+      location.hash = toHash(tag);
     };
 
     findAllClose.onClick(() => {
