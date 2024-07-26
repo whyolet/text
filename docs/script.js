@@ -176,7 +176,7 @@ Thank you!`
 
     /// db
 
-    let db, depth = 0;
+    let db;
 
     const stores = {
       conf: "conf",
@@ -256,6 +256,10 @@ Thank you!`
     /// onHashChange
 
     const onHashChange = (event) => {
+      if (!history.state) {
+        history.replaceState(history.length, "");
+      }
+
       const tag = toTag(location.hash);
 
       if (tag == reservedTags.findAll) return showFindAll();
@@ -263,7 +267,6 @@ Thank you!`
 
       if (tag.startsWith(reservedTags.prefix)) {
         alert(`Please don't use tags starting with "${reservedTags.prefix}"`);
-        depth--;
         history.back();
         return;
       };
@@ -435,7 +438,6 @@ Thank you!`
         const hash = toHash(tag);
         if (location.hash === hash) return;
         location.hash = hash;
-        depth++;
       });
     });
 
@@ -446,8 +448,7 @@ Thank you!`
     /// back
 
     getEl("back").onSavedClick(() => {
-      if (depth > 0) {
-        depth--;
+      if (history.state > 1) {
         history.back();
       } else toast("Click # first!");
     });
