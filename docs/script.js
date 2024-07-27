@@ -257,6 +257,7 @@ Thank you!`
 
     const onHashChange = (event) => {
       if (!history.state) {
+        alert(`rS ${history.length}`);
         history.replaceState(history.length, "");
       }
 
@@ -448,8 +449,10 @@ Thank you!`
     /// back
 
     const historyLengthOnStart = history.length;
+    alert(`oS ${history.length}`);
 
     getEl("back").onSavedClick(() => {
+      alert(`b ${history.state}/${history.length} vs ${historyLengthOnStart}`);
       if (history.state > historyLengthOnStart) {
         history.back();
       } else toast("Click # first!");
