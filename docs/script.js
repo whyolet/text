@@ -64,65 +64,18 @@ Thank you!`
       return el;
     };
 
+    /// getEl
+
+    const getEl = (id) => document.getElementById(id);
+
     /// on, onClick
 
-    const on = (el, eventName, handler) => el.addEventListener(eventName, handler);
+    const on = (el, eventName, handler) => {
+      if (typeof el === "string") el = getEl(el);
+      el.addEventListener(eventName, handler);
+    };
 
     const onClick = (el, handler) => on(el, "click", handler);
-
-    /// getEl, saveTimerId
-    
-    let saveTimerId;
-
-    const getEl = (id) => {
-      const el = document.getElementById(id);
-
-      // TODO: replace `el.on*` with `on(el`
-      el.on = el.addEventListener;
-      el.onClick = (onClick) => el.on("click", onClick);
-      el.onSavedClick = (onSaved) => onSavedClick(false, onSaved);
-      el.onSavedTextClick = (onSaved) => onSavedClick(true, onSaved);
-
-      const onSavedClick = (compareTextOnly, onSaved) => {
-
-        const onClick = () => {
-          ta.focus();
-          if (saveTimerId) clearTimeout(saveTimerId);
-          save(compareTextOnly, onSaved)
-        };
-
-        el.onClick(onClick);
-
-        let clickTimer;
-        const millis = 500;
-
-        const start = (event) => {
-          stop(event);
-          clickTimer = setInterval(onClick, millis);
-        };
-
-        const stop = (event) => {
-          ta.focus();
-          if (clickTimer) clearInterval(clickTimer);
-        };
-        
-        el.on("touchstart", start);
-        el.on("mousedown", start);
-
-        el.on("touchcancel", stop);
-        el.on("mouseleave", stop);
-
-        // `move` events are fired after soft keyboard reopens on `focus`,
-        // so we don't use them to avoid stopping auto-clicks.
-        // el.on("touchmove", stop);
-        // el.on("mousemove", stop);
-
-        el.on("touchend", stop);
-        el.on("mouseup", stop);
-      };
-
-      return el;
-    };
 
     /// elements
 
@@ -343,9 +296,11 @@ Thank you!`
       };
     };
 
-    /// input, save
+    /// input, saveTimerId, save, createOp
 
-    ta.on("input", () => {
+    let saveTimerId;
+
+    on(ta, "input", () => {
       autoindent();
       if (saveTimerId) clearTimeout(saveTimerId);
       saveTimerId = setTimeout(save, 1000);
@@ -442,9 +397,48 @@ Thank you!`
       return op;
     };
 
+    /// onSaved*Click
+
+    const onSavedClick = (el, compareTextOnly, handler) => {
+
+      const doClick = () => {
+        ta.focus();
+        if (saveTimerId) clearTimeout(saveTimerId);
+        save(compareTextOnly, handler);
+      };
+
+      onClick(el, doClick);
+      let clickTimerId;
+
+      const start = (event) => {
+        stop(event);
+        clickTimerId = setInterval(doClick, 500);
+      };
+  
+      const stop = (event) => {
+        ta.focus();
+        if (clickTimerId) clearInterval(clickTimerId);
+      };
+  
+      on(el, "touchstart", start);
+      on(el, "mousedown", start);
+
+      on(el, "touchcancel", stop);
+      on(el, "mouseleave", stop);
+
+      // `move` events are fired after soft keyboard reopens on `focus`, so we don't use them.
+
+      on(el, "touchend", stop);
+      on(el, "mouseup", stop);
+    };
+
+    const onSavedPageClick = (el, handler) => onSavedClick(el, false, handler);
+
+    const onSavedTextClick = (el, handler) => onSavedClick(el, true, handler);
+
     /// hash
 
-    getEl("hash").onSavedClick((page) => {
+    onSavedPageClick("hash", (page) => {
       let i = page.sel1;
 
       if (!(
@@ -477,7 +471,7 @@ Thank you!`
 
     const historyLengthOnStart = history.length;
 
-    getEl("back").onSavedClick(() => {
+    onSavedPageClick("back", () => {
       if (history.state > historyLengthOnStart) {
         history.back();
       } else toast("Click # first!");
@@ -496,7 +490,7 @@ Thank you!`
       };
     };
 
-    getEl("undo"). onSavedTextClick(() => {
+    onSavedTextClick("undo", () => {
       // `undo` should not use `onSavedClick` because:
       // imagine the `save` detects a diff of `scrollTop` or cursor,
       // so `onInputWhileUndone` may add multiple `ops`,
@@ -612,7 +606,7 @@ Thank you!`
 
     /// redo
 
-    getEl("redo").onSavedTextClick(() => {
+    onSavedTextClick("redo", () => {
       // `redo` should not use `onSavedClick`
       // for a similar reason `undo` has.
 
@@ -707,7 +701,7 @@ Thank you!`
 
     /// download
 
-    getEl("download").onSavedClick((page) => {
+    onSavedPageClick("download", (page) => {
       // TODO: Move to menu.
       const a = document.createElement("a");
       a.href = "data:application/octet-stream;charset=utf-8," + encodeURIComponent(page.text);
@@ -720,7 +714,7 @@ Thank you!`
 
     /// up, down
 
-    getEl("up").onSavedClick((page) => {
+    onSavedPageClick("up", (page) => {
       ensureTextEndsWithNewline();
       const prevStart = getPrevLineStartIndex(page.sel1);
       const thisStart = getThisLineStartIndex(page.sel1);
@@ -736,7 +730,7 @@ Thank you!`
       save();
     });
 
-    getEl("down").onSavedClick((page) => {
+    onSavedPageClick("down", (page) => {
       ensureTextEndsWithNewline();
       const thisStart = getThisLineStartIndex(page.sel1);
       const nextStart = getNextLineStartIndex(page.sel2);
@@ -833,11 +827,11 @@ Thank you!`
       save();
     };
 
-    getEl("delete").onSavedClick(doDelete);
+    onSavedPageClick("delete", doDelete);
 
     /// strike
 
-    getEl("strike").onSavedClick((page) => {
+    onSavedPageClick("strike", (page) => {
       toast("TODO");
     });
 
@@ -896,7 +890,7 @@ Thank you!`
       .put(current.zoom, conf.zoom);
     };
 
-    getEl("menu").onClick(() => {
+    onClick("menu", () => {
       // TODO: Move to menu as
       // "🤏 Zoom: {input number}%"
       // "{input range}"
@@ -909,7 +903,7 @@ Thank you!`
     let singleFinger;
     let distance = 0;
 
-    ta.on("pointerdown", (event) => {
+    on(ta, "pointerdown", (event) => {
       if (!fingersByIds.has(event.pointerId)) {
         distance = 0; // New finger? Reset diff!
       }
@@ -921,7 +915,7 @@ Thank you!`
       );
     });
 
-    ta.on("pointermove", (event) => {
+    on(ta, "pointermove", (event) => {
       fingersByIds.set(event.pointerId, event);
       if (fingersByIds.size < 2) return;
 
@@ -981,7 +975,7 @@ Thank you!`
     };
 
     for (const action of ["cancel", "leave", "out", "up"]) {
-      ta.on(`pointer${action}`, onFingerCancel);
+      on(ta, `pointer${action}`, onFingerCancel);
     }
 
     /// autoindent
@@ -1017,17 +1011,17 @@ Thank you!`
 
     /// indent, dedent
 
-    getEl("indent").onSavedClick((page) => {
+    onSavedPageClick("indent", (page) => {
       toast("TODO");
     });
 
-    getEl("dedent").onSavedClick((page) => {
+    onSavedPageClick("dedent", (page) => {
       toast("TODO");
     });
 
     /// find-replace
 
-    findReplace.onClick(() => {
+    onClick(findReplace, () => {
       showFindReplaceRow();
     });
 
@@ -1041,7 +1035,7 @@ Thank you!`
       ) findWhat.focus();
     };
 
-    findClose.onClick(() => {
+    onClick(findClose, () => {
       hideFindReplace();
       ta.focus();
     });
@@ -1053,11 +1047,11 @@ Thank you!`
       show(findReplace);
     };
 
-    getEl("find-prev").onSavedClick((page) => {
+    onSavedPageClick("find-prev", (page) => {
       doFind(page, page.sel1 - 1, false);
     });
 
-    getEl("find-next").onSavedClick((page) => {
+    onSavedPageClick("find-next", (page) => {
       doFind(page, page.sel2, true);
     });
 
@@ -1084,7 +1078,7 @@ Thank you!`
       save();
     };
 
-    getEl("replace").onSavedClick((page) => {
+    onSavedPageClick("replace", (page) => {
       ta.setRangeText(replaceWith.value, page.sel1, page.sel2, "select");
       save();
       // Do not auto find next or prev: to verify replacement.
@@ -1092,7 +1086,7 @@ Thank you!`
 
     /// find-all
 
-    findAll.onClick(() => {
+    onClick(findAll, () => {
       location.hash = toHash(reservedTags.findAll);
     });
 
@@ -1175,7 +1169,7 @@ Thank you!`
       }
     };
 
-    findAllWhat.on("input", doFindAll);
+    on(findAllWhat, "input", doFindAll);
 
     const onResultClick = (event) => {
       const kids = event.currentTarget.children;
@@ -1191,7 +1185,7 @@ Thank you!`
       location.hash = toHash(tag);
     };
 
-    findAllClose.onClick(() => {
+    onClick(findAllClose, () => {
       history.back();
     });
 
