@@ -959,7 +959,9 @@ Thank you!`
         !fingersByIds.delete(event.pointerId) ||
         !current.page ||
         !singleFinger ||
-        singleFinger.pointerId !== event.pointerId 
+        singleFinger.pointerId !== event.pointerId ||
+        !event.clientX && !event.clientY
+        // e.g. on `pointercancel`
       ) return;
 
       const dx = event.clientX - singleFinger.clientX;
