@@ -184,17 +184,17 @@ Thank you!`
       page: "page",
     };
 
+    const conf = {
+      undoneOpId: "undoneOpId",
+      zoom: "zoom",
+    };
+
     const current = {
       findWhatOnGotPage: "",
       page: null,
       pages: [], // for `find-all`
       textLength: 0, // for `autoindent`
       zoom: 100,
-    };
-
-    const conf = {
-      undoneOpId: "undoneOpId",
-      zoom: "zoom",
     };
 
     const updateAppVersion = () => {
@@ -447,8 +447,10 @@ Thank you!`
 
     /// back
 
+    const historyLengthOnStart = history.length;
+
     getEl("back").onSavedClick(() => {
-      if (history.state > 1) {
+      if (history.state > historyLengthOnStart) {
         history.back();
       } else toast("Click # first!");
     });
