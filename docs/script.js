@@ -185,6 +185,7 @@ Thank you!`
     };
 
     const conf = {
+      recentTags: "recentTags",
       undoneOpId: "undoneOpId",
       zoom: "zoom",
     };
@@ -271,6 +272,20 @@ Thank you!`
         return;
       };
 
+      getRecentTags((recentTags) => {
+        const i = recentTags.indexOf(tag);
+        if (i !== -1) recentTags.splice(i, 1);
+        recentTags.unshift(tag);
+        if (recentTags.length > 100) {
+          recentTags.pop();
+        }
+
+        db
+        .transaction(stores.conf, "readwrite")
+        .objectStore(stores.conf)
+        .put(recentTags, conf.recentTags);
+      });
+
       getPage(tag, (page) => {
         current.page = page;
         current.textLength = page.text.length;
@@ -292,6 +307,19 @@ Thank you!`
     };
 
     addEventListener("hashchange", onHashChange);
+
+    /// getRecentTags
+
+    const getRecentTags = (onGotRecentTags) => {
+      db
+      .transaction(stores.conf)
+      .objectStore(stores.conf)
+      .get(conf.recentTags)
+      .onsuccess = (event) => {
+        const recentTags = event.target.result || [];
+        onGotRecentTags(recentTags);
+      };
+    };
 
     /// getPage
 
@@ -1101,7 +1129,17 @@ Thank you!`
       findResultsRow.textContent = "";
 
       if (what === "") {
-        // TODO
+        getRecentTags((recentTags) => {
+          for (const tag of recentTags) {
+            const result = (
+              o("div", "result",
+                o("span", "tag", tag),
+              )
+            );
+            onClick(result, onResultClick);
+            findResultsRow.appendChild(result); 
+          }
+        });
         return;
       }
 
