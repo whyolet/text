@@ -130,6 +130,7 @@ input::placeholder {
   padding: 0.25rem 0.5rem;
 }
 
+#find-replace-row,
 #find-all-row,
 .text,
 .more {
