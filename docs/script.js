@@ -250,7 +250,7 @@ Thank you!`
         if (current.findWhatOnGotPage) {
           findWhat.value = current.findWhatOnGotPage;
           current.findWhatOnGotPage = "";
-          showFindReplaceRow({skipFocus: true});
+          showFindReplaceRow();
           doFind(page, 0, true);
         } else {
           ta.setSelectionRange(page.sel1, page.sel2);
@@ -294,6 +294,15 @@ Thank you!`
         );
         onGotPage(page);
       };
+    };
+
+    /// getSelText
+
+    const getSelText = () => {
+      return ta.value.slice(
+        ta.selectionStart,
+        ta.selectionEnd,
+      );
     };
 
     /// input, saveTimerId, save, createOp
@@ -1027,10 +1036,14 @@ Thank you!`
       show(findReplaceRow);
       hide(findReplace);
       show(findClose);
-      if (
-        !options ||
-        !options.skipFocus
-      ) findWhat.focus();
+
+      if (findWhat.value) {
+        // Set by `findWhatOnGotPage`.
+        // Keep focus on `ta` to show the found text selected.
+      } else {
+        findWhat.value = getSelText();
+        findWhat.focus();
+      }
     };
 
     onClick(findClose, () => {
@@ -1089,7 +1102,7 @@ Thank you!`
     });
 
     const showFindAll = () => {
-      findAllWhat.value = findWhat.value;
+      findAllWhat.value = findWhat.value || getSelText();
       findResultsRow.textContent = "";
       hideFindReplace();
       hide(topRow);
