@@ -423,13 +423,11 @@ Thank you!`
       on(el, "touchstart", start);
       on(el, "mousedown", start);
 
-      on(el, "touchcancel", stop);
-      on(el, "mouseleave", stop);
-
-      // `move` events are fired after soft keyboard reopens on `focus`, so we don't use them.
-
       on(el, "touchend", stop);
       on(el, "mouseup", stop);
+      on(el, "touchcancel", stop);
+      on(el, "mouseleave", stop);
+      // `...move` events are fired after soft keyboard reopens on `focus`, so we don't use them.
     };
 
     const onSavedPageClick = (el, handler) => onSavedClick(el, false, handler);
@@ -491,7 +489,7 @@ Thank you!`
     };
 
     onSavedTextClick("undo", () => {
-      // `undo` should not use `onSavedClick` because:
+      // `undo` should not use `onSavedPageClick` because:
       // imagine the `save` detects a diff of `scrollTop` or cursor,
       // so `onInputWhileUndone` may add multiple `ops`,
       // then `doSave` adds a new `op` with that diff,
@@ -607,7 +605,7 @@ Thank you!`
     /// redo
 
     onSavedTextClick("redo", () => {
-      // `redo` should not use `onSavedClick`
+      // `redo` should not use `onSavedPageClick`
       // for a similar reason `undo` has.
 
       getUndoneOpId((undoneOpId) => {
