@@ -216,8 +216,8 @@ Thank you!`
 
       const tag = toTag(location.hash);
 
-      if (tag == reservedTags.findAll) return showFindAll();
-      if (!isHidden(findAllRow)) hideFindAll();
+      if (tag == reservedTags.findAll) return showFindAllScreen();
+      if (!isHidden(findAllRow)) hideFindAllScreen();
 
       if (tag.startsWith(reservedTags.prefix)) {
         alert(`Please don't use tags starting with "${reservedTags.prefix}"`);
@@ -410,18 +410,18 @@ Thank you!`
 
     const onSavedClick = (el, compareTextOnly, handler) => {
 
-      const doClick = () => {
+      const clickHandler = () => {
         ta.focus();
         if (saveTimerId) clearTimeout(saveTimerId);
         save(compareTextOnly, handler);
       };
 
-      onClick(el, doClick);
+      onClick(el, clickHandler);
       let clickTimerId;
 
       const start = (event) => {
         stop(event);
-        clickTimerId = setInterval(doClick, 500);
+        clickTimerId = setInterval(clickHandler, 500);
       };
   
       const stop = (event) => {
@@ -858,7 +858,7 @@ Thank you!`
       };
     };
 
-    const setZoom = () => {
+    const askNewZoom = () => {
       // TODO: Move to a separate menu row.
       const text = ta.value;
       const cursor = ta.selectionStart;
@@ -901,7 +901,7 @@ Thank you!`
       // TODO: Move to menu as
       // "🤏 Zoom: {input number}%"
       // "{input range}"
-      setZoom();
+      askNewZoom();
     });
 
     /// gestures: zoom, delete, strike
@@ -1047,11 +1047,11 @@ Thank you!`
     };
 
     onClick(findClose, () => {
-      hideFindReplace();
+      hideFindReplaceRow();
       ta.focus();
     });
 
-    const hideFindReplace = () => {
+    const hideFindReplaceRow = () => {
       hide(findReplaceRow);
       findWhat.value = replaceWith.value = "";
       hide(findClose);
@@ -1101,10 +1101,10 @@ Thank you!`
       location.hash = toHash(reservedTags.findAll);
     });
 
-    const showFindAll = () => {
+    const showFindAllScreen = () => {
       findAllWhat.value = findWhat.value || getSelText();
       findResultsRow.textContent = "";
-      hideFindReplace();
+      hideFindReplaceRow();
       hide(topRow);
       hide(mainRow);
       hide(bottomRow);
@@ -1191,8 +1191,8 @@ Thank you!`
 
       // We need `ta.focus()` for auto-scroll of `ta` to selection that will be set by `findWhatOnGotPage`.
       // However `ta.focus()` has no effect when called in `onHashChange`.
-      // So we call `hideFindAll` to show and focus `ta` here in click handler:
-      hideFindAll();
+      // So we call `hideFindAllScreen` to show and focus `ta` here in click handler:
+      hideFindAllScreen();
       location.hash = toHash(tag);
     };
 
@@ -1200,7 +1200,7 @@ Thank you!`
       history.back();
     });
 
-    const hideFindAll = () => {
+    const hideFindAllScreen = () => {
       hide(findAllRow);
       hide(findResultsRow);
       findAllWhat.value = "";
