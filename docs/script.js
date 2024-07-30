@@ -1018,13 +1018,55 @@ Thank you!`
 
     /// indent, dedent
 
+    const indent = "  ";
+
     onSavedPageClick("indent", (page) => {
-      toast("TODO");
+      doIndent(page, true);
     });
 
     onSavedPageClick("dedent", (page) => {
-      toast("TODO");
+      doIndent(page, false);
     });
+
+    const doIndent = (page, isAdding) => {
+      const thisStart = getThisLineStartIndex(page.sel1);
+      const nextStart = getNextLineStartIndex(page.sel2);
+      const lines = page.text.slice(thisStart, nextStart).split("\n");
+      let firstAdded = 0, totalAdded = 0;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line === "" || line === "\r") continue;
+        let diff = indent, added = indent.length;
+
+        if (isAdding) {
+          lines[i] = diff + line;
+        } else do {
+          if (line.startsWith(diff)) {
+            lines[i] = line.slice(added);
+            break;
+          }
+          diff = diff.slice(0, --added);
+        } while (diff !== "");
+
+        if (!isAdding) added = -added;
+        if (!i) firstAdded = added;
+        totalAdded += added;
+      }
+
+      ta.setRangeText(
+        lines.join("\n"),
+        thisStart,
+        nextStart,
+      );
+
+      ta.setSelectionRange(
+        page.sel1 + firstAdded,
+        page.sel2 + totalAdded,
+      );
+
+      save();
+    };
 
     /// find-replace
 
