@@ -259,7 +259,7 @@ Thank you!`
       });
     };
 
-    addEventListener("hashchange", onHashChange);
+    on(window, "hashchange", onHashChange);
 
     /// getRecentTags
 
@@ -1029,6 +1029,7 @@ Thank you!`
     });
 
     const doIndent = (page, isAdding) => {
+      const hasSel = page.sel1 !== page.sel2;
       const thisStart = getThisLineStartIndex(page.sel1);
       const nextStart = getNextLineStartIndex(page.sel2);
       const lines = page.text.slice(thisStart, nextStart).split("\n");
@@ -1036,9 +1037,12 @@ Thank you!`
 
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
-        if (line === "" || line === "\r") continue;
-        let diff = indent, added = indent.length;
+        if ((hasSel || i) && (
+          line === "" ||
+          line === "\r"
+        )) continue;
 
+        let diff = indent, added = indent.length;
         if (isAdding) {
           lines[i] = diff + line;
         } else do {
@@ -1261,5 +1265,5 @@ Thank you!`
   };
 
   if (document.readyState === "complete") return main();
-  document.addEventListener("DOMContentLoaded", main);
+  on(document, "DOMContentLoaded", main);
 })();
