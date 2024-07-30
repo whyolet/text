@@ -36,46 +36,53 @@ Thank you!`
 
   const toTag = (hash) => decodeURIComponent(hash.replace(/^#+/, ""));
 
+  /// o - bullet point in a tree of elements
+
+  const o = function(tag, attrs /* , kids */) {
+    const el = document.createElement(tag);
+
+    if (typeof attrs === "string") {
+      el.className = attrs;
+    } else for (const key in attrs) {
+      const val = attrs[key];
+      if (val !== null) el.setAttribute(key, val);
+    }
+
+    for (let i = 2; i < arguments.length; i++) {
+      const kid = arguments[i];
+      if (kid !== null) el.appendChild(
+        typeof kid === "string"
+        ? document.createTextNode(kid)
+        : kid
+      );
+    }
+
+    return el;
+  };
+
+  /// getEl
+
+  const getEl = (id) => document.getElementById(id);
+
+  /// hide, show, isHidden
+
+  const hidden = "hidden";
+  const hide = (el) => el.classList.add(hidden);
+  const show = (el) => el.classList.remove(hidden);
+  const isHidden = (el) => el.classList.contains(hidden);
+
+  /// on, onClick
+
+  const on = (el, eventName, handler) => {
+    if (typeof el === "string") el = getEl(el);
+    el.addEventListener(eventName, handler);
+  };
+
+  const onClick = (el, handler) => on(el, "click", handler);
+
   /// main
 
   const main = () => {
-
-    /// o - bullet point in a tree of elements
-
-    const o = function(tag, attrs /* , kids */) {
-      const el = document.createElement(tag);
-
-      if (typeof attrs === "string") {
-        el.className = attrs;
-      } else for (const key in attrs) {
-        const val = attrs[key];
-        if (val !== null) el.setAttribute(key, val);
-      }
-
-      for (let i = 2; i < arguments.length; i++) {
-        const kid = arguments[i];
-        if (kid !== null) el.appendChild(
-          typeof kid === "string"
-          ? document.createTextNode(kid)
-          : kid
-        );
-      }
-
-      return el;
-    };
-
-    /// getEl
-
-    const getEl = (id) => document.getElementById(id);
-
-    /// on, onClick
-
-    const on = (el, eventName, handler) => {
-      if (typeof el === "string") el = getEl(el);
-      el.addEventListener(eventName, handler);
-    };
-
-    const onClick = (el, handler) => on(el, "click", handler);
 
     /// elements
 
@@ -98,13 +105,6 @@ Thank you!`
     const topRow = getEl("top-row");
     const mainRow = getEl("main-row");
     const bottomRow = getEl("bottom-row");
-
-    /// hide, show, isHidden
-
-    const hidden = "hidden";
-    const hide = (el) => el.classList.add(hidden);
-    const show = (el) => el.classList.remove(hidden);
-    const isHidden = (el) => el.classList.contains(hidden);
 
     /// toast
     
