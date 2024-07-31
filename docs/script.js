@@ -409,23 +409,25 @@ Thank you!`
     /// onSaved*Click
 
     const onSavedClick = (el, compareTextOnly, handler) => {
+      let prevFocused, clickTimerId;
 
       const clickHandler = () => {
-        ta.focus();
+        prevFocused = document.activeElement;
+        if (prevFocused) prevFocused.focus();
         if (saveTimerId) clearTimeout(saveTimerId);
         save(compareTextOnly, handler);
       };
 
       onClick(el, clickHandler);
-      let clickTimerId;
 
       const start = (event) => {
+        prevFocused = document.activeElement;
         stop(event);
         clickTimerId = setInterval(clickHandler, 500);
       };
   
       const stop = (event) => {
-        ta.focus();
+        if (prevFocused) prevFocused.focus();
         if (clickTimerId) clearInterval(clickTimerId);
       };
   
@@ -828,6 +830,14 @@ Thank you!`
     /// delete
 
     const doDelete = (page) => {
+      const focused = document.activeElement;
+      if (!focused) return;
+
+      if (focused.id !== "ta") {
+        focused.value = "";
+        return;
+      }
+
       const thisStart = getThisLineStartIndex(page.sel1);
       const nextStart = getNextLineStartIndex(page.sel2);
       ta.setRangeText("", thisStart, nextStart, "start");
@@ -835,12 +845,6 @@ Thank you!`
     };
 
     onSavedPageClick("delete", doDelete);
-
-    /// strike
-
-    onSavedPageClick("strike", (page) => {
-      toast("TODO");
-    });
 
     /// zoom
 
@@ -985,6 +989,62 @@ Thank you!`
       on(ta, `pointer${action}`, onFingerCancel);
     }
 
+    /// copy, paste
+
+    onSavedPageClick("copy", (page) => {
+      const focused = document.activeElement;
+      if (!focused) return;
+
+      const isTa = focused.id === "ta";
+      let start = focused.selectionStart;
+      let stop = focused.selectionEnd;
+      if (start == stop) {
+        if (isTa) {
+          start = getThisLineStartIndex(start);
+          stop = getNextLineStartIndex(stop);
+          stop = decreaseByNewline(stop);
+        } else {
+          start = 0;
+          stop = focused.value.length;
+        }
+        focused.setSelectionRange(start, stop);
+        if (isTa) save();
+      }
+
+      if ("clipboard" in navigator) {
+        const text = focused.value.slice(start, stop);
+        navigator.clipboard.writeText(text);
+        return;
+      }
+
+      if ("execCommand" in document) {
+        document.execCommand("copy", false, null);
+      }
+    });
+
+    onSavedPageClick("paste", (page) => {
+      const focused = document.activeElement;
+      if (!focused) return;
+
+      if ("clipboard" in navigator) {
+        navigator.clipboard.readText()
+        .then((text) => {
+          focused.setRangeText(
+            text,
+            focused.selectionStart,
+            focused.selectionEnd,
+            "end",
+          );
+          if (focused.id === "ta") save();
+        });
+        return;
+      }
+
+      if ("execCommand" in document) {
+        document.execCommand("paste", false, null);
+      }
+    });
+
     /// autoindent
 
     const autoindent = () => {
@@ -1071,6 +1131,12 @@ Thank you!`
 
       save();
     };
+
+    /// strike
+
+    onSavedPageClick("strike", (page) => {
+      toast("TODO");
+    });
 
     /// find-replace
 
