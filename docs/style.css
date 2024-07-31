@@ -94,6 +94,10 @@ input::placeholder {
   min-width: 4rem;
 }
 
+.triple {
+  min-width: 6rem;
+}
+
 .margin {
   flex: 0 1;
 }
