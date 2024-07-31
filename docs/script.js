@@ -1035,14 +1035,12 @@ Thank you!`
             focused.selectionEnd,
             "end",
           );
-          if (focused.id === "ta") save();
         });
-        return;
-      }
-
-      if ("execCommand" in document) {
+      } else if ("execCommand" in document) {
         document.execCommand("paste", false, null);
       }
+
+      if (focused.id === "ta") save();
     });
 
     /// autoindent
