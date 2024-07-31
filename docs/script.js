@@ -408,11 +408,11 @@ Thank you!`
 
     /// onSaved*Click
 
-    const onSavedClick = (el, compareTextOnly, handler) => {
+    const onSavedClick = (el, compareTextOnly, anyFocus, handler) => {
       let prevFocused, clickTimerId;
 
       const clickHandler = () => {
-        prevFocused = document.activeElement;
+        prevFocused = anyFocus ? document.activeElement : ta;
         if (prevFocused) prevFocused.focus();
         if (saveTimerId) clearTimeout(saveTimerId);
         save(compareTextOnly, handler);
@@ -421,7 +421,7 @@ Thank you!`
       onClick(el, clickHandler);
 
       const start = (event) => {
-        prevFocused = document.activeElement;
+        prevFocused = anyFocus ? document.activeElement : ta;
         stop(event);
         clickTimerId = setInterval(clickHandler, 500);
       };
@@ -441,9 +441,11 @@ Thank you!`
       // `...move` events are fired after soft keyboard reopens on `focus`, so we don't use them.
     };
 
-    const onSavedPageClick = (el, handler) => onSavedClick(el, false, handler);
+    const onSavedPageAnyFocusClick = (el, handler) => onSavedClick(el, false, true, handler);
 
-    const onSavedTextClick = (el, handler) => onSavedClick(el, true, handler);
+    const onSavedPageClick = (el, handler) => onSavedClick(el, false, false, handler);
+
+    const onSavedTextClick = (el, handler) => onSavedClick(el, true, false, handler);
 
     /// hash
 
@@ -844,7 +846,7 @@ Thank you!`
       save();
     };
 
-    onSavedPageClick("delete", doDelete);
+    onSavedPageAnyFocusClick("delete", doDelete);
 
     /// zoom
 
@@ -991,7 +993,7 @@ Thank you!`
 
     /// copy, paste
 
-    onSavedPageClick("copy", (page) => {
+    onSavedPageAnyFocusClick("copy", (page) => {
       const focused = document.activeElement;
       if (!focused) return;
 
@@ -1022,7 +1024,7 @@ Thank you!`
       }
     });
 
-    onSavedPageClick("paste", (page) => {
+    onSavedPageAnyFocusClick("paste", (page) => {
       const focused = document.activeElement;
       if (!focused) return;
 
