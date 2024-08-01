@@ -1113,7 +1113,11 @@ Thank you!`
           diff = diff.slice(0, --added);
         } while (diff !== "");
 
-        if (!isAdding) added = -added;
+        if (!isAdding) added = -Math.min(
+          added,
+          page.sel1 - thisStart,
+        );
+
         if (!i) firstAdded = added;
         totalAdded += added;
       }
