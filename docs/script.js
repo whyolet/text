@@ -408,27 +408,36 @@ Thank you!`
 
     /// onSaved*Click
 
-    const onSavedClick = (el, compareTextOnly, anyFocus, handler) => {
-      let prevFocused, clickTimerId;
+    const onSavedClick = (el, compareTextOnly, anyFocus, handler, heldHandler) => {
+      let prevFocused, clickTimerId = 0;
 
       const clickHandler = () => {
         prevFocused = anyFocus ? document.activeElement : ta;
         if (prevFocused) prevFocused.focus();
+
         if (saveTimerId) clearTimeout(saveTimerId);
+
+        if (clickTimerId && heldHandler) {
+          stop();
+          save(compareTextOnly, heldHandler);
+          return;
+        }
+
         save(compareTextOnly, handler);
       };
 
       onClick(el, clickHandler);
 
-      const start = (event) => {
+      const start = () => {
         prevFocused = anyFocus ? document.activeElement : ta;
-        stop(event);
+        stop();
         clickTimerId = setInterval(clickHandler, 500);
       };
   
-      const stop = (event) => {
+      const stop = () => {
         if (prevFocused) prevFocused.focus();
         if (clickTimerId) clearInterval(clickTimerId);
+        clickTimerId = 0;
       };
   
       on(el, "touchstart", start);
@@ -441,11 +450,11 @@ Thank you!`
       // `...move` events are fired after soft keyboard reopens on `focus`, so we don't use them.
     };
 
-    const onSavedPageAnyFocusClick = (el, handler) => onSavedClick(el, false, true, handler);
+    const onSavedPageAnyFocusClick = (el, handler, heldHandler) => onSavedClick(el, false, true, handler, heldHandler);
 
-    const onSavedPageClick = (el, handler) => onSavedClick(el, false, false, handler);
+    const onSavedPageClick = (el, handler, heldHandler) => onSavedClick(el, false, false, handler, heldHandler);
 
-    const onSavedTextClick = (el, handler) => onSavedClick(el, true, false, handler);
+    const onSavedTextClick = (el, handler, heldHandler) => onSavedClick(el, true, false, handler, heldHandler);
 
     /// hash
 
@@ -1183,11 +1192,8 @@ Thank you!`
     });
 
     const doFind = (page, start, forward) => {
-      const what = findWhat.value.toLowerCase();
-      if (!what) {
-        findWhat.focus();
-        return toast("Find what?");
-      }
+      const what = getFindWhat();
+      if (!what) return;
 
       const where = page.text.toLowerCase();
   
@@ -1205,10 +1211,32 @@ Thank you!`
       save();
     };
 
+    const getFindWhat = () => {
+      const what = findWhat.value.toLowerCase();
+      if (what) return what;
+
+      findWhat.focus();
+      toast("Find what?");
+      return "";
+    };
+
     onSavedPageClick("replace", (page) => {
       ta.setRangeText(replaceWith.value, page.sel1, page.sel2, "select");
       save();
       // Do not auto find next or prev: to verify replacement.
+    }, (page) => {
+      // On held button:
+
+      const what = getFindWhat();
+      if (!what) return;
+
+      const withValue = replaceWith.value;
+
+      if (!confirm(`Replace all
+"${what}" ➔
+"${withValue}"`)) return;
+
+      toast("TODO");
     });
 
     /// find-all
