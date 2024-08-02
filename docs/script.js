@@ -1120,7 +1120,7 @@ Thank you!`
             break;
           }
           diff = diff.slice(0, --added);
-        } while (diff !== "");
+        } while (diff);
 
         if (!isAdding) added = -Math.min(
           added,
@@ -1279,7 +1279,7 @@ Thank you!`
       const what = findAllWhat.value.toLowerCase();
       findResultsRow.textContent = "";
 
-      if (what === "") {
+      if (!what) {
         getRecentTags((recentTags) => {
           for (const tag of recentTags) {
             const result = (
