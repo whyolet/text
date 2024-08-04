@@ -927,17 +927,14 @@ Thank you!`
       return {cur, max};
     };
 
-    const getLineStart = (lineNumber) => {
+    const getLineStop = (lineNumber) => {
       const text = ta.value;
-      let i = -1, result = 0;
+      let i = -1;
       while (
         lineNumber > 0 &&
         (i = text.indexOf("\n", i + 1)) !== -1
-      ) {
-        result = i;
-        lineNumber--;
-      }
-      return result;
+      ) lineNumber--;
+      return i > 0 ? i : text.length;
     };
 
     /// gestures: zoom, delete, strike
@@ -1258,7 +1255,7 @@ Thank you!`
 
       const lineNumbers = getLineNumbers();
       ta.value = page.text.replaceAll(what, withValue);
-      const i = getLineStart(lineNumbers.cur);
+      const i = getLineStop(lineNumbers.cur);
       ta.setSelectionRange(i, i);
       ta.focus();
       save();
