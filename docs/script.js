@@ -422,7 +422,7 @@ Thank you!`
       );
 
       const clickHandler = () => {
-        prevFocused = getPrevFocused();
+        if (!clickTimerId) prevFocused = getPrevFocused();
         if (prevFocused) prevFocused.focus();
 
         if (saveTimerId) clearTimeout(saveTimerId);
