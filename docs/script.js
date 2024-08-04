@@ -409,13 +409,20 @@ Thank you!`
     /// onSavedClick
 
     const onSavedClick = (el, options, handler, heldHandler) => {
+      const anyFocus = options.includes("a");
+      const noFocus = options.includes("n");
       const compareTextOnly = options.includes("t");
-      const anyFocus = options.includes("f");
 
       let prevFocused, clickTimerId = 0;
 
+      const getPrevFocused = () => (
+        noFocus ? null :
+        anyFocus ? document.activeElement :
+        ta
+      );
+
       const clickHandler = () => {
-        prevFocused = anyFocus ? document.activeElement : ta;
+        prevFocused = getPrevFocused();
         if (prevFocused) prevFocused.focus();
 
         if (saveTimerId) clearTimeout(saveTimerId);
@@ -432,7 +439,7 @@ Thank you!`
       onClick(el, clickHandler);
 
       const start = () => {
-        prevFocused = anyFocus ? document.activeElement : ta;
+        prevFocused = getPrevFocused();
         stop();
         clickTimerId = setInterval(clickHandler, 500);
       };
@@ -851,7 +858,7 @@ Thank you!`
       save();
     };
 
-    onSavedClick("delete", "f", doDelete);
+    onSavedClick("delete", "a", doDelete);
 
     /// zoom
 
@@ -998,7 +1005,7 @@ Thank you!`
 
     /// copy, paste
 
-    onSavedClick("copy", "f", (page) => {
+    onSavedClick("copy", "a", (page) => {
       const focused = document.activeElement;
       if (!focused) return;
 
@@ -1029,7 +1036,7 @@ Thank you!`
       }
     });
 
-    onSavedClick("paste", "f", (page) => {
+    onSavedClick("paste", "a", (page) => {
       const focused = document.activeElement;
       if (!focused) return;
 
@@ -1216,7 +1223,8 @@ Thank you!`
       return "";
     };
 
-    onSavedClick("replace", "", (page) => {
+    onSavedClick("replace", "n", (page) => {
+      ta.focus();
       ta.setRangeText(replaceWith.value, page.sel1, page.sel2, "select");
       save();
       // Do not auto find next or prev: to verify replacement.
@@ -1228,11 +1236,10 @@ Thank you!`
 
       const withValue = replaceWith.value;
 
-      if (!confirm(`Replace all
-"${what}" ➔
-"${withValue}"`)) return;
+      if (!confirm(`Replace all "${what}" ➔ "${withValue}"?`)) return;
 
       toast("TODO");
+      ta.focus();
     });
 
     /// find-all
