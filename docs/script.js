@@ -878,16 +878,10 @@ Thank you!`
 
     const askNewZoom = () => {
       // TODO: Move to a separate menu row.
-      const text = ta.value;
-      const cursor = ta.selectionStart;
-      let line = 1, total = 1, i = -1;
-      while ((i = text.indexOf("\n", i + 1)) !== -1) {
-        total++;
-        if (i < cursor) line++;
-      }
-      const lineNumbers = `Line ${line}/${total}`;
+      const lineNumbers = getLineNumbers();
+      const lineInfo = `Line ${lineNumbers.cur}/${lineNumbers.max}`;
 
-      let newZoom = prompt(`${lineNumbers}\nZoom %`, current.zoom);
+      let newZoom = prompt(`${lineInfo}\nZoom %`, current.zoom);
       if (!newZoom) return;
 
       newZoom = parseInt(newZoom, 10);
@@ -921,6 +915,30 @@ Thank you!`
       // "{input range}"
       askNewZoom();
     });
+
+    const getLineNumbers = () => {
+      const text = ta.value;
+      const cursor = ta.selectionStart;
+      let cur = 1, max = 1, i = -1;
+      while ((i = text.indexOf("\n", i + 1)) !== -1) {
+        max++;
+        if (i < cursor) cur++;
+      }
+      return {cur, max};
+    };
+
+    const getLineStart = (lineNumber) => {
+      const text = ta.value;
+      let i = -1, result = 0;
+      while (
+        lineNumber > 0 &&
+        (i = text.indexOf("\n", i + 1)) !== -1
+      ) {
+        result = i;
+        lineNumber--;
+      }
+      return result;
+    };
 
     /// gestures: zoom, delete, strike
 
@@ -1238,8 +1256,12 @@ Thank you!`
 
       if (!confirm(`Replace all "${what}" ➔ "${withValue}"?`)) return;
 
-      toast("TODO");
+      const lineNumbers = getLineNumbers();
+      ta.value = page.text.replaceAll(what, withValue);
+      const i = getLineStart(lineNumbers.cur);
+      ta.setSelectionRange(i, i);
       ta.focus();
+      save();
     });
 
     /// find-all
