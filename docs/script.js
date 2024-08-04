@@ -209,9 +209,14 @@ Thank you!`
 
     /// onHashChange
 
+   let historyStateOnStart = null;
+
     const onHashChange = (event) => {
       if (!history.state) {
         history.replaceState(history.length, "");
+      }
+      if (historyStateOnStart === null) {
+        historyStateOnStart = history.state;
       }
 
       const tag = toTag(location.hash);
@@ -493,10 +498,8 @@ Thank you!`
 
     /// back
 
-    const historyLengthOnStart = history.length;
-
     onSavedClick("back", "", () => {
-      if (history.state > historyLengthOnStart) {
+      if (history.state > historyStateOnStart) {
         history.back();
       } else toast("Click # first!");
     });
