@@ -406,9 +406,12 @@ Thank you!`
       return op;
     };
 
-    /// onSaved*Click
+    /// onSavedClick
 
-    const onSavedClick = (el, compareTextOnly, anyFocus, handler, heldHandler) => {
+    const onSavedClick = (el, options, handler, heldHandler) => {
+      const compareTextOnly = options.includes("t");
+      const anyFocus = options.includes("f");
+
       let prevFocused, clickTimerId = 0;
 
       const clickHandler = () => {
@@ -450,15 +453,9 @@ Thank you!`
       // `...move` events are fired after soft keyboard reopens on `focus`, so we don't use them.
     };
 
-    const onSavedPageAnyFocusClick = (el, handler, heldHandler) => onSavedClick(el, false, true, handler, heldHandler);
-
-    const onSavedPageClick = (el, handler, heldHandler) => onSavedClick(el, false, false, handler, heldHandler);
-
-    const onSavedTextClick = (el, handler, heldHandler) => onSavedClick(el, true, false, handler, heldHandler);
-
     /// hash
 
-    onSavedPageClick("hash", (page) => {
+    onSavedClick("hash", "", (page) => {
       let i = page.sel1;
 
       if (!(
@@ -491,7 +488,7 @@ Thank you!`
 
     const historyLengthOnStart = history.length;
 
-    onSavedPageClick("back", () => {
+    onSavedClick("back", "", () => {
       if (history.state > historyLengthOnStart) {
         history.back();
       } else toast("Click # first!");
@@ -510,8 +507,8 @@ Thank you!`
       };
     };
 
-    onSavedTextClick("undo", () => {
-      // `undo` should not use `onSavedPageClick` because:
+    onSavedClick("undo", "t", () => {
+      // `undo` should use `"t" = compareTextOnly` because:
       // imagine the `save` detects a diff of `scrollTop` or cursor,
       // so `onInputWhileUndone` may add multiple `ops`,
       // then `doSave` adds a new `op` with that diff,
@@ -626,9 +623,8 @@ Thank you!`
 
     /// redo
 
-    onSavedTextClick("redo", () => {
-      // `redo` should not use `onSavedPageClick`
-      // for a similar reason `undo` has.
+    onSavedClick("redo", "t", () => {
+      // `redo` should use "t" for a similar reason `undo` has.
 
       getUndoneOpId((undoneOpId) => {
         if (!undoneOpId) return toast("This is the newest!");
@@ -721,7 +717,7 @@ Thank you!`
 
     /// download
 
-    onSavedPageClick("download", (page) => {
+    onSavedClick("download", "", (page) => {
       // TODO: Move to menu.
       const a = document.createElement("a");
       a.href = "data:application/octet-stream;charset=utf-8," + encodeURIComponent(page.text);
@@ -734,7 +730,7 @@ Thank you!`
 
     /// up, down
 
-    onSavedPageClick("up", (page) => {
+    onSavedClick("up", "", (page) => {
       ensureTextEndsWithNewline();
       const prevStart = getPrevLineStartIndex(page.sel1);
       const thisStart = getThisLineStartIndex(page.sel1);
@@ -750,7 +746,7 @@ Thank you!`
       save();
     });
 
-    onSavedPageClick("down", (page) => {
+    onSavedClick("down", "", (page) => {
       ensureTextEndsWithNewline();
       const thisStart = getThisLineStartIndex(page.sel1);
       const nextStart = getNextLineStartIndex(page.sel2);
@@ -855,7 +851,7 @@ Thank you!`
       save();
     };
 
-    onSavedPageAnyFocusClick("delete", doDelete);
+    onSavedClick("delete", "f", doDelete);
 
     /// zoom
 
@@ -1002,7 +998,7 @@ Thank you!`
 
     /// copy, paste
 
-    onSavedPageAnyFocusClick("copy", (page) => {
+    onSavedClick("copy", "f", (page) => {
       const focused = document.activeElement;
       if (!focused) return;
 
@@ -1033,7 +1029,7 @@ Thank you!`
       }
     });
 
-    onSavedPageAnyFocusClick("paste", (page) => {
+    onSavedClick("paste", "f", (page) => {
       const focused = document.activeElement;
       if (!focused) return;
 
@@ -1089,11 +1085,11 @@ Thank you!`
 
     const indent = "  ";
 
-    onSavedPageClick("indent", (page) => {
+    onSavedClick("indent", "", (page) => {
       doIndent(page, true);
     });
 
-    onSavedPageClick("dedent", (page) => {
+    onSavedClick("dedent", "", (page) => {
       doIndent(page, false);
     });
 
@@ -1147,7 +1143,7 @@ Thank you!`
 
     /// strike
 
-    onSavedPageClick("strike", (page) => {
+    onSavedClick("strike", "", (page) => {
       toast("TODO");
     });
 
@@ -1183,11 +1179,11 @@ Thank you!`
       show(findReplace);
     };
 
-    onSavedPageClick("find-prev", (page) => {
+    onSavedClick("find-prev", "", (page) => {
       doFind(page, page.sel1 - 1, false);
     });
 
-    onSavedPageClick("find-next", (page) => {
+    onSavedClick("find-next", "", (page) => {
       doFind(page, page.sel2, true);
     });
 
@@ -1220,7 +1216,7 @@ Thank you!`
       return "";
     };
 
-    onSavedPageClick("replace", (page) => {
+    onSavedClick("replace", "", (page) => {
       ta.setRangeText(replaceWith.value, page.sel1, page.sel2, "select");
       save();
       // Do not auto find next or prev: to verify replacement.
