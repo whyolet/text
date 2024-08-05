@@ -746,6 +746,7 @@ Thank you!`
       const thisStart = getThisLineStartIndex(page.sel1);
       const nextStart = getNextLineStartIndex(page.sel2);
       const thisStop = decreaseByNewline(nextStart);
+      if (thisStop < thisStart) return;
       const thisLength = thisStop - thisStart;
 
       const prevLine = page.text.slice(prevStart, thisStart);
@@ -761,6 +762,7 @@ Thank you!`
       const thisStart = getThisLineStartIndex(page.sel1);
       const nextStart = getNextLineStartIndex(page.sel2);
       const thisStop = decreaseByNewline(nextStart);
+      if (thisStop < thisStart) return;
       const thisLength = thisStop - thisStart;
       const nextNextStart = getNextLineStartIndex(nextStart);
 
@@ -1023,7 +1025,7 @@ Thank you!`
 
     /// copy, paste
 
-    onSavedClick("copy", "a", (page) => {
+    onSavedClick("copy", "a", () => {
       const focused = document.activeElement;
       if (!focused) return;
 
@@ -1035,6 +1037,7 @@ Thank you!`
           start = getThisLineStartIndex(start);
           stop = getNextLineStartIndex(stop);
           stop = decreaseByNewline(stop);
+          if (stop < start) return;
         } else {
           start = 0;
           stop = focused.value.length;
@@ -1054,7 +1057,7 @@ Thank you!`
       }
     });
 
-    onSavedClick("paste", "a", (page) => {
+    onSavedClick("paste", "a", () => {
       const focused = document.activeElement;
       if (!focused) return;
 
@@ -1168,8 +1171,35 @@ Thank you!`
 
     /// strike
 
-    onSavedClick("strike", "", (page) => {
-      toast("TODO");
+    const strikeChar = "\u0336";
+
+    onSavedClick("strike", "a", () => {
+      const focused = document.activeElement;
+      if (!focused) return;
+
+      const isTa = focused.id === "ta";
+      let start = focused.selectionStart;
+      let stop = focused.selectionEnd;
+      if (start == stop) {
+        if (isTa) {
+          start = getThisLineStartIndex(start);
+          stop = getNextLineStartIndex(stop);
+          stop = decreaseByNewline(stop);
+          if (stop < start) return;
+        } else {
+          start = 0;
+          stop = focused.value.length;
+        }
+      }
+
+      let text = focused.value.slice(start, stop);
+
+      text = text.includes(strikeChar)
+        ? text.replaceAll(strikeChar, "")
+        : text.replaceAll("", strikeChar).slice(1);
+
+      focused.setRangeText(text, start, stop, "select");
+      if (isTa) save();
     });
 
     /// find-replace
