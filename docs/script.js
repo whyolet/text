@@ -479,7 +479,7 @@ Thank you!`
       const start = i;
 
       while (i < page.text.length && isTag(i)) i++;
-      const tag = page.text.slice(start, i);
+      const tag = page.text.slice(start, i).replaceAll(strikeChar, "");
 
       if (tag.charAt(0) !== "#") {
         ta.setRangeText("#", start, start);
@@ -942,7 +942,7 @@ Thank you!`
       return i > 0 ? i : text.length;
     };
 
-    /// gestures: zoom, delete, strike
+    /// gestures: zoom, delete, send
 
     const fingersByIds = new Map();
     let singleFinger;
@@ -1198,7 +1198,7 @@ Thank you!`
         ? text.replaceAll(strikeChar, "")
         : text.replaceAll("", strikeChar).slice(1);
 
-      focused.setRangeText(text, start, stop, "select");
+      focused.setRangeText(text, start, stop, "end");
       if (isTa) save();
     });
 
