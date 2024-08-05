@@ -106,6 +106,8 @@ Thank you!`
     const mainRow = getEl("main-row");
     const bottomRow = getEl("bottom-row");
 
+    const menuRow = getEl("menu-row");
+
     /// toast
     
     let toastTimerId;
@@ -200,11 +202,16 @@ Thank you!`
       db.onerror = onDbError;
       db.onversionchange = updateAppVersion;
       getZoom();
+      goTag("draft", true);
+    };
 
-      const hash = toHash("draft");
-      if (location.hash === hash) {
-        onHashChange();
-      } else location.replace(hash);
+    /// goTag
+
+    const goTag = (tag, isReplace) => {
+      const hash = toHash(tag);
+      if (location.hash === hash) return onHashChange();
+      if (isReplace) return location.replace(hash);
+      location.assign(hash);
     };
 
     /// onHashChange
@@ -212,17 +219,24 @@ Thank you!`
    let historyStateOnStart = null;
 
     const onHashChange = (event) => {
+      const tag = toTag(location.hash);
+
       if (!history.state) {
         history.replaceState(history.length, "");
       }
       if (historyStateOnStart === null) {
         historyStateOnStart = history.state;
+        if (tag === reservedTags.menu) {
+          goTag("draft");
+          return;
+        }
       }
 
-      const tag = toTag(location.hash);
-
-      if (tag == reservedTags.findAll) return showFindAllScreen();
+      if (!isHidden(menuRow)) hideMenuRow();
       if (!isHidden(findAllRow)) hideFindAllScreen();
+
+      if (tag === reservedTags.menu) return showMenuRow();
+      if (tag === reservedTags.findAll) return showFindAllScreen();
 
       if (tag.startsWith(reservedTags.prefix)) {
         alert(`Please don't use tags starting with "${reservedTags.prefix}"`);
@@ -485,11 +499,7 @@ Thank you!`
         ta.setRangeText("#", start, start);
       }
 
-      save(false, () => {
-        const hash = toHash(tag);
-        if (location.hash === hash) return;
-        location.hash = hash;
-      });
+      save(false, () => goTag(tag));
     });
 
     const isTag = (charIndex) => /\S/.test(charAt(charIndex));
@@ -564,13 +574,7 @@ Thank you!`
       const txn = db.transaction([stores.page, stores.conf], "readwrite");
       txn.objectStore(stores.page).put(page);
       txn.objectStore(stores.conf).put(undoneOpId, conf.undoneOpId);
-
-      txn.oncomplete = () => {
-        const hash = toHash(page.tag);
-        if (location.hash === hash) {
-          onHashChange();
-        } else location.hash = hash;
-      }
+      txn.oncomplete = () => goTag(page.tag);
     };
 
     /// input while undone
@@ -886,6 +890,9 @@ Thank you!`
       const lineNumbers = getLineNumbers();
       const lineInfo = `Line ${lineNumbers.cur}/${lineNumbers.max}`;
 
+      // TODO: Move to menu as
+      // "🤏 Zoom: {input number}%"
+      // "{input range}"
       let newZoom = prompt(`${lineInfo}\nZoom %`, current.zoom);
       if (!newZoom) return;
 
@@ -913,13 +920,6 @@ Thank you!`
       .objectStore(stores.conf)
       .put(current.zoom, conf.zoom);
     };
-
-    onClick("menu", () => {
-      // TODO: Move to menu as
-      // "🤏 Zoom: {input number}%"
-      // "{input range}"
-      askNewZoom();
-    });
 
     const getLineNumbers = () => {
       const text = ta.value;
@@ -1032,7 +1032,7 @@ Thank you!`
       const isTa = focused.id === "ta";
       let start = focused.selectionStart;
       let stop = focused.selectionEnd;
-      if (start == stop) {
+      if (start === stop) {
         if (isTa) {
           start = getThisLineStartIndex(start);
           stop = getNextLineStartIndex(stop);
@@ -1180,7 +1180,7 @@ Thank you!`
       const isTa = focused.id === "ta";
       let start = focused.selectionStart;
       let stop = focused.selectionEnd;
-      if (start == stop) {
+      if (start === stop) {
         if (isTa) {
           start = getThisLineStartIndex(start);
           stop = getNextLineStartIndex(stop);
@@ -1296,9 +1296,7 @@ Thank you!`
 
     /// find-all
 
-    onClick(findAll, () => {
-      location.hash = toHash(reservedTags.findAll);
-    });
+    onClick(findAll, () => goTag(reservedTags.findAll));
 
     const showFindAllScreen = () => {
       findAllWhat.value = findWhat.value || getSelText();
@@ -1392,7 +1390,7 @@ Thank you!`
       // However `ta.focus()` has no effect when called in `onHashChange`.
       // So we call `hideFindAllScreen` to show and focus `ta` here in click handler:
       hideFindAllScreen();
-      location.hash = toHash(tag);
+      goTag(tag);
     };
 
     onClick(findAllClose, () => {
@@ -1415,6 +1413,30 @@ Thank you!`
     onSavedClick("to", "", (page) => {
       toast("TODO");
     });
+
+    /// menu
+
+    onSavedClick("menu", "", () => goTag(reservedTags.menu));
+
+    const showMenuRow = () => {
+      hideFindReplaceRow();
+      hide(topRow);
+      hide(mainRow);
+      hide(bottomRow);
+      show(menuRow);
+
+      setTimeout(() => {
+        askNewZoom();
+        history.back();
+      }, 300);
+    };
+
+    const hideMenuRow = () => {
+      hide(menuRow);
+      show(topRow);
+      show(mainRow);
+      show(bottomRow);
+    };
 
     /// auto-focus
 
