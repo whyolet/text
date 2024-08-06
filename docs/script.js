@@ -104,7 +104,8 @@ Thank you!`
     const mainRow = getEl("main-row");
     const bottomRow = getEl("bottom-row");
 
-    const menuRow = getEl("menu-row");
+    const menuTopRow = getEl("menu-top-row");
+    const menuMainRow = getEl("menu-main-row");
 
     /// toast
     
@@ -230,10 +231,10 @@ Thank you!`
         }
       }
 
-      if (!isHidden(menuRow)) hideMenuRow();
+      if (!isHidden(menuMainRow)) hideMenuMainRow();
       if (!isHidden(findAllRow)) hideFindAllScreen();
 
-      if (tag === reservedTags.menu) return showMenuRow();
+      if (tag === reservedTags.menu) return showMenuMainRow();
       if (tag === reservedTags.findAll) return showFindAllScreen();
 
       if (tag.startsWith(reservedTags.prefix)) {
@@ -1416,21 +1417,23 @@ Thank you!`
 
     onSavedClick("menu", "", () => goTag(reservedTags.menu));
 
-    const showMenuRow = () => {
+    const showMenuMainRow = () => {
       hideFindReplaceRow();
       hide(topRow);
       hide(mainRow);
       hide(bottomRow);
-      show(menuRow);
-
-      setTimeout(() => {
-        askNewZoom();
-        history.back();
-      }, 300);
+      show(menuTopRow);
+      show(menuMainRow);
     };
 
-    const hideMenuRow = () => {
-      hide(menuRow);
+    onClick("menu-close", () => {
+      askNewZoom();
+      history.back();
+    });
+
+    const hideMenuMainRow = () => {
+      hide(menuTopRow);
+      hide(menuMainRow);
       show(topRow);
       show(mainRow);
       show(bottomRow);
