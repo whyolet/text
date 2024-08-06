@@ -90,7 +90,6 @@ Thank you!`
     const header = getEl("header");
 
     const findReplace = getEl("find-replace");
-    const findAll = getEl("find-all");
     const findClose = getEl("find-close");
 
     const findReplaceRow = getEl("find-replace-row");
@@ -99,7 +98,6 @@ Thank you!`
 
     const findAllRow = getEl("find-all-row");
     const findAllWhat = getEl("find-all-what");
-    const findAllClose = getEl("find-all-close");
     const findResultsRow = getEl("find-results-row");
 
     const topRow = getEl("top-row");
@@ -1296,7 +1294,7 @@ Thank you!`
 
     /// find-all
 
-    onClick(findAll, () => goTag(reservedTags.findAll));
+    onClick("find-all", () => goTag(reservedTags.findAll));
 
     const showFindAllScreen = () => {
       findAllWhat.value = findWhat.value || getSelText();
@@ -1393,7 +1391,7 @@ Thank you!`
       goTag(tag);
     };
 
-    onClick(findAllClose, () => {
+    onClick("find-all-close", () => {
       history.back();
     });
 
