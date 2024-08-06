@@ -1415,7 +1415,7 @@ Thank you!`
 
     /// menu
 
-    onSavedClick("menu", "", () => goTag(reservedTags.menu));
+    onSavedClick("menu", "n", () => goTag(reservedTags.menu));
 
     const showMenuMainRow = () => {
       hideFindReplaceRow();
