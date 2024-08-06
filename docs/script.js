@@ -64,13 +64,6 @@ Thank you!`
 
   const getEl = (id) => document.getElementById(id);
 
-  /// hide, show, isHidden
-
-  const hidden = "hidden";
-  const hide = (el) => el.classList.add(hidden);
-  const show = (el) => el.classList.remove(hidden);
-  const isHidden = (el) => el.classList.contains(hidden);
-
   /// on, onClick
 
   const on = (el, eventName, handler) => {
@@ -79,6 +72,13 @@ Thank you!`
   };
 
   const onClick = (el, handler) => on(el, "click", handler);
+
+  /// hide, show, isHidden
+
+  const hidden = "hidden";
+  const hide = (el) => el.classList.add(hidden);
+  const show = (el) => el.classList.remove(hidden);
+  const isHidden = (el) => el.classList.contains(hidden);
 
   /// main
 
