@@ -89,7 +89,7 @@ Thank you!`
     const ta = getEl("ta"); // TextArea
     const header = getEl("header");
 
-    const findReplace = getEl("find-replace");
+    const findReplaceButton = getEl("find-replace");
     const findClose = getEl("find-close");
 
     const findReplaceRow = getEl("find-replace-row");
@@ -231,17 +231,41 @@ Thank you!`
         }
       }
 
-      if (!isHidden(menuMainRow)) hideMenuMainRow();
-      if (!isHidden(findAllRow)) hideFindAllScreen();
+      for (const el of [
+        findReplaceRow,
+        findClose,
+        topRow,
+        mainRow,
+        bottomRow,
+        findAllRow,
+        findResultsRow,
+        menuTopRow,
+        menuMainRow,
+      ]) hide(el);
 
-      if (tag === reservedTags.menu) return showMenuMainRow();
       if (tag === reservedTags.findAll) return showFindAllScreen();
+      if (tag === reservedTags.menu) return showMenuMainRow();
 
       if (tag.startsWith(reservedTags.prefix)) {
         alert(`Please don't use tags starting with "${reservedTags.prefix}"`);
         history.back();
         return;
       };
+
+      showPage(tag);
+    };
+
+    on(window, "hashchange", onHashChange);
+
+    /// showPage
+
+    const showPage = (tag) => {
+      clearFindReplaceValues();
+      show(findReplaceButton);
+      
+      show(topRow);
+      show(mainRow);
+      show(bottomRow);
 
       getRecentTags((recentTags) => {
         const i = recentTags.indexOf(tag);
@@ -266,9 +290,7 @@ Thank you!`
         ta.readOnly = false;
 
         if (current.findWhatOnGotPage) {
-          findWhat.value = current.findWhatOnGotPage;
-          current.findWhatOnGotPage = "";
-          showFindReplaceRow();
+          showFindReplaceRow(); // with ^
           doFind(page, 0, true);
         } else {
           ta.setSelectionRange(page.sel1, page.sel2);
@@ -276,8 +298,6 @@ Thank you!`
         }
       });
     };
-
-    on(window, "hashchange", onHashChange);
 
     /// getRecentTags
 
@@ -1203,17 +1223,19 @@ Thank you!`
 
     /// find-replace
 
-    onClick(findReplace, () => {
+    onClick(findReplaceButton, () => {
       showFindReplaceRow();
     });
 
-    const showFindReplaceRow = (options) => {
+    const showFindReplaceRow = () => {
+      clearFindReplaceValues();
       show(findReplaceRow);
-      hide(findReplace);
+      hide(findReplaceButton);
       show(findClose);
 
-      if (findWhat.value) {
-        // Set by `findWhatOnGotPage`.
+      if (current.findWhatOnGotPage) {
+        findWhat.value = current.findWhatOnGotPage;
+        current.findWhatOnGotPage = "";
         // Keep focus on `ta` to show the found text selected.
       } else {
         findWhat.value = getSelText();
@@ -1221,17 +1243,18 @@ Thank you!`
       }
     };
 
+    const clearFindReplaceValues = () => {
+      findWhat.value = "";
+      replaceWith.value = "";
+    };
+
     onClick(findClose, () => {
-      hideFindReplaceRow();
+      clearFindReplaceValues();
+      hide(findReplaceRow);
+      hide(findClose);
+      show(findReplaceButton);
       ta.focus();
     });
-
-    const hideFindReplaceRow = () => {
-      hide(findReplaceRow);
-      findWhat.value = replaceWith.value = "";
-      hide(findClose);
-      show(findReplace);
-    };
 
     onSavedClick("find-prev", "", (page) => {
       doFind(page, page.sel1 - 1, false);
@@ -1242,7 +1265,7 @@ Thank you!`
     });
 
     const doFind = (page, start, forward) => {
-      const what = getFindWhat();
+      const what = getFindWhat().toLowerCase();
       if (!what) return;
 
       const where = page.text.toLowerCase();
@@ -1262,7 +1285,7 @@ Thank you!`
     };
 
     const getFindWhat = () => {
-      const what = findWhat.value.toLowerCase();
+      const what = findWhat.value;
       if (what) return what;
 
       findWhat.focus();
@@ -1300,10 +1323,6 @@ Thank you!`
     const showFindAllScreen = () => {
       findAllWhat.value = findWhat.value || getSelText();
       findResultsRow.textContent = "";
-      hideFindReplaceRow();
-      hide(topRow);
-      hide(mainRow);
-      hide(bottomRow);
       show(findAllRow);
       show(findResultsRow);
       findAllWhat.focus();
@@ -1386,26 +1405,16 @@ Thank you!`
       }
 
       // We need `ta.focus()` for auto-scroll of `ta` to selection that will be set by `findWhatOnGotPage`.
-      // However `ta.focus()` has no effect when called in `onHashChange`.
-      // So we call `hideFindAllScreen` to show and focus `ta` here in click handler:
-      hideFindAllScreen();
+      // However `ta.focus()` has no effect when called in `onHashChange` or when `ta` is still hidden, so:
+      hide(findResultsRow);
+      show(mainRow);
+      ta.focus();
       goTag(tag);
     };
 
     onClick("find-all-close", () => {
       history.back();
     });
-
-    const hideFindAllScreen = () => {
-      hide(findAllRow);
-      hide(findResultsRow);
-      findAllWhat.value = "";
-      current.pages = [];
-      show(topRow);
-      show(mainRow);
-      show(bottomRow);
-      ta.focus();
-    };
 
     /// move-to
 
@@ -1418,10 +1427,6 @@ Thank you!`
     onSavedClick("menu", "n", () => goTag(reservedTags.menu));
 
     const showMenuMainRow = () => {
-      hideFindReplaceRow();
-      hide(topRow);
-      hide(mainRow);
-      hide(bottomRow);
       show(menuTopRow);
       show(menuMainRow);
     };
@@ -1430,14 +1435,6 @@ Thank you!`
       askNewZoom();
       history.back();
     });
-
-    const hideMenuMainRow = () => {
-      hide(menuTopRow);
-      hide(menuMainRow);
-      show(topRow);
-      show(mainRow);
-      show(bottomRow);
-    };
 
     /// auto-focus
 
