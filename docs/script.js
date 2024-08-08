@@ -86,26 +86,25 @@ Thank you!`
 
     /// elements
 
-    const ta = getEl("ta"); // TextArea
-    const header = getEl("header");
-
-    const findReplaceButton = getEl("find-replace");
-    const findClose = getEl("find-close");
-
     const findReplaceRow = getEl("find-replace-row");
     const findWhat = getEl("find-what");
     const replaceWith = getEl("replace-with");
 
-    const findAllRow = getEl("find-all-row");
-    const findAllWhat = getEl("find-all-what");
-    const findResultsRow = getEl("find-results-row");
-
     const topRow = getEl("top-row");
+    const header = getEl("header");
+    const findReplaceButton = getEl("find-replace");
+    const findClose = getEl("find-close");
+
     const mainRow = getEl("main-row");
+    const ta = getEl("ta"); // TextArea
+
     const bottomRow = getEl("bottom-row");
 
+    const findAllRow = getEl("find-all-row");
+    const findAllWhat = getEl("find-all-what");
+
     const menuTopRow = getEl("menu-top-row");
-    const menuMainRow = getEl("menu-main-row");
+    const itemsRow = getEl("items-row");
 
     /// toast
     
@@ -238,13 +237,12 @@ Thank you!`
         mainRow,
         bottomRow,
         findAllRow,
-        findResultsRow,
         menuTopRow,
-        menuMainRow,
+        itemsRow,
       ]) hide(el);
 
       if (tag === reservedTags.findAll) return showFindAllScreen();
-      if (tag === reservedTags.menu) return showMenuMainRow();
+      if (tag === reservedTags.menu) return showMenu();
 
       if (tag.startsWith(reservedTags.prefix)) {
         alert(`Please don't use tags starting with "${reservedTags.prefix}"`);
@@ -1322,10 +1320,11 @@ Thank you!`
 
     const showFindAllScreen = () => {
       findAllWhat.value = findWhat.value || getSelText();
-      findResultsRow.textContent = "";
       show(findAllRow);
-      show(findResultsRow);
       findAllWhat.focus();
+
+      itemsRow.textContent = "";
+      show(itemsRow);
 
       db
       .transaction(stores.page)
@@ -1348,18 +1347,18 @@ Thank you!`
 
     const doFindAll = () => {
       const what = findAllWhat.value.toLowerCase();
-      findResultsRow.textContent = "";
+      itemsRow.textContent = "";
 
       if (!what) {
         getRecentTags((recentTags) => {
           for (const tag of recentTags) {
-            const result = (
-              o("div", "result",
+            const item = (
+              o("div", "item button",
                 o("span", "tag", tag),
               )
             );
-            onClick(result, onResultClick);
-            findResultsRow.appendChild(result); 
+            onClick(item, onFindResultClick);
+            itemsRow.appendChild(item); 
           }
         });
         return;
@@ -1383,21 +1382,21 @@ Thank you!`
           i = page.lowerText.indexOf(what, i + 1);
         }
 
-        const result = (
-          o("div", "result",
+        const item = (
+          o("div", "item button",
             o("span", "tag", page.tag),
             found ? o("span", "text", line) : null,
             found > 1 ? o("span", "more", `(+${found - 1})`) : null,
           )
         );
-        onClick(result, onResultClick);
-        findResultsRow.appendChild(result);
+        onClick(item, onFindResultClick);
+        itemsRow.appendChild(item);
       }
     };
 
     on(findAllWhat, "input", doFindAll);
 
-    const onResultClick = (event) => {
+    const onFindResultClick = (event) => {
       const kids = event.currentTarget.children;
       const tag = kids[0]. textContent;
       if (kids.length > 1) {
@@ -1406,7 +1405,7 @@ Thank you!`
 
       // We need `ta.focus()` for auto-scroll of `ta` to selection that will be set by `findWhatOnGotPage`.
       // However `ta.focus()` has no effect when called in `onHashChange` or when `ta` is still hidden, so:
-      hide(findResultsRow);
+      hide(itemsRow);
       show(mainRow);
       ta.focus();
       goTag(tag);
@@ -1426,9 +1425,17 @@ Thank you!`
 
     onSavedClick("menu", "n", () => goTag(reservedTags.menu));
 
-    const showMenuMainRow = () => {
+    const showMenu = () => {
       show(menuTopRow);
-      show(menuMainRow);
+      const items = [];
+
+      items.push(
+        o("div", "item",
+        ),
+      );
+
+      itemsRow.textContent = "";
+      show(itemsRow);
     };
 
     onClick("menu-close", () => {
