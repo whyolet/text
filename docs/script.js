@@ -1486,7 +1486,7 @@ Thank you!`
       if (!newZoom) return;
 
       newZoom = parseInt(newZoom, 10);
-      if (newZoom == current.zoom) return;
+      if (newZoom === current.zoom) return;
 
       if (
         newZoom < minZoom ||
