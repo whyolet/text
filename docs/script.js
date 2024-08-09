@@ -108,13 +108,24 @@ Thank you!`
 
     /// toast
     
-    let toastTimerId;
+    let toastTimerId, pinnedToast = "";
 
-    const toast = (line) => {
+    const toast = (line, pin) => {
+      if (pin) pinnedToast = line;
+
+      if (toastTimerId) {
+        if (pin) return; // Keep message.
+
+        clearTimeout(toastTimerId);
+        toastTimerId = 0;
+      }
+
       header.textContent = line;
-      if (toastTimerId) clearTimeout(toastTimerId);
+      if (pin) return;
+
       toastTimerId = setTimeout(() => {
-        header.textContent = current.page ? current.page.tag : "";
+        toastTimerId = 0;
+        header.textContent = pinnedToast;
       }, 2000);
     };
 
@@ -153,7 +164,7 @@ Thank you!`
 
     const updateAppVersion = () => {
       ta.readOnly = true;
-      header.textContent = "Update available...";
+      toast("Update available...", true);
       setTimeout(() => {
         location.reload();
       }, 1000);
@@ -241,6 +252,8 @@ Thank you!`
         itemsRow,
       ]) hide(el);
 
+      if (!menu.isSaved) saveMenu();
+
       if (tag === reservedTags.findAll) return showFindAllScreen();
       if (tag === reservedTags.menu) return showMenu();
 
@@ -283,7 +296,7 @@ Thank you!`
         current.page = page;
         current.textLength = page.text.length;
 
-        header.textContent = tag;
+        toast(tag, true);
         ta.value = page.text;
         ta.readOnly = false;
 
@@ -902,26 +915,6 @@ Thank you!`
       };
     };
 
-    const askNewZoom = () => {
-      // TODO: Move to a separate menu row.
-      const lineNumbers = getLineNumbers();
-      const lineInfo = `Line ${lineNumbers.cur}/${lineNumbers.max}`;
-
-      // TODO: Move to menu as
-      // "🤏 Zoom: {input number}%"
-      // "{input range}"
-      let newZoom = prompt(`${lineInfo}\nZoom %`, current.zoom);
-      if (!newZoom) return;
-
-      newZoom = parseInt(newZoom, 10);
-      if (
-        newZoom < minZoom ||
-        newZoom > maxZoom
-      ) return toast(`From ${minZoom}% to ${maxZoom}%`);
-
-      saveZoom(newZoom);
-    };
-
     const saveZoom = (newZoom) => {
       current.zoom = newZoom;
       ta.style.fontSize = `${current.zoom}%`;
@@ -1423,23 +1416,87 @@ Thank you!`
 
     /// menu
 
+    const menu = {
+      isSaved: true,
+    };
+
     onSavedClick("menu", "n", () => goTag(reservedTags.menu));
 
     const showMenu = () => {
       show(menuTopRow);
-      const items = [];
 
-      items.push(
+      menu.lineNumbers = getLineNumbers();
+
+      menu.lineItem = (
         o("div", "item",
-        ),
+          "Line: ",
+          o("input", {
+            "class": "small",
+            "type": "number",
+            min: 1,
+            max: menu.lineNumbers.max,
+            step: 1,
+            value: menu.lineNumbers.cur,
+          }),
+          `/${menu.lineNumbers.max}`,
+        )
       );
 
+      menu.zoomItem = (
+        o("div", "item",
+          "Zoom: ",
+          o("input", {
+            "class": "small",
+            "type": "number",
+            min: minZoom,
+            max: maxZoom,
+            step: 1,
+            value: current.zoom,
+          }),
+          "%",
+        )
+      );
+
+      menu.isSaved = false;
+
+      const items = [
+        menu.lineItem,
+        menu.zoomItem,
+      ];
+
       itemsRow.textContent = "";
+      for (const item of items) {
+        itemsRow.appendChild(item);
+      }
       show(itemsRow);
     };
 
+    const saveMenu = () => {
+      saveLineMenuItem();
+      saveZoomMenuItem();
+      menu.isSaved = true;
+    };
+
+    const saveLineMenuItem = () => {
+      // TODO
+    };
+
+    const saveZoomMenuItem = () => {
+      let newZoom = menu.zoomItem.children[0].value;
+      if (!newZoom) return;
+
+      newZoom = parseInt(newZoom, 10);
+      if (newZoom == current.zoom) return;
+
+      if (
+        newZoom < minZoom ||
+        newZoom > maxZoom
+      ) return toast(`From ${minZoom}% to ${maxZoom}%`);
+
+      saveZoom(newZoom);
+    };
+
     onClick("menu-close", () => {
-      askNewZoom();
       history.back();
     });
 
