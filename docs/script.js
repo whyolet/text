@@ -1549,7 +1549,7 @@ Thank you!`
       item, cur, min, max, unit,
       useNewValue
     ) => {
-      let newValue = item.children[1].value;
+      let newValue = item.children[5].children[0].value;
       if (!newValue) return;
 
       newValue = parseInt(newValue, 10);
