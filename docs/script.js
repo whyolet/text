@@ -1444,10 +1444,18 @@ Thank you!`
         )
       );
 
+      onClick(menu.helpItem, () => {
+        alert("TODO");
+      });
+
       menu.lineNumbers = getLineNumbers();
 
       menu.lineItem = (
         o("div", "mid row start item",
+          o("div", "gap"),
+          o("div", "ibox",
+            o("div", "icon", "format_list_numbered"),
+          ),
           o("div", "gap"),
           o("div", "mid", "Line:"),
           o("div", "gap"),
@@ -1470,6 +1478,10 @@ Thank you!`
 
       menu.zoomItem = (
         o("div", "mid row start item",
+          o("div", "gap"),
+          o("div", "ibox",
+            o("div", "icon", "pan_zoom"),
+          ),
           o("div", "gap"),
           o("div", "mid", "Zoom:"),
           o("div", "gap"),
