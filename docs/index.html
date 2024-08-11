@@ -26,86 +26,113 @@
     <script defer src="script.js"></script>
   </head>
   <body>
-    <div class="column">
+    <div class="big column">
 
-      <div id="find-replace-row" class="hidden margin">
-        <div class="main tools">
+      <div id="find-replace-row" class="hidden mid row item">
+        <div class="gap"></div>
+        <div class="big">
           <input id="find-what" placeholder="Find..." />
+        </div>
+        <div class="ibox">
           <span id="replace" class="icon">arrow_forward</span>
+        </div>
+        <div class="big">
           <input id="replace-with" placeholder="Replace..." />
         </div>
-        <div class="double margin tools">
+        <div class="ibox">
           <span id="find-prev" class="icon">chevron_backward</span>
+        </div>
+        <div class="ibox">
           <span id="find-next" class="icon">chevron_forward</span>
         </div>
       </div>
 
-      <div id="top-row" class="margin">
-        <div class="margin tools">
+      <div id="top-row" class="mid row">
+        <div class="ibox">
           <span id="menu" class="icon">menu</span>
         </div>
-        <div class="main tools">
+        <div class="big">
           <span id="header" class="header"></span>
           <span id="download" class="icon">download</span>
         </div>
-        <div class="double margin tools">
+        <div class="ibox">
           <span id="find-replace" class="icon">find_in_page</span>
-          <span id="find-close" class="hidden icon">search_off</span>
+        </div>
+        <div class="ibox">
           <span id="find-all" class="icon">manage_search</span>
         </div>
       </div>
 
-      <div id="main-row" class="main">
-        <div class="margin tools column">
-          <span id="hash" class="icon">tag</span>
-          <span id="back" class="icon">arrow_back</span>
+      <div id="main-row" class="big row">
+        <div class="mid column">
+          <div class="ibox">
+            <span id="hash" class="icon">tag</span>
+          </div>
+          <div class="ibox">
+            <span id="back" class="icon">arrow_back</span>
+          </div>
         </div>
-        <div class="main">
+        <div class="big column">
           <textarea id="ta" readonly>Loading...</textarea>
         </div>
-        <div class="margin tools column">
-          <span id="up" class="icon">north</span>
-          <span id="to" class="icon">send</span>
-          <span id="down" class="icon">south</span>
+        <div class="mid column">
+          <div class="ibox">
+            <span id="up" class="icon">north</span>
+          </div>
+          <div class="ibox">
+            <span id="to" class="icon">send</span>
+          </div>
+          <div class="ibox">
+            <span id="down" class="icon">south</span>
+          </div>
         </div>
       </div>
 
-      <div id="bottom-row" class="margin">
-        <div class="triple margin tools">
+      <div id="bottom-row" class="mid row">
+        <div class="ibox">
           <span id="delete" class="icon">backspace</span>
+        </div>
+        <div class="ibox">
           <span id="copy" class="icon">content_copy</span>
+        </div>
+        <div class="ibox">
           <span id="paste" class="icon">content_paste</span>
         </div>
-        <div class="main tools">
+        <div class="big">
           <span id="undo" class="icon">undo</span>
           <span id="redo" class="icon">redo</span>
         </div>
-        <div class="triple margin tools">
+        <div class="ibox">
           <span id="dedent" class="icon">format_indent_decrease</span>
+        </div>
+        <div class="ibox">
           <span id="indent" class="icon">format_indent_increase</span>
+        </div>
+        <div class="ibox">
           <span id="strike" class="icon">remove</span>
         </div>
       </div>
 
-      <div id="find-all-row" class="hidden margin">
-        <div class="main tools">
+      <div id="find-all-row" class="hidden mid row item">
+        <div class="gap"></div>
+        <div class="big">
           <input id="find-all-what" placeholder="Find..." />
         </div>
-        <div class="margin tools">
+        <div class="ibox">
            <span id="find-all-close" class="icon">search_off</span>
         </div>
       </div>
 
-      <div id="menu-top-row" class="hidden margin">
-        <div class="main tools">
+      <div id="menu-top-row" class="hidden mid row item">
+        <div class="big">
           <span class="header">Menu</span>
         </div>
-        <div class="margin tools">
+        <div class="ibox">
           <span id="menu-close" class="icon">close</span>
         </div>
       </div>
 
-      <div id="items-row" class="hidden main column"></div>
+      <div id="items-row" class="hidden big row column start"></div>
 
     </div>
   </body>
