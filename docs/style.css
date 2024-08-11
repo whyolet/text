@@ -126,6 +126,7 @@ input::placeholder {
 
 #find-replace-row,
 #find-all-row,
+input.small,
 .item {
   border-bottom: 0.5px solid var(--hint);
 }
@@ -139,6 +140,12 @@ input::placeholder {
 .text,
 .more {
   padding-left: 0.5rem;
+}
+
+input.small {
+  display: inline;
+  max-width: 4rem;
+  text-align: right;
 }
 
 .icon,
