@@ -155,11 +155,13 @@ Thank you!`
     };
 
     const current = {
-      findWhatOnGotPage: "",
       page: null,
       pages: [], // for `find-all`
       textLength: 0, // for `autoindent`
       zoom: 100,
+
+      findWhatOnGotPage: "",
+      lineNumberOnGotPage: null,
     };
 
     const updateAppVersion = () => {
@@ -277,6 +279,7 @@ Thank you!`
       show(topRow);
       show(mainRow);
       show(bottomRow);
+      ta.focus();
 
       getRecentTags((recentTags) => {
         const i = recentTags.indexOf(tag);
@@ -303,6 +306,10 @@ Thank you!`
         if (current.findWhatOnGotPage) {
           showFindReplaceRow(); // with ^
           doFind(page, 0, true);
+        } else if (current.lineNumberOnGotPage) {
+          const i = getLineStop(current.lineNumberOnGotPage);
+          current.lineNumberOnGotPage = null;
+          ta.setSelectionRange(i, i);
         } else {
           ta.setSelectionRange(page.sel1, page.sel2);
           ta.scrollTop = page.scro;
@@ -1478,22 +1485,45 @@ Thank you!`
     };
 
     const saveLineMenuItem = () => {
-      // TODO
+      saveIntMenuItem(
+        menu.lineItem,
+        menu.lineNumbers.cur,
+        1,
+        menu.lineNumbers.max,
+        "",
+        (lineNumber) => {
+          current.lineNumberOnGotPage = lineNumber;
+        },
+      );
     };
 
     const saveZoomMenuItem = () => {
-      let newZoom = menu.zoomItem.children[0].value;
-      if (!newZoom) return;
+      saveIntMenuItem(
+        menu.zoomItem,
+        current.zoom,
+        minZoom,
+        maxZoom,
+        "%",
+        saveZoom,
+      );
+    };
 
-      newZoom = parseInt(newZoom, 10);
-      if (newZoom === current.zoom) return;
+    const saveIntMenuItem = (
+      item, cur, min, max, unit,
+      useNewValue
+    ) => {
+      let newValue = item.children[0].value;
+      if (!newValue) return;
+
+      newValue = parseInt(newValue, 10);
+      if (newValue === cur) return;
 
       if (
-        newZoom < minZoom ||
-        newZoom > maxZoom
-      ) return toast(`From ${minZoom}% to ${maxZoom}%`);
+        newValue < min ||
+        newValue > max
+      ) return toast(`From ${min}${unit} to ${max}${unit}`);
 
-      saveZoom(newZoom);
+      useNewValue(newValue);
     };
 
     onClick("menu-close", () => {
