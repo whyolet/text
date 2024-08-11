@@ -89,6 +89,11 @@ input.small,
   border-bottom: 0.5px solid var(--hint);
 }
 
+.item {
+  max-height: 2rem;
+  overflow: hidden;
+}
+
 .big,
 .mid,
 .ibox,
@@ -105,7 +110,6 @@ input.small,
 }
 
 .mid {
-  flex-basis: content;
   /* border: 1px solid yellow; */
 }
 
