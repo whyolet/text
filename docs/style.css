@@ -63,6 +63,7 @@ textarea {
   font-size: 1rem;
 
   touch-action: pan-y;
+  scrollbar-color: var(--hint) var(--back);
 }
 
 input,
@@ -70,47 +71,68 @@ textarea {
   display: block;  /* Avoid scrollbar and visible background */
   outline: 0;  /* Avoid outline on focus */
   resize: none;
-  scrollbar-color: var(--hint) var(--back);
 }
 
 input::placeholder {
   color: var(--hint);
 }
 
-.column {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+input.small {
+  display: inline;
+  min-width: 4rem;
+  max-width: 4rem;
+  text-align: right;
 }
 
-.margin,
-.main {
+input.small,
+.item {
+  border-bottom: 0.5px solid var(--hint);
+}
+
+.big,
+.mid,
+.ibox,
+.gap {
   display: flex;
+  flex: 0 0;
+  justify-content: center;
+  align-items: center;
+}
+
+.big {
+  flex: 1 0;
+  /* border: 1px solid green; */
+}
+
+.mid {
+  flex-basis: content;
+  /* border: 1px solid yellow; */
+}
+
+.ibox {
   min-width: 2rem;
+  min-height: 2rem;
+  /* border: 1px solid red; */
+}
+
+.gap {
+  min-width: 0.5rem;
+  /* border: 1px solid blue; */
+}
+
+.row {
+  width: 100%;
   min-height: 2rem;
 }
 
-.double {
-  min-width: 4rem;
+.column {
+  flex-direction: column;
+  min-width: 2rem;
+  height: 100%;
 }
 
-.triple {
-  min-width: 6rem;
-}
-
-.margin {
-  flex: 0 1;
-}
-
-.main {
-  flex: 1 0;
-}
-
-.tools {
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  color: var(--tool);
+.start {
+  justify-content: start;
 }
 
 .header,
@@ -124,30 +146,6 @@ input::placeholder {
   color: var(--hint);
 }
 
-#find-replace-row,
-#find-all-row,
-input.small,
-.item {
-  border-bottom: 0.5px solid var(--hint);
-}
-
-.item {
-  padding: 0.25rem 0.5rem;
-}
-
-#find-replace-row,
-#find-all-row,
-.text,
-.more {
-  padding-left: 0.5rem;
-}
-
-input.small {
-  display: inline;
-  max-width: 4rem;
-  text-align: right;
-}
-
 .icon,
 .button {
   cursor: pointer;
@@ -155,6 +153,8 @@ input.small {
 }
 
 .icon {
+  color: var(--tool);
+
   font-family: "Material Symbols Outlined";
   font-style: normal;
   /* Let's inherit `font-weight` from text. */
@@ -173,7 +173,8 @@ input.small {
 
 .icon:active,
 .button:active,
-.button:active > .tag,
+.button:active .icon,
+.button:active .tag,
 ::selection {
   color: var(--back);
   background-color: var(--tool);
