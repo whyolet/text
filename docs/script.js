@@ -1433,6 +1433,8 @@ Thank you!`
     const showMenu = () => {
       show(menuTopRow);
 
+      /// help
+
       menu.helpItem = (
         o("div", "mid row start button item",
           o("div", "gap"),
@@ -1448,7 +1450,20 @@ Thank you!`
         alert("TODO");
       });
 
+      /// line
+
       menu.lineNumbers = getLineNumbers();
+
+      menu.lineInput = (
+        o("input", {
+          "class": "small",
+          "type": "number",
+          min: 1,
+          max: menu.lineNumbers.max,
+          step: 1,
+          value: menu.lineNumbers.cur,
+        })
+      );
 
       menu.lineItem = (
         o("div", "mid row start item",
@@ -1459,21 +1474,25 @@ Thank you!`
           o("div", "gap"),
           o("div", "mid", "Line:"),
           o("div", "gap"),
-          o("div", "mid",
-            o("input", {
-              "class": "small",
-              "type": "number",
-              min: 1,
-              max: menu.lineNumbers.max,
-              step: 1,
-              value: menu.lineNumbers.cur,
-            }),
-          ),
+          o("div", "mid", menu.lineInput),
           o("div", "gap"),
           o("div", "mid", "/"),
           o("div", "gap"),
           o("div", "big start", `${menu.lineNumbers.max}`),
         )
+      );
+
+      /// zoom
+
+      menu.zoomInput = (
+        o("input", {
+          "class": "small",
+          "type": "number",
+          min: minZoom,
+          max: maxZoom,
+          step: 1,
+          value: current.zoom,
+        })
       );
 
       menu.zoomItem = (
@@ -1485,20 +1504,13 @@ Thank you!`
           o("div", "gap"),
           o("div", "mid", "Zoom:"),
           o("div", "gap"),
-          o("div", "mid",
-            o("input", {
-              "class": "small",
-              "type": "number",
-              min: minZoom,
-              max: maxZoom,
-              step: 1,
-              value: current.zoom,
-            }),
-          ),
+          o("div", "mid", menu.zoomInput),
           o("div", "gap"),
           o("div", "big start", "%"),
         )
       );
+
+      /// menu items
 
       menu.isSaved = false;
 
@@ -1523,7 +1535,7 @@ Thank you!`
 
     const saveLineMenuItem = () => {
       saveIntMenuItem(
-        menu.lineItem,
+        menu.lineInput,
         menu.lineNumbers.cur,
         1,
         menu.lineNumbers.max,
@@ -1536,7 +1548,7 @@ Thank you!`
 
     const saveZoomMenuItem = () => {
       saveIntMenuItem(
-        menu.zoomItem,
+        menu.zoomInput,
         current.zoom,
         minZoom,
         maxZoom,
@@ -1546,10 +1558,10 @@ Thank you!`
     };
 
     const saveIntMenuItem = (
-      item, cur, min, max, unit,
+      input, cur, min, max, unit,
       useNewValue
     ) => {
-      let newValue = item.children[5].children[0].value;
+      let newValue = input.value;
       if (!newValue) return;
 
       newValue = parseInt(newValue, 10);
