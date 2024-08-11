@@ -93,7 +93,6 @@ Thank you!`
     const topRow = getEl("top-row");
     const header = getEl("header");
     const findReplaceButton = getEl("find-replace");
-    const findClose = getEl("find-close");
 
     const mainRow = getEl("main-row");
     const ta = getEl("ta"); // TextArea
@@ -245,7 +244,6 @@ Thank you!`
 
       for (const el of [
         findReplaceRow,
-        findClose,
         topRow,
         mainRow,
         bottomRow,
@@ -1222,14 +1220,14 @@ Thank you!`
     /// find-replace
 
     onClick(findReplaceButton, () => {
-      showFindReplaceRow();
+      if (isHidden(findReplaceRow)) {
+        showFindReplaceRow();
+      } else hideFindReplaceRow();
     });
 
     const showFindReplaceRow = () => {
       clearFindReplaceValues();
       show(findReplaceRow);
-      hide(findReplaceButton);
-      show(findClose);
 
       if (current.findWhatOnGotPage) {
         findWhat.value = current.findWhatOnGotPage;
@@ -1246,13 +1244,11 @@ Thank you!`
       replaceWith.value = "";
     };
 
-    onClick(findClose, () => {
+    const hideFindReplaceRow = () => {
       clearFindReplaceValues();
       hide(findReplaceRow);
-      hide(findClose);
-      show(findReplaceButton);
       ta.focus();
-    });
+    };
 
     onSavedClick("find-prev", "", (page) => {
       doFind(page, page.sel1 - 1, false);
@@ -1353,8 +1349,9 @@ Thank you!`
         getRecentTags((recentTags) => {
           for (const tag of recentTags) {
             const item = (
-              o("div", "item button",
-                o("span", "tag", tag),
+              o("div", "mid row start button item",
+                o("div", "gap"),
+                o("div", "mid tag", tag),
               )
             );
             onClick(item, onFindResultClick);
@@ -1383,10 +1380,14 @@ Thank you!`
         }
 
         const item = (
-          o("div", "item button",
-            o("span", "tag", page.tag),
-            found ? o("span", "text", line) : null,
-            found > 1 ? o("span", "more", `(+${found - 1})`) : null,
+          o("div", "mid row start button item",
+            o("div", "gap"),
+            o("div", "mid tag", page.tag),
+            found ? o("div", "gap") : null,
+            found ? o("div", "big start text", line) : null,
+            found > 1 ? o("div", "gap") : null,
+            found > 1 ? o("div", "mid more", `(+${found - 1})`) : null,
+            o("div", "gap")
           )
         );
         onClick(item, onFindResultClick);
@@ -1398,7 +1399,7 @@ Thank you!`
 
     const onFindResultClick = (event) => {
       const kids = event.currentTarget.children;
-      const tag = kids[0]. textContent;
+      const tag = kids[1]. textContent;
       if (kids.length > 1) {
         current.findWhatOnGotPage = findAllWhat.value;
       }
@@ -1432,41 +1433,65 @@ Thank you!`
     const showMenu = () => {
       show(menuTopRow);
 
+      menu.helpItem = (
+        o("div", "mid row start button item",
+          o("div", "gap"),
+          o("div", "ibox",
+            o("div", "icon", "info"),
+          ),
+          o("div", "gap"),
+          o("div", "big start", "Cheatsheet"),
+        )
+      );
+
       menu.lineNumbers = getLineNumbers();
 
       menu.lineItem = (
-        o("div", "item",
-          "Line: ",
-          o("input", {
-            "class": "small",
-            "type": "number",
-            min: 1,
-            max: menu.lineNumbers.max,
-            step: 1,
-            value: menu.lineNumbers.cur,
-          }),
-          `/${menu.lineNumbers.max}`,
+        o("div", "mid row start item",
+          o("div", "gap"),
+          o("div", "mid", "Line:"),
+          o("div", "gap"),
+          o("div", "mid",
+            o("input", {
+              "class": "small",
+              "type": "number",
+              min: 1,
+              max: menu.lineNumbers.max,
+              step: 1,
+              value: menu.lineNumbers.cur,
+            }),
+          ),
+          o("div", "gap"),
+          o("div", "mid", "/"),
+          o("div", "gap"),
+          o("div", "big start", `${menu.lineNumbers.max}`),
         )
       );
 
       menu.zoomItem = (
-        o("div", "item",
-          "Zoom: ",
-          o("input", {
-            "class": "small",
-            "type": "number",
-            min: minZoom,
-            max: maxZoom,
-            step: 1,
-            value: current.zoom,
-          }),
-          "%",
+        o("div", "mid row start item",
+          o("div", "gap"),
+          o("div", "mid", "Zoom:"),
+          o("div", "gap"),
+          o("div", "mid",
+            o("input", {
+              "class": "small",
+              "type": "number",
+              min: minZoom,
+              max: maxZoom,
+              step: 1,
+              value: current.zoom,
+            }),
+          ),
+          o("div", "gap"),
+          o("div", "big start", "%"),
         )
       );
 
       menu.isSaved = false;
 
       const items = [
+        menu.helpItem,
         menu.lineItem,
         menu.zoomItem,
       ];
@@ -1512,7 +1537,7 @@ Thank you!`
       item, cur, min, max, unit,
       useNewValue
     ) => {
-      let newValue = item.children[0].value;
+      let newValue = item.children[1].value;
       if (!newValue) return;
 
       newValue = parseInt(newValue, 10);
