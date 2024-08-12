@@ -151,6 +151,10 @@ input.small,
   color: var(--hint);
 }
 
+.scrollable {
+  overflow-y: scroll;
+}
+
 .block {
   display: block;
   width: 100%;
@@ -170,6 +174,15 @@ li::marker {
   color: var(--hint);
 }
 
+a {
+  text-decoration: none;
+}
+
+a,
+.icon {
+  color: var(--tool);
+}
+
 .icon,
 .button {
   cursor: pointer;
@@ -177,8 +190,6 @@ li::marker {
 }
 
 .icon {
-  color: var(--tool);
-
   font-family: "Material Symbols Outlined";
   font-style: normal;
   /* Let's inherit `font-weight` from text. */
@@ -197,6 +208,7 @@ li::marker {
   text-rendering: optimizeLegibility;
 }
 
+a:active,
 .icon:active,
 .button:active,
 .button:active .icon,
