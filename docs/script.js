@@ -90,20 +90,23 @@ Thank you!`
     const findWhat = getEl("find-what");
     const replaceWith = getEl("replace-with");
 
-    const topRow = getEl("top-row");
-    const header = getEl("header");
+    const pageTopRow = getEl("page-top-row");
+    const pageHeader = getEl("page-header");
     const findReplaceButton = getEl("find-replace");
 
-    const mainRow = getEl("main-row");
+    const pageMainRow = getEl("page-main-row");
     const ta = getEl("ta"); // TextArea
 
-    const bottomRow = getEl("bottom-row");
+    const pageBottomRow = getEl("page-bottom-row");
 
     const findAllRow = getEl("find-all-row");
     const findAllWhat = getEl("find-all-what");
 
     const menuTopRow = getEl("menu-top-row");
+    const menuHeader = getEl("menu-header");
+
     const itemsRow = getEl("items-row");
+    const helpRow = getEl("help-row");
 
     /// toast
     
@@ -119,16 +122,16 @@ Thank you!`
         toastTimerId = 0;
       }
 
-      header.textContent = line;
+      pageHeader.textContent = line;
       if (pin) return;
 
       toastTimerId = setTimeout(() => {
         toastTimerId = 0;
-        header.textContent = pinnedToast;
+        pageHeader.textContent = pinnedToast;
       }, 2000);
     };
 
-    /// reservedTags
+    /// reservedTags, reservedActions
 
     const reservedTags = {
       prefix: "--",
@@ -136,6 +139,8 @@ Thank you!`
       help: "--help",
       menu: "--menu",
     };
+
+    const reservedActions = {};
 
     /// db
 
@@ -244,20 +249,21 @@ Thank you!`
 
       for (const el of [
         findReplaceRow,
-        topRow,
-        mainRow,
-        bottomRow,
+        pageTopRow,
+        pageMainRow,
+        pageBottomRow,
         findAllRow,
         menuTopRow,
         itemsRow,
+        helpRow,
       ]) hide(el);
 
       if (!menu.isSaved) saveMenu();
 
-      if (tag === reservedTags.findAll) return showFindAllScreen();
-      if (tag === reservedTags.menu) return showMenu();
-
       if (tag.startsWith(reservedTags.prefix)) {
+        const action = reservedActions[tag];
+        if (action) return action();
+
         alert(`Please don't use tags starting with "${reservedTags.prefix}"`);
         history.back();
         return;
@@ -274,9 +280,9 @@ Thank you!`
       clearFindReplaceValues();
       show(findReplaceButton);
       
-      show(topRow);
-      show(mainRow);
-      show(bottomRow);
+      show(pageTopRow);
+      show(pageMainRow);
+      show(pageBottomRow);
       ta.focus();
 
       getRecentTags((recentTags) => {
@@ -1314,7 +1320,7 @@ Thank you!`
 
     onClick("find-all", () => goTag(reservedTags.findAll));
 
-    const showFindAllScreen = () => {
+    reservedActions[reservedTags.findAll] = () => {
       findAllWhat.value = findWhat.value || getSelText();
       show(findAllRow);
       findAllWhat.focus();
@@ -1407,7 +1413,7 @@ Thank you!`
       // We need `ta.focus()` for auto-scroll of `ta` to selection that will be set by `findWhatOnGotPage`.
       // However `ta.focus()` has no effect when called in `onHashChange` or when `ta` is still hidden, so:
       hide(itemsRow);
-      show(mainRow);
+      show(pageMainRow);
       ta.focus();
       goTag(tag);
     };
@@ -1430,7 +1436,8 @@ Thank you!`
 
     onSavedClick("menu", "n", () => goTag(reservedTags.menu));
 
-    const showMenu = () => {
+    reservedActions[reservedTags.menu]  = () => {
+      menuHeader.textContent = "Menu";
       show(menuTopRow);
 
       /// help
@@ -1446,9 +1453,7 @@ Thank you!`
         )
       );
 
-      onClick(menu.helpItem, () => {
-        alert("TODO");
-      });
+      onClick(menu.helpItem, () => goTag(reservedTags.help));
 
       /// line
 
@@ -1527,6 +1532,8 @@ Thank you!`
       show(itemsRow);
     };
 
+    /// saveMenu
+
     const saveMenu = () => {
       saveLineMenuItem();
       saveZoomMenuItem();
@@ -1579,9 +1586,17 @@ Thank you!`
       history.back();
     });
 
+    /// help
+
+    reservedActions[reservedTags.help]  = () => {
+      menuHeader.textContent = "Cheatsheet";
+      show(menuTopRow);
+      show(helpRow);
+    };
+
     /// auto-focus
 
-    if (!isHidden(mainRow)) ta.focus();
+    if (!isHidden(pageMainRow)) ta.focus();
 
     /// call main
   };
