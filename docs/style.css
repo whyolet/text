@@ -85,6 +85,7 @@ input.small {
 }
 
 input.small,
+.section,
 .item {
   border-bottom: 0.5px solid var(--hint);
 }
@@ -150,6 +151,25 @@ input.small,
   color: var(--hint);
 }
 
+.block {
+  display: block;
+  width: 100%;
+}
+
+.section {
+  padding: 0.5rem;
+}
+
+ul {
+  list-style-type: square;
+  margin: 0;
+  padding-left: 1em;
+}
+
+li::marker {
+  color: var(--hint);
+}
+
 .icon,
 .button {
   cursor: pointer;
@@ -167,6 +187,8 @@ input.small,
 
   display: inline-block;
   line-height: 1;
+  vertical-align: middle;
+
   text-transform: none;
   letter-spacing: normal;
   word-wrap: normal;
