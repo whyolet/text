@@ -1388,11 +1388,11 @@ Thank you!`
         const item = (
           o("div", "mid row start button item",
             o("div", "gap"),
-            o("div", "mid tag", page.tag),
+            o("div", "mid found-tag", page.tag),
             found ? o("div", "gap") : null,
-            found ? o("div", "big start text", line) : null,
+            found ? o("div", "big start found-text", line) : null,
             found > 1 ? o("div", "gap") : null,
-            found > 1 ? o("div", "mid more", `(+${found - 1})`) : null,
+            found > 1 ? o("div", "mid found-more", `(+${found - 1})`) : null,
             o("div", "gap")
           )
         );
