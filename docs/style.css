@@ -4,6 +4,9 @@
   --tool:   #B399CC; /* 0.50 */
   --hint: #8C66B3; /* 0.25 */
   --back:   #663399; /* 0.00 */
+
+  --mid: 2rem;
+  --gap: 0.5rem;
 }
 
 @font-face {
@@ -91,7 +94,7 @@ input.small,
 }
 
 .item {
-  max-height: 2rem;
+  max-height: var(--mid);
   overflow: hidden;
 }
 
@@ -115,24 +118,24 @@ input.small,
 }
 
 .ibox {
-  min-width: 2rem;
-  min-height: 2rem;
+  min-width: var(--mid);
+  min-height: var(--mid);
   /* border: 1px solid red; */
 }
 
 .gap {
-  min-width: 0.5rem;
+  min-width: var(--gap);
   /* border: 1px solid blue; */
 }
 
 .row {
   width: 100%;
-  min-height: 2rem;
+  min-height: var(--mid);
 }
 
 .column {
   flex-direction: column;
-  min-width: 2rem;
+  min-width: var(--mid);
   height: 100%;
 }
 
@@ -149,7 +152,7 @@ input.small,
 
 .found-text {
   align-self: start;
-  min-height: 2rem;
+  min-height: var(--mid);
 }
 
 .found-more {
@@ -166,7 +169,7 @@ input.small,
 }
 
 .section {
-  padding: 0.5rem;
+  padding: var(--gap);
 }
 
 ul {
@@ -224,7 +227,7 @@ a:active,
 }
 
 .icon:active {
-  border-radius: 2rem;
+  border-radius: var(--mid);
 }
 
 .hidden {
