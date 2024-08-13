@@ -141,13 +141,18 @@ input.small,
 }
 
 .header,
-.tag {
+.found-tag {
   font-weight: 700;
   font-size: 1.2rem;
   color: var(--tool);
 }
 
-.more {
+.found-text {
+  align-self: start;
+  min-height: 2rem;
+}
+
+.found-more {
   color: var(--hint);
 }
 
