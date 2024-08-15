@@ -131,6 +131,8 @@ Thank you!`
       }, 2000);
     };
 
+    const todo = () => toast("TODO");
+
     /// reservedTags, reservedActions
 
     const reservedTags = {
@@ -1036,7 +1038,7 @@ Thank you!`
 
       save(false, (page) => {
         if (dx < 0) doDelete(page);
-        else toast("TODO");
+        else todo();
       });
     };
 
@@ -1424,9 +1426,7 @@ Thank you!`
 
     /// move-to
 
-    onSavedClick("to", "", (page) => {
-      toast("TODO");
-    });
+    onSavedClick("to", "", todo);
 
     /// menu
 
@@ -1454,6 +1454,70 @@ Thank you!`
       );
 
       onClick(menu.helpItem, () => goTag(reservedTags.help));
+
+      /// sync
+
+      menu.syncItem = (
+        o("div", "mid row start button item",
+          o("div", "gap"),
+          o("div", "ibox",
+            o("div", "icon", "sync"),
+          ),
+          o("div", "gap"),
+          o("div", "big start", "Sync with Google Drive"),
+        )
+      );
+
+      onClick(menu.syncItem, todo);
+
+      /// all pages
+
+      menu.allPagesFileName = "whyolet.txt";
+
+      menu.downloadAllPagesIcon = o("div", "icon", "download");
+      onClick(menu.downloadAllPagesIcon, todo);
+
+      menu.uploadAllPagesIcon = o("div", "icon", "upload");
+      onClick(menu.uploadAllPagesIcon, todo);
+
+      menu.allPagesItem = (
+        o("div", "mid row start item",
+          o("div", "gap"),
+          o("div", "ibox", menu.downloadAllPagesIcon),
+          o("div", "gap"),
+          o("div", "ibox", menu.uploadAllPagesIcon),
+          o("div", "gap"),
+          o("div", "big start", `All pages: ${menu.allPagesFileName}`),
+        )
+      );
+
+      /// one page
+
+      if (current.page) {
+        menu.tag =  current.page.tag;
+
+        menu.pageFileName = menu.tag
+        .replaceAll("/", "_")
+        .replaceAll("\\", "_")
+        + (menu.tag.includes(".") ? "" : ".txt");
+
+        menu.downloadPageIcon = o("div", "icon", "file_save");
+        onClick(menu.downloadPageIcon, todo);
+
+        menu.uploadPageIcon = o("div", "icon", "upload_file");
+        onClick(menu.uploadPageIcon, todo);
+
+        menu.onePageItem = (
+          o("div", "mid row start item",
+            o("div", "gap"),
+            o("div", "ibox", menu.downloadPageIcon),
+            o("div", "gap"),
+            o("div", "ibox", menu.uploadPageIcon),
+            o("div", "gap"),
+            o("div", "big start", `One page: ${menu.pageFileName}`),
+          )
+        );
+      } else menu.onePageItem = null;
 
       /// line
 
@@ -1521,6 +1585,9 @@ Thank you!`
 
       const items = [
         menu.helpItem,
+        menu.syncItem,
+        menu.allPagesItem,
+        menu.onePageItem,
         menu.lineItem,
         menu.zoomItem,
       ];
@@ -1593,6 +1660,10 @@ Thank you!`
       show(menuTopRow);
       show(helpRow);
     };
+
+    /// sync
+
+    onClick("sync", todo);
 
     /// auto-focus
 
