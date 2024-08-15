@@ -1457,18 +1457,25 @@ Thank you!`
 
       /// sync
 
+      menu.rsSyncIcon = o("div", "icon", "layers");
+      onClick(menu.rsSyncIcon, todo);
+
+      menu.gdSyncIcon = o("div", "icon", "drive_export");
+      onClick(menu.gdSyncIcon, todo);
+
       menu.syncItem = (
-        o("div", "mid row start button item",
+        o("div", "mid row start item",
           o("div", "gap"),
           o("div", "ibox",
             o("div", "icon", "sync"),
           ),
           o("div", "gap"),
-          o("div", "big start", "Sync with Google Drive"),
+          o("div", "mid", "Sync:"),
+          o("div", "gap"),
+          o("div", "ibox", menu.rsSyncIcon),
+          o("div", "ibox", menu.gdSyncIcon),
         )
       );
-
-      onClick(menu.syncItem, todo);
 
       /// all pages
 
@@ -1670,10 +1677,6 @@ Thank you!`
       show(menuTopRow);
       show(helpRow);
     };
-
-    /// sync
-
-    onClick("sync", todo);
 
     /// auto-focus
 
