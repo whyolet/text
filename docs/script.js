@@ -1474,20 +1474,25 @@ Thank you!`
 
       menu.allPagesFileName = "whyolet.txt";
 
-      menu.downloadAllPagesIcon = o("div", "icon", "download");
-      onClick(menu.downloadAllPagesIcon, todo);
-
-      menu.uploadAllPagesIcon = o("div", "icon", "upload");
+      menu.uploadAllPagesIcon = o("div", "icon", "west");
       onClick(menu.uploadAllPagesIcon, todo);
+
+      menu.downloadAllPagesIcon = o("div", "icon", "east");
+      onClick(menu.downloadAllPagesIcon, todo);
 
       menu.allPagesItem = (
         o("div", "mid row start item",
           o("div", "gap"),
-          o("div", "ibox", menu.downloadAllPagesIcon),
+          o("div", "ibox",
+            o("div", "icon", "folder"),
+          ),
+          o("div", "gap"),
+          o("div", "mid", "Data"),
           o("div", "gap"),
           o("div", "ibox", menu.uploadAllPagesIcon),
+          o("div", "ibox", menu.downloadAllPagesIcon),
           o("div", "gap"),
-          o("div", "big start", `All pages: ${menu.allPagesFileName}`),
+          o("div", "big start", menu.allPagesFileName),
         )
       );
 
@@ -1501,20 +1506,25 @@ Thank you!`
         .replaceAll("\\", "_")
         + (menu.tag.includes(".") ? "" : ".txt");
 
-        menu.downloadPageIcon = o("div", "icon", "file_save");
-        onClick(menu.downloadPageIcon, todo);
-
-        menu.uploadPageIcon = o("div", "icon", "upload_file");
+        menu.uploadPageIcon = o("div", "icon", "west");
         onClick(menu.uploadPageIcon, todo);
+
+        menu.downloadPageIcon = o("div", "icon", "east");
+        onClick(menu.downloadPageIcon, todo);
 
         menu.onePageItem = (
           o("div", "mid row start item",
             o("div", "gap"),
-            o("div", "ibox", menu.downloadPageIcon),
+            o("div", "ibox",
+              o("div", "icon", "draft"),
+            ),
+            o("div", "gap"),
+            o("div", "mid", "Page"),
             o("div", "gap"),
             o("div", "ibox", menu.uploadPageIcon),
+            o("div", "ibox", menu.downloadPageIcon),
             o("div", "gap"),
-            o("div", "big start", `One page: ${menu.pageFileName}`),
+            o("div", "big start", menu.pageFileName),
           )
         );
       } else menu.onePageItem = null;
