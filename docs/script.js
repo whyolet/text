@@ -1459,10 +1459,10 @@ Thank you!`
 
       /// sync
 
-      menu.rsSyncIcon = o("div", "icon", "layers");
+      menu.rsSyncIcon = o("div", "icon button", "layers");
       onClick(menu.rsSyncIcon, todo);
 
-      menu.gdSyncIcon = o("div", "icon", "drive_export");
+      menu.gdSyncIcon = o("div", "icon button", "drive_export");
       onClick(menu.gdSyncIcon, todo);
 
       menu.syncItem = (
@@ -1483,10 +1483,10 @@ Thank you!`
 
       menu.allPagesFileName = "whyolet.txt";
 
-      menu.uploadAllPagesIcon = o("div", "icon", "west");
+      menu.uploadAllPagesIcon = o("div", "icon button", "west");
       onClick(menu.uploadAllPagesIcon, todo);
 
-      menu.downloadAllPagesIcon = o("div", "icon", "east");
+      menu.downloadAllPagesIcon = o("div", "icon button", "east");
       onClick(menu.downloadAllPagesIcon, todo);
 
       menu.allPagesItem = (
@@ -1515,11 +1515,11 @@ Thank you!`
         .replaceAll("\\", "_")
         + (menu.tag.includes(".") ? "" : ".txt");
 
-        menu.uploadPageIcon = o("div", "icon", "west");
+        menu.uploadPageIcon = o("div", "icon button", "west");
         onClick(menu.uploadPageIcon, todo);
 
-        menu.downloadPageIcon = o("div", "icon", "east");
-        onSavedClick(menu.downloadPageIcon, "", downloadPage);
+        menu.downloadPageIcon = o("div", "icon button", "east");
+        onClick(menu.downloadPageIcon, downloadPage);
 
         menu.onePageItem = (
           o("div", "mid row start item",
@@ -1682,10 +1682,10 @@ Thank you!`
 
     /// download page
 
-    const downloadPage = (page) => {
+    const downloadPage = () => {
       const a = o("a", {
         "class": "hidden",
-        href: "data:application/octet-stream;charset=utf-8," + encodeURIComponent(page.text),
+        href: "data:application/octet-stream;charset=utf-8," + encodeURIComponent(current.page.text),
         download: menu.pageFileName,
       });
 
