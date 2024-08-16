@@ -1519,7 +1519,7 @@ Thank you!`
         onClick(menu.uploadPageIcon, todo);
 
         menu.downloadPageIcon = o("div", "icon", "east");
-        onSavedClick(menu.downloadPageIcon, "", doDownload);
+        onSavedClick(menu.downloadPageIcon, "", downloadPage);
 
         menu.onePageItem = (
           o("div", "mid row start item",
@@ -1682,11 +1682,13 @@ Thank you!`
 
     /// download page
 
-    const doDownload = (page) => {
-      const a = document.createElement("a");
-      a.href = "data:application/octet-stream;charset=utf-8," + encodeURIComponent(page.text);
-      a.download = menu.pageFileName;
-      a.style.display = "none";
+    const downloadPage = (page) => {
+      const a = o("a", {
+        "class": "hidden",
+        href: "data:application/octet-stream;charset=utf-8," + encodeURIComponent(page.text),
+        download: menu.pageFileName,
+      });
+
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
