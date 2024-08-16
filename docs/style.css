@@ -95,7 +95,7 @@ input.small,
 
 .item {
   max-height: var(--mid);
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 .big,
@@ -103,29 +103,22 @@ input.small,
 .ibox,
 .gap {
   display: flex;
-  flex: 0 0;
+  flex: 0 0 auto;
   justify-content: center;
   align-items: center;
 }
 
 .big {
-  flex: 1 0;
-  /* border: 1px solid green; */
-}
-
-.mid {
-  /* border: 1px solid yellow; */
+  flex: 1 0 0;
 }
 
 .ibox {
   min-width: var(--mid);
   min-height: var(--mid);
-  /* border: 1px solid red; */
 }
 
 .gap {
   min-width: var(--gap);
-  /* border: 1px solid blue; */
 }
 
 .row {
@@ -148,6 +141,7 @@ input.small,
   font-weight: 700;
   font-size: 1.2rem;
   color: var(--tool);
+  overflow-x: hidden;
 }
 
 .found-text {
@@ -160,7 +154,7 @@ input.small,
 }
 
 .scrollable {
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .block {
