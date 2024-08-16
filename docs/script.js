@@ -123,12 +123,27 @@ Thank you!`
       }
 
       pageHeader.textContent = line;
+      alignToast();
       if (pin) return;
 
       toastTimerId = setTimeout(() => {
         toastTimerId = 0;
         pageHeader.textContent = pinnedToast;
+        alignToast();
       }, 2000);
+    };
+
+    const alignToast = () => {
+      doAlignToast();
+      setTimeout(doAlignToast, 100);
+    };
+
+    const doAlignToast = () => {
+      if (pageHeader.scrollWidth > pageHeader.clientWidth) {
+        pageHeader.classList.add("start");
+      } else {
+        pageHeader.classList.remove("start");
+      }
     };
 
     const todo = () => toast("TODO");
@@ -772,19 +787,6 @@ Thank you!`
       .delete(query);
     };
 
-    /// download
-
-    onSavedClick("download", "", (page) => {
-      // TODO: Move to menu.
-      const a = document.createElement("a");
-      a.href = "data:application/octet-stream;charset=utf-8," + encodeURIComponent(page.text);
-      a.download = page.tag;
-      a.style.display = "none";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    });
-
     /// up, down
 
     onSavedClick("up", "", (page) => {
@@ -1359,7 +1361,7 @@ Thank you!`
             const item = (
               o("div", "mid row start button item",
                 o("div", "gap"),
-                o("div", "mid tag", tag),
+                o("div", "mid found-tag", tag),
               )
             );
             onClick(item, onFindResultClick);
@@ -1470,7 +1472,7 @@ Thank you!`
             o("div", "icon", "sync"),
           ),
           o("div", "gap"),
-          o("div", "mid", "Sync:"),
+          o("div", "mid", "Sync"),
           o("div", "gap"),
           o("div", "ibox", menu.rsSyncIcon),
           o("div", "ibox", menu.gdSyncIcon),
@@ -1491,7 +1493,7 @@ Thank you!`
         o("div", "mid row start item",
           o("div", "gap"),
           o("div", "ibox",
-            o("div", "icon", "folder"),
+            o("div", "icon", "folder_open"),
           ),
           o("div", "gap"),
           o("div", "mid", "Data"),
@@ -1517,7 +1519,7 @@ Thank you!`
         onClick(menu.uploadPageIcon, todo);
 
         menu.downloadPageIcon = o("div", "icon", "east");
-        onClick(menu.downloadPageIcon, todo);
+        onSavedClick(menu.downloadPageIcon, "", doDownload);
 
         menu.onePageItem = (
           o("div", "mid row start item",
@@ -1558,7 +1560,7 @@ Thank you!`
             o("div", "icon", "format_list_numbered"),
           ),
           o("div", "gap"),
-          o("div", "mid", "Line:"),
+          o("div", "mid", "Line"),
           o("div", "gap"),
           o("div", "mid", menu.lineInput),
           o("div", "gap"),
@@ -1588,7 +1590,7 @@ Thank you!`
             o("div", "icon", "pan_zoom"),
           ),
           o("div", "gap"),
-          o("div", "mid", "Zoom:"),
+          o("div", "mid", "Zoom"),
           o("div", "gap"),
           o("div", "mid", menu.zoomInput),
           o("div", "gap"),
@@ -1676,6 +1678,18 @@ Thank you!`
       menuHeader.textContent = "Cheatsheet";
       show(menuTopRow);
       show(helpRow);
+    };
+
+    /// download page
+
+    const doDownload = (page) => {
+      const a = document.createElement("a");
+      a.href = "data:application/octet-stream;charset=utf-8," + encodeURIComponent(page.text);
+      a.download = menu.pageFileName;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     };
 
     /// auto-focus
