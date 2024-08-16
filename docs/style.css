@@ -186,7 +186,6 @@ a,
   color: var(--tool);
 }
 
-.icon,
 .button {
   cursor: pointer;
   user-select: none;
@@ -212,7 +211,6 @@ a,
 }
 
 a:active,
-.icon:active,
 .button:active,
 .button:active .icon,
 .button:active .tag,
