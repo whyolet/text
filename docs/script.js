@@ -1368,6 +1368,7 @@ Thank you!`
               o("div", "mid row start button item",
                 o("div", "gap"),
                 o("div", "mid found-tag", tag),
+                o("div", "gap"),
               )
             );
             onClick(item, onFindResultClick);
@@ -1458,6 +1459,7 @@ Thank you!`
           ),
           o("div", "gap"),
           o("div", "big start", "Cheatsheet"),
+          o("div", "gap"),
         )
       );
 
@@ -1482,6 +1484,7 @@ Thank you!`
           o("div", "gap"),
           o("div", "ibox", menu.rsSyncIcon),
           o("div", "ibox", menu.gdSyncIcon),
+          o("div", "gap"),
         )
       );
 
@@ -1573,6 +1576,7 @@ Thank you!`
           o("div", "mid", "/"),
           o("div", "gap"),
           o("div", "big start", `${menu.lineNumbers.max}`),
+          o("div", "gap"),
         )
       );
 
@@ -1601,6 +1605,7 @@ Thank you!`
           o("div", "mid", menu.zoomInput),
           o("div", "gap"),
           o("div", "big start", "%"),
+          o("div", "gap"),
         )
       );
 
@@ -1609,7 +1614,11 @@ Thank you!`
       menu.findAllIcon = o("div", "icon button", "manage_search");
       onClick(menu.findAllIcon, goFindAll);
 
-      menu.dateInput = o("input", {"type": "date"});
+      menu.dateInput = o("input", {
+        "class": "small",
+        "type": "date",
+      });
+
       on(menu.dateInput, "change", () => {
         goTag(menu.dateInput.value);
       });
@@ -1617,11 +1626,15 @@ Thank you!`
       menu.goItem = (
         o("div", "mid row start borderless item",
           o("div", "gap"),
-          o("div", "ibox", menu.findAllIcon),
+          o("div", "ibox",
+            o("div", "icon", "tag"),
+          ),
           o("div", "gap"),
           o("div", "mid", "Go to"),
           o("div", "gap"),
-          o("div", "big", menu.dateInput),
+          o("div", "mid", menu.dateInput),
+          o("div", "gap"),
+          o("div", "ibox", menu.findAllIcon),
           o("div", "gap"),
         )
       );
