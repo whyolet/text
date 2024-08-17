@@ -82,12 +82,10 @@ input::placeholder {
 
 input.small {
   display: inline;
-  min-width: 4rem;
-  max-width: 4rem;
+  width: 4rem;
   text-align: right;
 }
 
-input[type=date],
 input.small,
 .section,
 .item {
@@ -114,12 +112,12 @@ input.small,
 }
 
 .ibox {
-  min-width: var(--mid);
-  min-height: var(--mid);
+  width: var(--mid);
+  height: var(--mid);
 }
 
 .gap {
-  min-width: var(--gap);
+  width: var(--gap);
 }
 
 .row {
@@ -147,7 +145,7 @@ input.small,
 
 .found-text {
   align-self: start;
-  min-height: var(--mid);
+  height: var(--mid);
   overflow: hidden;
 }
 
