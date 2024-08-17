@@ -165,6 +165,8 @@ input.small,
 
 .section {
   padding: var(--gap);
+  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 ul {
