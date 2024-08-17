@@ -36,6 +36,10 @@ Thank you!`
 
   const toTag = (hash) => decodeURIComponent(hash.replace(/^#+/, ""));
 
+  /// isDate
+
+  const isDate = (tag) => /^\d{4}-\d{2}-\d{2}$/.test(tag);
+
   /// o - bullet point in a tree of elements
 
   const o = function(tag, attrs /* , kids */) {
@@ -1322,7 +1326,9 @@ Thank you!`
 
     /// find-all
 
-    onClick("find-all", () => goTag(reservedTags.findAll));
+    const goFindAll = () => goTag(reservedTags.findAll);
+
+    onClick("find-all", goFindAll);
 
     reservedActions[reservedTags.findAll] = () => {
       findAllWhat.value = findWhat.value || getSelText();
@@ -1598,6 +1604,28 @@ Thank you!`
         )
       );
 
+      /// go
+
+      menu.findAllIcon = o("div", "icon button", "manage_search");
+      onClick(menu.findAllIcon, goFindAll);
+
+      menu.dateInput = o("input", {"type": "date"});
+      on(menu.dateInput, "change", () => {
+        goTag(menu.dateInput.value);
+      });
+
+      menu.goItem = (
+        o("div", "mid row start borderless item",
+          o("div", "gap"),
+          o("div", "ibox", menu.findAllIcon),
+          o("div", "gap"),
+          o("div", "mid", "Go to"),
+          o("div", "gap"),
+          o("div", "big", menu.dateInput),
+          o("div", "gap"),
+        )
+      );
+
       /// tags
 
       const tagsSection = o("div", "section");
@@ -1628,6 +1656,7 @@ Thank you!`
         menu.onePageItem,
         menu.lineItem,
         menu.zoomItem,
+        menu.goItem,
         menu.tagsItem,
       ];
 
@@ -1722,10 +1751,15 @@ Thank you!`
       .objectStore(stores.page)
       .getAll()
       .onsuccess = (event) => {
-        const tags = [];
+        const tags = [], dateTags = [];
         for (const page of event.target.result) {
-          if (page.text) tags.push(page.tag);
+          if (!page.text) continue;
+          const tag = page.tag;
+          if (isDate(tag)) {
+            dateTags.push(tag);
+          } else tags.push(tag);
         }
+        tags.push(...dateTags);
         onGotTags(tags);
       };
     };
