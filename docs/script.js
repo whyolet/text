@@ -1520,8 +1520,7 @@ Thank you!`
         menu.tag =  current.page.tag;
 
         menu.pageFileName = menu.tag
-        .replaceAll("/", "_")
-        .replaceAll("\\", "_")
+        .replace(/^.*[\/\\]/, "")
         + (menu.tag.includes(".") ? "" : ".txt");
 
         menu.uploadPageIcon = o("div", "icon button", "west");
