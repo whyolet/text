@@ -43,7 +43,7 @@ Thank you!`
 
     if (typeof attrs === "string") {
       el.className = attrs;
-    } else for (const key in attrs) {
+    } else if (attrs) for (const key in attrs) {
       const val = attrs[key];
       if (val !== null) el.setAttribute(key, val);
     }
@@ -1336,10 +1336,10 @@ Thank you!`
       .transaction(stores.page)
       .objectStore(stores.page)
       .getAll()
-      .onsuccess = onGotPages;
+      .onsuccess = onGotPagesForFind;
     };
 
-    const onGotPages = (event) => {
+    const onGotPagesForFind = (event) => {
       if (isHidden(findAllRow)) return;
   
       current.pages = event.target.result;
@@ -1598,6 +1598,30 @@ Thank you!`
         )
       );
 
+      /// tags
+
+      menu.tagsItem = o("div", "big block");
+
+      getTags((tags) => {
+        let row, rowLetter = null;
+        for (const tag of tags) {
+          const tagLetter = tag.charAt(0);
+
+          if (rowLetter !== tagLetter) {
+            row = o("div", "section",
+              o("span", "", tagLetter.toUpperCase()),
+            );
+            menu.tagsItem.appendChild(row);
+            rowLetter = tagLetter;
+          }
+
+          row.appendChild(o("span", "", "  ")); // Breakable spaces for text wrap.
+          const tagButton = o("span", "found-tag button", `#${tag}`);
+          onClick(tagButton, () => goTag(tag));
+          row.appendChild(tagButton);
+        }
+      });
+
       /// menu items
 
       menu.isSaved = false;
@@ -1609,6 +1633,7 @@ Thank you!`
         menu.onePageItem,
         menu.lineItem,
         menu.zoomItem,
+        menu.tagsItem,
       ];
 
       itemsRow.textContent = "";
@@ -1692,6 +1717,22 @@ Thank you!`
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    };
+
+    /// getTags
+
+    const getTags = (onGotTags) => {
+      db
+      .transaction(stores.page)
+      .objectStore(stores.page)
+      .getAll()
+      .onsuccess = (event) => {
+        const tags = [];
+        for (const page of event.target.result) {
+          if (page.text) tags.push(page.tag);
+        }
+        onGotTags(tags);
+      };
     };
 
     /// auto-focus
