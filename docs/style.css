@@ -87,6 +87,7 @@ input.small {
   text-align: right;
 }
 
+input[type=date],
 input.small,
 .section,
 .item {
@@ -223,6 +224,10 @@ a:active,
 
 .icon:active {
   border-radius: var(--mid);
+}
+
+.borderless {
+  border: 0;
 }
 
 .hidden {
