@@ -1600,30 +1600,20 @@ Thank you!`
 
       /// tags
 
-      menu.tagsItem = o("div", "big block");
+      const tagsSection = o("div", "section");
+      menu.tagsItem = o("div", "big block", tagsSection);
 
       getTags((tags) => {
-        let row, rowLetter = null;
         for (const tag of tags) {
-          const tagLetter = tag.charAt(0);
+          const tagButton = o("span", "found-tag button", `#${tag}`);
+          onClick(tagButton, () => goTag(tag));
+          tagsSection.appendChild(tagButton);
 
-          if (rowLetter !== tagLetter) {
-            row = o("div", "section",
-              o("span", "", tagLetter.toUpperCase()),
-            );
-            menu.tagsItem.appendChild(row);
-            rowLetter = tagLetter;
-          }
-
-          row.appendChild(
+          tagsSection.appendChild(
             o("span", "", "\u00a0 ")
             // Non-breakable space adds gap,
             // breakable space enables text wrap.
           );
-
-          const tagButton = o("span", "found-tag button", `#${tag}`);
-          onClick(tagButton, () => goTag(tag));
-          row.appendChild(tagButton);
         }
       });
 
