@@ -131,6 +131,11 @@ input.small,
   height: 100%;
 }
 
+.label {
+  width: 3rem;
+}
+
+.label,
 .start {
   justify-content: start;
 }
