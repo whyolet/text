@@ -1615,7 +1615,12 @@ Thank you!`
             rowLetter = tagLetter;
           }
 
-          row.appendChild(o("span", "", "  ")); // Breakable spaces for text wrap.
+          row.appendChild(
+            o("span", "", "\u00a0 ")
+            // Non-breakable space adds gap,
+            // breakable space enables text wrap.
+          );
+
           const tagButton = o("span", "found-tag button", `#${tag}`);
           onClick(tagButton, () => goTag(tag));
           row.appendChild(tagButton);
