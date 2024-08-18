@@ -100,6 +100,8 @@ Thank you!`
 
     const pageMainRow = getEl("page-main-row");
     const ta = getEl("ta"); // TextArea
+    const moveToDateButton = getEl("move-to-date-button");
+    const moveToDateInput = getEl("move-to-date-input");
 
     const pageBottomRow = getEl("page-bottom-row");
 
@@ -489,7 +491,7 @@ Thank you!`
 
     /// onSavedClick
 
-    const onSavedClick = (el, options, handler, heldHandler) => {
+    const onSavedClick = (el, options, handler, longClickHandler) => {
       const anyFocus = options.includes("a");
       const noFocus = options.includes("n");
       const compareTextOnly = options.includes("t");
@@ -508,9 +510,9 @@ Thank you!`
 
         if (saveTimerId) clearTimeout(saveTimerId);
 
-        if (clickTimerId && heldHandler) {
+        if (clickTimerId && longClickHandler) {
           stop();
-          save(compareTextOnly, heldHandler);
+          save(compareTextOnly, longClickHandler);
           return;
         }
 
@@ -791,9 +793,9 @@ Thank you!`
       .delete(query);
     };
 
-    /// up, down
+    /// move-up, move-down
 
-    onSavedClick("up", "", (page) => {
+    onSavedClick("move-up", "", (page) => {
       ensureTextEndsWithNewline();
       const prevStart = getPrevLineStartIndex(page.sel1);
       const thisStart = getThisLineStartIndex(page.sel1);
@@ -810,7 +812,7 @@ Thank you!`
       save();
     });
 
-    onSavedClick("down", "", (page) => {
+    onSavedClick("move-down", "", (page) => {
       ensureTextEndsWithNewline();
       const thisStart = getThisLineStartIndex(page.sel1);
       const nextStart = getNextLineStartIndex(page.sel2);
@@ -1044,7 +1046,7 @@ Thank you!`
 
       save(false, (page) => {
         if (dx < 0) doDelete(page);
-        else todo();
+        else moveToDate();
       });
     };
 
@@ -1306,9 +1308,7 @@ Thank you!`
       ta.setRangeText(replaceWith.value, page.sel1, page.sel2, "select");
       save();
       // Do not auto find next or prev: to verify replacement.
-    }, (page) => {
-      // On held button:
-
+    }, (page) => { // Long-click.
       const what = getFindWhat();
       if (!what) return;
 
@@ -1432,10 +1432,6 @@ Thank you!`
     onClick("find-all-close", () => {
       history.back();
     });
-
-    /// move-to
-
-    onSavedClick("to", "", todo);
 
     /// menu
 
@@ -1774,6 +1770,36 @@ Thank you!`
         tags.push(...dateTags);
         onGotTags(tags);
       };
+    };
+
+    /// move-to-date
+
+    onSavedClick(moveToDateButton, "", () => {
+      moveToDate();
+    }, () => { // Long-click.
+      moveToDateInput.value = "";
+      moveToDateInput.min = getTodayPlus(0);
+      if ("showPicker" in moveToDateInput) {
+        try { // May fail without interaction!
+          moveToDateInput.showPicker();
+          return;
+        } catch {}
+      }
+      moveToDateInput.click();
+    });
+
+    on(moveToDateInput, "change", () => {
+      moveToDate(moveToDateInput.value);
+    });
+
+    const getTodayPlus = (days) => {
+      const date = new Date(Date.now() + days * 1000*60*60*24);
+      return date.toISOString().split("T")[0];
+    };
+
+    const moveToDate = (date) => {
+      if (!date) date = getTodayPlus(1);
+      toast(`TODO ${date}`);
     };
 
     /// auto-focus
