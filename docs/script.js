@@ -559,8 +559,8 @@ Thank you!`
       while (i > 0 && isTag(text, i - 1)) i--;
       const start = i;
 
-      while (i < page.text.length && isTag(text, i)) i++;
-      const tag = page.text.slice(start, i).replaceAll(strikeChar, "");
+      while (i < text.length && isTag(text, i)) i++;
+      const tag = text.slice(start, i).replaceAll(strikeChar, "");
 
       if (tag.charAt(0) !== "#") {
         ta.setRangeText("#", start, start);
@@ -1765,6 +1765,7 @@ Thank you!`
         const tags = [], dateTags = [];
         for (const page of event.target.result) {
           if (!page.text) continue;
+
           const tag = page.tag;
           if (isDate(tag)) {
             dateTags.push(tag);
@@ -1805,10 +1806,11 @@ Thank you!`
       const page = current.page;
       if (!page || page.tag === date) return;
 
-      const thisStart = getThisLineStartIndex(page.text, page.sel1);
-      const nextStart = getNextLineStartIndex(page.text, page.sel2);
-      const movedText = page.text.slice(thisStart, nextStart);
-      if (!movedText) return;
+      const text = page.text;
+      const thisStart = getThisLineStartIndex(text, page.sel1);
+      const nextStart = getNextLineStartIndex(text, page.sel2);
+      const movedText = text.slice(thisStart, nextStart);
+      if (!movedText) return toast("Move what?");
 
       toast(`▷ ${date}`);
       ta.setRangeText("", thisStart, nextStart, "start");
