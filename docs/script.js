@@ -38,7 +38,7 @@ Thank you!`
 
   /// isDate
 
-  const isDate = (tag) => /^\d{4}-\d{2}-\d{2}$/.test(tag);
+  const isDate = (tag) => /^\d+-\d{2}-\d{2}$/.test(tag);
 
   /// o - bullet point in a tree of elements
 
@@ -95,6 +95,8 @@ Thank you!`
     const replaceWith = getEl("replace-with");
 
     const pageTopRow = getEl("page-top-row");
+    const overdueBox = getEl("overdue-box");
+    const overdueButton = getEl("overdue-button");
     const pageHeader = getEl("page-header");
     const findReplaceButton = getEl("find-replace");
 
@@ -182,6 +184,7 @@ Thank you!`
     };
 
     const current = {
+      overdueDate: null,
       page: null,
       pages: [], // for `find-all`
       textLength: 0, // for `autoindent`
@@ -264,10 +267,6 @@ Thank you!`
       }
       if (historyStateOnStart === null) {
         historyStateOnStart = history.state;
-        if (tag === reservedTags.menu) {
-          goTag("draft");
-          return;
-        }
       }
 
       for (const el of [
@@ -341,6 +340,13 @@ Thank you!`
           ta.setSelectionRange(page.sel1, page.sel2);
           ta.scrollTop = page.scro;
         }
+      });
+
+      getOverdueDate((overdueDate) => {
+        current.overdueDate = overdueDate;
+        if (overdueDate) {
+          show(overdueBox);
+        } else hide(overdueBox);
       });
     };
 
@@ -1823,6 +1829,36 @@ Thank you!`
         });
       });
     };
+
+    /// getOverdueDate, overdueButton
+
+    const getOverdueDate = (onGotOverdueDate) => {
+      const query = IDBKeyRange.bound("0", getTodayPlus(-1));
+      
+      db
+      .transaction(stores.page)
+      .objectStore(stores.page)
+      .getAll(query)
+      .onsuccess = (event) => {
+        for (const page of event.target.result) {
+          if (!isDate(page.tag)) continue;
+
+          // Blank (with spaces) page is not empty.
+          // "Undo" will be broken if we delete not empty page.
+          if (page.text) return onGotOverdueDate(page.tag);
+
+          db
+          .transaction(stores.page, "readwrite")
+          .objectStore(stores.page)
+          .delete(page.tag);
+        }
+        onGotOverdueDate(null);
+      };
+    };
+
+    onClick(overdueButton, () => {
+      goTag(current.overdueDate);
+    });
 
     /// auto-focus
 
