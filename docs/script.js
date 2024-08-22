@@ -243,7 +243,7 @@ Thank you!`
       db.onerror = onDbError;
       db.onversionchange = updateAppVersion;
       getZoom();
-      goTag("draft", true);
+      goTag(getTodayPlus(0), true);
     };
 
     /// goTag
@@ -259,7 +259,14 @@ Thank you!`
 
    let historyStateOnStart = null;
 
-    const onHashChange = (event) => {
+    const onHashChange = () => {
+      if (saveTimerId) {
+        clearTimeout(saveTimerId);
+        save(false, doHashChange);
+      } else doHashChange();
+    };
+
+    const doHashChange = () => {
       const tag = toTag(location.hash);
 
       if (!history.state) {
@@ -580,10 +587,15 @@ Thank you!`
     /// back
 
     onSavedClick("back", "", () => {
+      // Using `onSavedClick` here for auto-repeat on long-click only.
       if (history.state > historyStateOnStart) {
         history.back();
       } else toast("Click # first!");
     });
+
+    /// today
+
+    onClick("today", () => goTag(getTodayPlus(0)));
 
     /// undo
 
@@ -1448,7 +1460,7 @@ Thank you!`
       isSaved: true,
     };
 
-    onSavedClick("menu", "n", () => goTag(reservedTags.menu));
+    onClick("menu", () => goTag(reservedTags.menu));
 
     reservedActions[reservedTags.menu]  = () => {
       menuHeader.textContent = "Menu";
