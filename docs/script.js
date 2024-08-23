@@ -160,8 +160,9 @@ Thank you!`
 
     const reservedTags = {
       prefix: "--",
-      findAll: "--find-all",
+      find: "--find",
       help: "--help",
+      local: "--local",
       menu: "--menu",
     };
 
@@ -1347,11 +1348,11 @@ Thank you!`
 
     /// find-all
 
-    const goFindAll = () => goTag(reservedTags.findAll);
+    const goFindAll = () => goTag(reservedTags.find);
 
     onClick("find-all", goFindAll);
 
-    reservedActions[reservedTags.findAll] = () => {
+    reservedActions[reservedTags.find] = () => {
       findAllWhat.value = findWhat.value || getSelText();
       show(findAllRow);
       findAllWhat.focus();
@@ -1481,6 +1482,22 @@ Thank you!`
       );
 
       onClick(menu.helpItem, () => goTag(reservedTags.help));
+
+      /// local
+
+      menu.localItem = (
+        o("div", "mid row start button item",
+          o("div", "gap"),
+          o("div", "ibox",
+            o("div", "icon", "pending"),
+          ),
+          o("div", "gap"),
+          o("div", "big start", "Local data: ..."),
+          o("div", "gap"),
+        )
+      );
+
+      onClick(menu.localItem, () => goTag(reservedTags.local));
 
       /// sync
 
@@ -1680,6 +1697,7 @@ Thank you!`
 
       const items = [
         menu.helpItem,
+        menu.localItem,
         menu.syncItem,
         menu.allPagesItem,
         menu.onePageItem,
@@ -1758,6 +1776,16 @@ Thank you!`
       show(helpRow);
     };
 
+    /// local
+
+    reservedActions[reservedTags.local]  = () => {
+      menuHeader.textContent = "Local data";
+      show(menuTopRow);
+      // TODO: show either local-ok-row or local-problem-row
+      itemsRow.textContent = "";
+      show(itemsRow);
+    };
+
     /// download page
 
     const downloadPage = () => {
@@ -1820,9 +1848,16 @@ Thank you!`
     };
 
     const moveToDate = (date) => {
-      if (!date) date = getTodayPlus(1);
       const page = current.page;
-      if (!page || page.tag === date) return;
+      if (!page) return;
+
+      if (!date) date = getTodayPlus(
+        (
+          isDate(page.tag) &&
+          page.tag < getTodayPlus(0)
+        ) ? 0 : 1
+      );
+      if (date === page.tag) return;
 
       const text = page.text;
       const thisStart = getThisLineStartIndex(text, page.sel1);
