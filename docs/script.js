@@ -116,6 +116,9 @@ Thank you!`
     const itemsRow = getEl("items-row");
     const helpRow = getEl("help-row");
 
+    const localProblemRow = getEl("local-problem-row");
+    const localOkRow = getEl("local-ok-row");
+
     /// toast
     
     let toastTimerId, pinnedToast = "";
@@ -286,6 +289,8 @@ Thank you!`
         menuTopRow,
         itemsRow,
         helpRow,
+        localProblemRow,
+        localOkRow,
       ]) hide(el);
 
       if (!menu.isSaved) saveMenu();
@@ -1492,10 +1497,21 @@ Thank you!`
             o("div", "icon", "pending"),
           ),
           o("div", "gap"),
-          o("div", "big start", "Local data: ..."),
+          o("div", "big start", "Local data: "),
           o("div", "gap"),
         )
       );
+
+      getPersisted((persisted) => {
+        menu.localItem
+        .children[1].children[0]
+        .textContent = persisted
+        ? "health_and_safety" : "warning";
+
+        menu.localItem.children[3]
+        .textContent += persisted
+        ? "OK" : "problem";
+      });
 
       onClick(menu.localItem, () => goTag(reservedTags.local));
 
@@ -1778,13 +1794,77 @@ Thank you!`
 
     /// local
 
+    const isPersistSupported = (
+      "storage" in navigator &&
+      "persist" in navigator.storage
+    );
+
+    const getPersisted = (onGotPersisted) => {
+      if (isPersistSupported) {
+        navigator.storage.persisted()
+        .then(onGotPersisted);
+      } else onGotPersisted(false);
+    };
+
+    const tryPersist = (onGotPersisted) => {
+      if (onGotPersisted === undefined) {
+        onGotPersisted = () => {};
+      }
+      if (isPersistSupported) {
+        navigator.storage.persist()
+        .then(onGotPersisted);
+      } else onGotPersisted(false);
+    };
+
     reservedActions[reservedTags.local]  = () => {
       menuHeader.textContent = "Local data";
       show(menuTopRow);
-      // TODO: show either local-ok-row or local-problem-row
-      itemsRow.textContent = "";
-      show(itemsRow);
+
+      getPersisted((persisted) => {
+        if (persisted) return show(localOkRow);
+
+        tryPersist((persisted) => show(
+          persisted
+          ? localOkRow
+          : localProblemRow
+        ));
+      });
     };
+
+    onClick("local-request-button", () => {
+      if (!isPersistSupported) {
+        alert("Persistence is not supported, get a new browser!");
+        return;
+      }
+
+      if (!("Notification" in window)) {
+        alert("Notification is not supported, get a new browser!");
+        return;
+      }
+
+      if (Notification.permission === "granted") {
+        alert("Notification was allowed already, but it does not help. Try another browser.");
+        return;
+      }
+
+      Notification.requestPermission()
+      .then((permission) => {
+        if (permission !== "granted") {
+          alert("Notification is NOT allowed! Please try again.");
+          return;
+        }
+
+        tryPersist((persisted) => {
+          if (!persisted) {
+            alert("Notification is allowed, but it does not help. Try another browser.");
+            return;
+          }
+
+          alert("Success! 🐱");
+          history.back();
+        });
+      });
+    });
 
     /// download page
 
@@ -1907,9 +1987,13 @@ Thank you!`
       goTag(current.overdueDate);
     });
 
-    /// auto-focus
+    /// try
 
     if (!isHidden(pageMainRow)) ta.focus();
+
+    getPersisted((persisted) => {
+      if (!persisted) tryPersist();
+    });
 
     /// call main
   };
