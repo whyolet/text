@@ -141,7 +141,8 @@ input.small,
 }
 
 .header,
-.found-tag {
+.found-tag,
+.outlined {
   font-weight: 700;
   font-size: 1.2rem;
   color: var(--tool);
@@ -190,6 +191,13 @@ a {
 a,
 .icon {
   color: var(--tool);
+}
+
+.outlined {
+  margin: var(--gap);
+  border: 0.5px solid var(--hint);
+  padding: var(--gap);
+  text-align: center;
 }
 
 .button {
