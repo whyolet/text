@@ -157,7 +157,7 @@ Thank you!`
       }
     };
 
-    const todo = () => toast("TODO");
+    const todo = () => alert("TODO");
 
     /// reservedTags, reservedActions
 
@@ -266,6 +266,7 @@ Thank you!`
     const onHashChange = () => {
       if (saveTimerId) {
         clearTimeout(saveTimerId);
+        saveTimerId = 0;
         save(false, doHashChange);
       } else doHashChange();
     };
@@ -1574,7 +1575,7 @@ Thank you!`
         + (menu.tag.includes(".") ? "" : ".txt");
 
         menu.uploadPageIcon = o("div", "icon button", "west");
-        onClick(menu.uploadPageIcon, todo);
+        onClick(menu.uploadPageIcon, uploadPage);
 
         menu.downloadPageIcon = o("div", "icon button", "east");
         onClick(menu.downloadPageIcon, downloadPage);
@@ -1865,6 +1866,50 @@ Thank you!`
         });
       });
     });
+
+    /// upload page
+
+    const uploadPage = () => {
+      if (!current.page) return;
+
+      const page = current.page;
+
+      getUploadedText((text) => {
+        const next = {
+          tag: page.tag,
+          text,
+          sel1: 0,
+          sel2: 0,
+          scro: 0,
+        };
+
+        doSave(page, next, () => {
+          history.back();
+        });
+      });
+    };
+
+    const getUploadedText = (onGotUploadedText) => {
+      const fileInput = o("input", {
+        "class": "hidden",
+        "type": "file",
+      });
+
+      on(fileInput, "change", () => {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        on(reader, "load", () => {
+          onGotUploadedText(reader.result);
+        });
+
+        reader.readAsText(file);
+      });
+
+      document.body.appendChild(fileInput);
+      fileInput.click();
+      document.body.removeChild(fileInput);
+    };
 
     /// download page
 
