@@ -40,6 +40,12 @@ Thank you!`
 
   const isDate = (tag) => /^\d+-\d{2}-\d{2}$/.test(tag);
 
+  /// getNow
+
+  const getNow = () => (
+    new Date()
+  ).toISOString();
+
   /// o - bullet point in a tree of elements
 
   const o = function(tag, attrs /* , kids */) {
@@ -392,10 +398,23 @@ Thank you!`
             sel1: 0,
             sel2: 0,
             scro: 0,
+            upd: getNow(),
           },
           event.target.result,
         );
         onGotPage(page);
+      };
+    };
+
+    /// getPages
+
+    const getPages = (onGotPages) => {
+      db
+      .transaction(stores.page)
+      .objectStore(stores.page)
+      .getAll()
+      .onsuccess = (event) => {
+        onGotPages(event.target.result);
       };
     };
 
@@ -456,6 +475,7 @@ Thank you!`
     const doSave = (page, next, onSaved) => {
       const op = createOp(page, next);
       Object.assign(page, next);
+      page.upd = getNow();
 
       const txn = db.transaction([stores.op, stores.page], "readwrite");
       txn.objectStore(stores.op).add(op);
@@ -661,6 +681,7 @@ Thank you!`
     };
 
     const saveAndShowPage = (page, undoneOpId) => {
+      page.upd = getNow();
       const txn = db.transaction([stores.page, stores.conf], "readwrite");
       txn.objectStore(stores.page).put(page);
       txn.objectStore(stores.conf).put(undoneOpId, conf.undoneOpId);
@@ -1366,18 +1387,14 @@ Thank you!`
       itemsRow.textContent = "";
       show(itemsRow);
 
-      db
-      .transaction(stores.page)
-      .objectStore(stores.page)
-      .getAll()
-      .onsuccess = onGotPagesForFind;
+      getPages(onGotPagesForFind);
     };
 
-    const onGotPagesForFind = (event) => {
+    const onGotPagesForFind = (pages) => {
       if (isHidden(findAllRow)) return;
   
-      current.pages = event.target.result;
-      for (const page of current.pages) {
+      current.pages = pages;
+      for (const page of pages) {
         page.lowerTag = page.tag.toLowerCase();
         page.lowerText = page.text.toLowerCase();
       }
@@ -1547,7 +1564,7 @@ Thank you!`
       onClick(menu.uploadAllPagesIcon, todo);
 
       menu.downloadAllPagesIcon = o("div", "icon button", "east");
-      onClick(menu.downloadAllPagesIcon, todo);
+      onClick(menu.downloadAllPagesIcon, downloadAllPages);
 
       menu.allPagesItem = (
         o("div", "mid row start item",
@@ -1867,6 +1884,19 @@ Thank you!`
       });
     });
 
+    /// download all pages
+
+    const downloadAllPages = () => {
+      getPages((pages) => {
+        const lines = [];
+        for (const page of pages) {
+          lines.push(JSON.stringify(page));
+        }
+        const text = `[\n${lines.join(",\n")}\n]\n`;
+        downloadText(text, menu.allPagesFileName);
+      });
+    };
+
     /// upload page
 
     const uploadPage = () => {
@@ -1932,13 +1962,9 @@ Thank you!`
     /// getTags
 
     const getTags = (onGotTags) => {
-      db
-      .transaction(stores.page)
-      .objectStore(stores.page)
-      .getAll()
-      .onsuccess = (event) => {
+      getPages((pages) => {
         const tags = [], dateTags = [];
-        for (const page of event.target.result) {
+        for (const page of pages) {
           if (!page.text) continue;
 
           const tag = page.tag;
@@ -1948,7 +1974,7 @@ Thank you!`
         }
         tags.push(...dateTags);
         onGotTags(tags);
-      };
+      });
     };
 
     /// move-to-date
