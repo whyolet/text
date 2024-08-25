@@ -1914,10 +1914,14 @@ Thank you!`
     /// download page
 
     const downloadPage = () => {
+      downloadText(current.page.text, menu.pageFileName);
+    };
+
+    const downloadText = (text, fileName) => {
       const a = o("a", {
         "class": "hidden",
-        href: "data:application/octet-stream;charset=utf-8," + encodeURIComponent(current.page.text),
-        download: menu.pageFileName,
+        href: "data:application/octet-stream;charset=utf-8," + encodeURIComponent(text),
+        download: fileName,
       });
 
       document.body.appendChild(a);
