@@ -1893,12 +1893,13 @@ Thank you!`
     const uploadAllPages = () => {
       getUploadedText((text) => {
         importText(text, (report) => {
-          alert(`Done!
- 
-Had pages: ${report.local}
-Created: ${report.created}
-Updated: ${report.updated}
-Not changed: ${report.imported - report.created - report.updated}
+          alert(`Success:
+* Created: ${report.created}
+* Updated: ${report.updated}
+
+Skipped:
+* Outdated: ${report.outdated}
+* Not changed: ${report.notChanged}
 `);
         });
       });
@@ -1998,6 +1999,7 @@ Not changed: ${report.imported - report.created - report.updated}
 
       getPages((localPages) => {
         let created = 0, updated = 0;
+        let outdated = 0, notChanged = 0;
 
         const localPagesByTag = {};
         for (const localPage of localPages) {
@@ -2012,10 +2014,23 @@ Not changed: ${report.imported - report.created - report.updated}
 
           const tag = importedPage.tag;
           const localPage = localPagesByTag[tag];
-          if (localPage && localPage.upd >= importedPage.upd) continue;
 
-          if (localPage) updated++;
-          else created++;
+          if (localPage) {
+            const localUpd = localPage.upd || "";
+            const importedUpd = importedPage.upd || "";
+
+            if (localUpd === importedUpd) {
+              notChanged++;
+              continue;
+            }
+
+            if (localUpd > importedUpd) {
+              outdated++;
+              continue;
+            }
+
+            updated++;
+          } else created++;
 
           doSave(
             ensurePage(localPage, tag),
@@ -2024,10 +2039,10 @@ Not changed: ${report.imported - report.created - report.updated}
         }
 
         if (onImported) onImported({
-          local: localPages.length,
-          imported: importedPages.length,
           created,
           updated,
+          outdated,
+          notChanged,
         });
       });
     };
