@@ -391,20 +391,24 @@ Thank you!`
       .objectStore(stores.page)
       .get(tag)
       .onsuccess = (event) => {
-        const page = Object.assign(
-          {
-            tag,
-            text: "",
-            sel1: 0,
-            sel2: 0,
-            scro: 0,
-            upd: getNow(),
-          },
-          event.target.result,
-        );
+        const page = ensurePage(event.target.result, tag);
         onGotPage(page);
       };
     };
+
+    /// ensurePage
+
+    const ensurePage = (page, tag) => Object.assign(
+      {
+        tag,
+        text: "",
+        sel1: 0,
+        sel2: 0,
+        scro: 0,
+        upd: getNow(),
+      },
+      page,
+    );
 
     /// getPages
 
@@ -450,6 +454,7 @@ Thank you!`
         sel1: ta.selectionStart,
         sel2: ta.selectionEnd,
         scro: ta.scrollTop,
+        upd: getNow(),
       };
       current.textLength = next.text.length;
 
@@ -475,7 +480,6 @@ Thank you!`
     const doSave = (page, next, onSaved) => {
       const op = createOp(page, next);
       Object.assign(page, next);
-      page.upd = getNow();
 
       const txn = db.transaction([stores.op, stores.page], "readwrite");
       txn.objectStore(stores.op).add(op);
@@ -1561,7 +1565,7 @@ Thank you!`
       menu.allPagesFileName = "whyolet.txt";
 
       menu.uploadAllPagesIcon = o("div", "icon button", "west");
-      onClick(menu.uploadAllPagesIcon, todo);
+      onClick(menu.uploadAllPagesIcon, uploadAllPages);
 
       menu.downloadAllPagesIcon = o("div", "icon button", "east");
       onClick(menu.downloadAllPagesIcon, downloadAllPages);
@@ -1884,7 +1888,23 @@ Thank you!`
       });
     });
 
-    /// download all pages
+    /// uploadAllPages
+
+    const uploadAllPages = () => {
+      getUploadedText((text) => {
+        importText(text, (report) => {
+          alert(`Done!
+ 
+Had pages: ${report.local}
+Created: ${report.created}
+Updated: ${report.updated}
+Not changed: ${report.imported - report.created - report.updated}
+`);
+        });
+      });
+    };
+
+    /// downloadAllPages
 
     const downloadAllPages = () => {
       getPages((pages) => {
@@ -1897,7 +1917,7 @@ Thank you!`
       });
     };
 
-    /// upload page
+    /// uploadPage
 
     const uploadPage = () => {
       if (!current.page) return;
@@ -1911,6 +1931,7 @@ Thank you!`
           sel1: 0,
           sel2: 0,
           scro: 0,
+          upd: getNow(),
         };
 
         doSave(page, next, () => {
@@ -1918,6 +1939,14 @@ Thank you!`
         });
       });
     };
+
+    /// downloadPage
+
+    const downloadPage = () => {
+      downloadText(current.page.text, menu.pageFileName);
+    };
+
+    /// getUploadedText
 
     const getUploadedText = (onGotUploadedText) => {
       const fileInput = o("input", {
@@ -1941,11 +1970,7 @@ Thank you!`
       document.body.removeChild(fileInput);
     };
 
-    /// download page
-
-    const downloadPage = () => {
-      downloadText(current.page.text, menu.pageFileName);
-    };
+    /// downloadText
 
     const downloadText = (text, fileName) => {
       const a = o("a", {
@@ -1957,6 +1982,58 @@ Thank you!`
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    };
+
+    /// importText
+
+    const importText = (text, onImported) => {
+      let importedPages;
+      try {
+        importedPages = JSON.parse(text);
+      } catch {
+        return importFailed();
+      }
+
+      if (!Array.isArray(importedPages)) return importFailed();
+
+      getPages((localPages) => {
+        let created = 0, updated = 0;
+
+        const localPagesByTag = {};
+        for (const localPage of localPages) {
+          localPagesByTag[localPage.tag] = localPage;
+        }
+
+        for (const importedPage of importedPages) {
+          if (!(
+            "tag" in importedPage &&
+            typeof importedPage.tag === "string"
+          )) return importFailed();
+
+          const tag = importedPage.tag;
+          const localPage = localPagesByTag[tag];
+          if (localPage && localPage.upd >= importedPage.upd) continue;
+
+          if (localPage) updated++;
+          else created++;
+
+          doSave(
+            ensurePage(localPage, tag),
+            ensurePage(importedPage, tag),
+          );
+        }
+
+        if (onImported) onImported({
+          local: localPages.length,
+          imported: importedPages.length,
+          created,
+          updated,
+        });
+      });
+    };
+
+    const importFailed = () => {
+      alert("Cannot import this file!\nPlease use a file exported previously with:\nMenu - Data ➔ whyolet.txt");
     };
 
     /// getTags
@@ -2027,6 +2104,7 @@ Thank you!`
         getPage(date, (datePage) => {
           const next = Object.assign({}, datePage);
           next.text = ensureTextEndsWithNewline(next.text) + movedText;
+          next.upd = getNow();
           doSave(datePage, next);
         });
       });
