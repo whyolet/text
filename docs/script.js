@@ -1552,7 +1552,7 @@ Thank you!`
             o("div", "icon", "sync"),
           ),
           o("div", "gap"),
-          o("div", "mid", "Sync"),
+          o("div", "mid mid-label", "Sync"),
           o("div", "gap"),
           o("div", "ibox", menu.rsSyncIcon),
           o("div", "ibox", menu.gdSyncIcon),
@@ -1577,12 +1577,12 @@ Thank you!`
             o("div", "icon", "folder_open"),
           ),
           o("div", "gap"),
-          o("div", "mid", "Data"),
+          o("div", "mid mid-label", "Data"),
           o("div", "gap"),
           o("div", "ibox", menu.uploadAllPagesIcon),
           o("div", "ibox", menu.downloadAllPagesIcon),
           o("div", "gap"),
-          o("div", "big start", menu.allPagesFileName),
+          o("div", "big start", "Backup"),
         )
       );
 
@@ -1608,12 +1608,12 @@ Thank you!`
               o("div", "icon", "draft"),
             ),
             o("div", "gap"),
-            o("div", "mid", "Page"),
+            o("div", "mid mid-label", "Page"),
             o("div", "gap"),
             o("div", "ibox", menu.uploadPageIcon),
             o("div", "ibox", menu.downloadPageIcon),
             o("div", "gap"),
-            o("div", "big start", menu.pageFileName),
+            o("div", "big start", "File"),
           )
         );
       } else menu.onePageItem = null;
@@ -1640,7 +1640,7 @@ Thank you!`
             o("div", "icon", "format_list_numbered"),
           ),
           o("div", "gap"),
-          o("div", "mid label", "Line"),
+          o("div", "mid big-label", "Line"),
           o("div", "gap"),
           o("div", "mid", menu.lineInput),
           o("div", "gap"),
@@ -1671,7 +1671,7 @@ Thank you!`
             o("div", "icon", "pan_zoom"),
           ),
           o("div", "gap"),
-          o("div", "mid label", "Zoom"),
+          o("div", "mid big-label", "Zoom"),
           o("div", "gap"),
           o("div", "mid", menu.zoomInput),
           o("div", "gap"),
@@ -1701,10 +1701,11 @@ Thank you!`
             o("div", "icon", "tag"),
           ),
           o("div", "gap"),
-          o("div", "mid label", "Go to"),
+          o("div", "mid big-label", "Go to"),
           o("div", "gap"),
           o("div", "mid", menu.dateInput),
           o("div", "gap"),
+          o("div", "mid", "date or tag"),
           o("div", "ibox", menu.findAllIcon),
           o("div", "gap"),
         )
@@ -2071,7 +2072,7 @@ Skipped:
     };
 
     const importFailed = () => {
-      alert("Cannot import this file!\nPlease use a file exported previously with:\nMenu - Data ➔ whyolet.txt");
+      alert("Cannot import this file!\nPlease use a file exported previously with:\nMenu - Backup or Sync");
     };
 
     /// getTags
