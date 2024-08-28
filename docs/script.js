@@ -1562,7 +1562,7 @@ Thank you!`
 
       /// all pages
 
-      menu.allPagesFileName = "whyolet.txt";
+      menu.allPagesFileName = "whyolet-text.db";
 
       menu.uploadAllPagesIcon = o("div", "icon button", "west");
       onClick(menu.uploadAllPagesIcon, uploadAllPages);
@@ -1914,7 +1914,23 @@ Skipped:
           lines.push(JSON.stringify(page));
         }
         const text = `[\n${lines.join(",\n")}\n]\n`;
-        downloadText(text, menu.allPagesFileName);
+
+        if ("CompressionStream" in window) {
+          const jsonified = new Response(text);
+
+          const gzipped = new Response(
+            jsonified.body.pipeThrough(new CompressionStream("gzip")),
+            {headers: {"Content-Type": "application/octet-stream"}},
+          );
+
+          gzipped.blob().then((blob) => {
+            const url = URL.createObjectURL(blob);
+            downloadURL(url, menu.allPagesFileName);
+            setTimeout(() => {
+              URL.revokeObjectURL(url);
+            }, 1000);
+          });
+        } else downloadText(text, menu.allPagesFileName);
       });
     };
 
@@ -1971,12 +1987,12 @@ Skipped:
       document.body.removeChild(fileInput);
     };
 
-    /// downloadText
+    /// downloadURL
 
-    const downloadText = (text, fileName) => {
+    const downloadURL = (url, fileName) => {
       const a = o("a", {
         "class": "hidden",
-        href: "data:application/octet-stream;charset=utf-8," + encodeURIComponent(text),
+        href: url,
         download: fileName,
       });
 
@@ -1984,6 +2000,13 @@ Skipped:
       a.click();
       document.body.removeChild(a);
     };
+
+    /// downloadText
+
+    const downloadText = (text, fileName) => downloadURL(
+      "data:application/octet-stream;charset=utf-8," + encodeURIComponent(text),
+      fileName,
+    );
 
     /// importText
 
