@@ -131,11 +131,16 @@ input.small,
   height: 100%;
 }
 
-.label {
-  width: 3rem;
+.mid-label {
+  width: 2.3rem;
 }
 
-.label,
+.big-label {
+  width: 2.7rem;
+}
+
+.mid-label,
+.big-label,
 .start {
   justify-content: start;
 }
