@@ -1043,6 +1043,8 @@ Thank you!`
     });
 
     on(ta, "pointermove", (event) => {
+      if (!fingersByIds.has(event.pointerId)) return;
+
       fingersByIds.set(event.pointerId, event);
       if (fingersByIds.size < 2) return;
 
