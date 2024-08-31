@@ -1748,10 +1748,13 @@ Thank you!`
         menu.tagsItem,
       ];
 
-      itemsRow.textContent = "";
+      const fragment = document.createDocumentFragment();
       for (const item of items) {
-        itemsRow.appendChild(item);
+        fragment.appendChild(item);
       }
+
+      itemsRow.textContent = "";
+      itemsRow.appendChild(fragment);
       show(itemsRow);
     };
 
@@ -2178,7 +2181,14 @@ Skipped:
     };
 
     onClick(overdueButton, () => {
-      goTag(current.overdueDate);
+      if (!current.page) return;
+
+      if (current.page.tag !== current.overdueDate) return goTag(current.overdueDate);
+
+      getOverdueDate((overdueDate) => {
+        current.overdueDate = overdueDate;
+        goTag(overdueDate || getTodayPlus(0));
+      });
     });
 
     /// try
