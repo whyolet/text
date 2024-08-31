@@ -1562,17 +1562,20 @@ Thank you!`
         )
       );
 
-      /// all pages
+      /// backup
 
-      menu.allPagesFileName = "whyolet-text.db";
+      menu.backupFileName = "whyolet-text.db";
 
-      menu.uploadAllPagesIcon = o("div", "icon button", "west");
-      onClick(menu.uploadAllPagesIcon, uploadAllPages);
+      menu.uploadBackupIcon = o("div", "icon button", "west");
+      onClick(menu.uploadBackupIcon, uploadBackup);
 
-      menu.downloadAllPagesIcon = o("div", "icon button", "east");
-      onClick(menu.downloadAllPagesIcon, downloadAllPages);
+      menu.downloadBackupIcon = o("div", "icon button", "east");
+      onClick(menu.downloadBackupIcon, downloadBackup);
 
-      menu.allPagesItem = (
+      menu.backupKeyIcon = o("div", "icon button", "key");
+      onClick(menu.backupKeyIcon, todo);
+
+      menu.backupItem = (
         o("div", "mid row start item",
           o("div", "gap"),
           o("div", "ibox",
@@ -1581,10 +1584,12 @@ Thank you!`
           o("div", "gap"),
           o("div", "mid mid-label", "Data"),
           o("div", "gap"),
-          o("div", "ibox", menu.uploadAllPagesIcon),
-          o("div", "ibox", menu.downloadAllPagesIcon),
+          o("div", "ibox", menu.uploadBackupIcon),
+          o("div", "ibox", menu.downloadBackupIcon),
           o("div", "gap"),
-          o("div", "big start", "Backup"),
+          o("div", "mid", "Backup"),
+          o("div", "gap"),
+          o("div", "ibox", menu.backupKeyIcon),
         )
       );
 
@@ -1740,7 +1745,7 @@ Thank you!`
         menu.helpItem,
         menu.localItem,
         menu.syncItem,
-        menu.allPagesItem,
+        menu.backupItem,
         menu.onePageItem,
         menu.lineItem,
         menu.zoomItem,
@@ -1894,9 +1899,9 @@ Thank you!`
       });
     });
 
-    /// uploadAllPages
+    /// uploadBackup
 
-    const uploadAllPages = () => {
+    const uploadBackup = () => {
       getUploadedText((text) => {
         importText(text, (report) => {
           alert(`Success:
@@ -1911,9 +1916,9 @@ Skipped:
       });
     };
 
-    /// downloadAllPages
+    /// downloadBackup
 
-    const downloadAllPages = () => {
+    const downloadBackup = () => {
       getPages((pages) => {
         const lines = [];
         for (const page of pages) {
@@ -1931,12 +1936,12 @@ Skipped:
 
           gzipped.blob().then((blob) => {
             const url = URL.createObjectURL(blob);
-            downloadURL(url, menu.allPagesFileName);
+            downloadURL(url, menu.backupFileName);
             setTimeout(() => {
               URL.revokeObjectURL(url);
             }, 1000);
           });
-        } else downloadText(text, menu.allPagesFileName);
+        } else downloadText(text, menu.backupFileName);
       });
     };
 
