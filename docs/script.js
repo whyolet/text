@@ -1581,7 +1581,7 @@ Thank you!`
       onClick(menu.downloadBackupIcon, downloadBackup);
 
       menu.backupKeyIcon = o("div", "icon button", "key");
-      onClick(menu.backupKeyIcon, todo);
+      onClick(menu.backupKeyIcon, setBackupKey);
 
       menu.backupItem = (
         o("div", "mid row start item",
@@ -1906,6 +1906,19 @@ Thank you!`
         });
       });
     });
+
+    /// setBackupKey
+
+    const setBackupKey = () => {
+      const newPassphrase = prompt(`The best key is a passphrase -
+a few easy-to-remember words
+like a line from a song.
+
+New passphrase:`);
+      if (newPassphrase === null) return;
+
+      todo();
+    };
 
     /// uploadBackup
 
