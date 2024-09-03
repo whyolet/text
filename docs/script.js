@@ -200,6 +200,7 @@ Thank you!`
       textLength: 0, // for `autoindent`
       zoom: 100,
 
+      findReplaceOnShowPage: false,
       findWhatOnGotPage: "",
       lineNumberOnGotPage: null,
     };
@@ -287,6 +288,10 @@ Thank you!`
         historyStateOnStart = history.state;
       }
 
+      if (!isHidden(pageTopRow)) {
+        current.findReplaceOnShowPage = !isHidden(findReplaceRow);
+      }
+
       for (const el of [
         findReplaceRow,
         pageTopRow,
@@ -319,9 +324,12 @@ Thank you!`
     /// showPage
 
     const showPage = (tag) => {
-      clearFindReplaceValues();
       show(findReplaceButton);
-      
+      if (current.findReplaceOnShowPage) {
+        // Just show keeping old values.
+        show(findReplaceRow);
+      } else clearFindReplaceValues();
+
       show(pageTopRow);
       show(pageMainRow);
       show(pageBottomRow);
