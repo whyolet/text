@@ -545,7 +545,7 @@ Thank you!`
 
     /// onSavedClick
 
-    const onSavedClick = (el, options, handler, longClickHandler) => {
+    const onSavedClick = (el, options, handler, longPressHandler) => {
       const anyFocus = options.includes("a");
       const noFocus = options.includes("n");
       const compareTextOnly = options.includes("t");
@@ -564,9 +564,9 @@ Thank you!`
 
         if (saveTimerId) clearTimeout(saveTimerId);
 
-        if (clickTimerId && longClickHandler) {
+        if (clickTimerId && longPressHandler) {
           stop();
-          save(compareTextOnly, longClickHandler);
+          save(compareTextOnly, longPressHandler);
           return;
         }
 
@@ -626,7 +626,7 @@ Thank you!`
     /// back
 
     onSavedClick("back", "", () => {
-      // Using `onSavedClick` here for auto-repeat on long-click only.
+      // Using `onSavedClick` here for auto-repeat on long press only.
       if (history.state > historyStateOnStart) {
         history.back();
       } else toast("Click # first!");
@@ -1371,7 +1371,7 @@ Thank you!`
       ta.setRangeText(replaceWith.value, page.sel1, page.sel2, "select");
       save();
       // Do not auto find next or prev: to verify replacement.
-    }, (page) => { // Long-click.
+    }, (page) => { // Long press.
       const what = getFindWhat();
       if (!what) return;
 
@@ -2128,7 +2128,7 @@ Skipped:
 
     onSavedClick(moveToDateButton, "", () => {
       moveToDate();
-    }, () => { // Long-click.
+    }, () => { // Long press.
       moveToDateInput.value = "";
       moveToDateInput.min = getTodayPlus(0);
       if ("showPicker" in moveToDateInput) {
