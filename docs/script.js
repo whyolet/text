@@ -188,6 +188,8 @@ Thank you!`
     };
 
     const conf = {
+      backupSalt: "backupSalt",
+      backupKey: "backupKey",
       recentTags: "recentTags",
       undoneOpId: "undoneOpId",
       zoom: "zoom",
@@ -1910,14 +1912,67 @@ Thank you!`
     /// setBackupKey
 
     const setBackupKey = () => {
-      const newPassphrase = prompt(`The best key is a passphrase -
-a few easy-to-remember words
-like a line from a song.
-
-New passphrase:`);
+      const newPassphrase = prompt(`New passphrase (few words)
+to encrypt and decrypt
+Backup and Sync files:`);
       if (newPassphrase === null) return;
 
-      todo();
+      const salt = getSalt();
+      getKey(salt, newPassphrase, true, (exportedKey) => {
+        const txn = db.transaction(stores.conf, "readwrite");
+        const store = txn.objectStore(stores.conf);
+        store.put(salt, conf.backupSalt);
+        store.put(exportedKey, conf.backupKey);
+        txn.oncomplete = () => {
+          alert(`Saved!
+
+Use the same passphrase
+on your other devices
+to encrypt and decrypt
+Backup and Sync files.
+`);
+        };
+      });
+    };
+
+    /// getSalt
+
+    const getSalt = () => crypto.getRandomValues(new Uint8Array(24));
+
+    /// getKey
+
+    const getKey = async (salt, passphrase, isExport, onGotKey) => {
+      const encoder = new TextEncoder();
+
+      const keyMaterial = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(passphrase),
+        "PBKDF2",
+        false,
+        ["deriveKey"],
+      );
+
+      const key = await crypto.subtle.deriveKey(
+        {
+          name: "PBKDF2",
+          hash: "SHA-256",
+          salt,
+          iterations: 600000,
+        },
+        keyMaterial,
+        {
+          name: "AES-GCM",
+          length: 256,
+        },
+        true,
+        ["encrypt", "decrypt"],
+      );
+
+      if (isExport) return onGotKey(
+        await crypto.subtle.exportKey("raw", key)
+      );
+
+      onGotKey(key);
     };
 
     /// uploadBackup
