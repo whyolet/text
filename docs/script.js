@@ -188,14 +188,13 @@ Thank you!`
     };
 
     const conf = {
-      backupSalt: "backupSalt",
-      backupKey: "backupKey",
       recentTags: "recentTags",
       undoneOpId: "undoneOpId",
       zoom: "zoom",
     };
 
     const current = {
+      backupPassphrase: "",
       overdueDate: null,
       page: null,
       pages: [], // for `find-all`
@@ -1583,7 +1582,7 @@ Thank you!`
       onClick(menu.downloadBackupIcon, downloadBackup);
 
       menu.backupKeyIcon = o("div", "icon button", "key");
-      onClick(menu.backupKeyIcon, setBackupKey);
+      onClick(menu.backupKeyIcon, setBackupPassphrase);
 
       menu.backupItem = (
         o("div", "mid row start item",
@@ -1909,30 +1908,19 @@ Thank you!`
       });
     });
 
-    /// setBackupKey
+    /// setBackupPassphrase
 
-    const setBackupKey = () => {
-      const newPassphrase = prompt(`New passphrase (few words)
+    const setBackupPassphrase = () => {
+      const newPassphrase = prompt(`A passphrase (few words)
 to encrypt and decrypt
 Backup and Sync files:`);
       if (newPassphrase === null) return;
 
-      const salt = getSalt();
-      getKey(salt, newPassphrase, true, (exportedKey) => {
-        const txn = db.transaction(stores.conf, "readwrite");
-        const store = txn.objectStore(stores.conf);
-        store.put(salt, conf.backupSalt);
-        store.put(exportedKey, conf.backupKey);
-        txn.oncomplete = () => {
-          alert(`Saved!
+      current.backupPassphrase = newPassphrase;
 
-Use the same passphrase
-on your other devices
-to encrypt and decrypt
-Backup and Sync files.
-`);
-        };
-      });
+      alert(`This passphrase will be kept in memory
+until you set a new passphrase
+or close this app.`);
     };
 
     /// getSalt
