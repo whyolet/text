@@ -194,7 +194,7 @@ Thank you!`
     };
 
     const current = {
-      backupPassphrase: "",
+      backupPassphrase: null,
       overdueDate: null,
       page: null,
       pages: [], // for `find-all`
@@ -1582,7 +1582,7 @@ Thank you!`
       onClick(menu.downloadBackupIcon, downloadBackup);
 
       menu.backupKeyIcon = o("div", "icon button", "key");
-      onClick(menu.backupKeyIcon, setBackupPassphrase);
+      onClick(menu.backupKeyIcon, () => setBackupPassphrase());
 
       menu.backupItem = (
         o("div", "mid row start item",
@@ -1910,7 +1910,7 @@ Thank you!`
 
     /// setBackupPassphrase
 
-    const setBackupPassphrase = () => {
+    const setBackupPassphrase = (onSuccess) => {
       const newPassphrase = prompt(`A passphrase (few words)
 to encrypt and decrypt
 Backup and Sync files:`);
@@ -1921,15 +1921,29 @@ Backup and Sync files:`);
       alert(`This passphrase will be kept in memory
 until you set a new passphrase
 or close this app.`);
+
+      if (onSuccess) onSuccess();
     };
 
-    /// getSalt
+    /// withBackupPassphrase
 
-    const getSalt = () => crypto.getRandomValues(new Uint8Array(24));
+    const withBackupPassphrase = (onSuccess) => {
+      if (current.backupPassphrase === null) {
+        setBackupPassphrase(onSuccess);
+      } else onSuccess();
+    };
+
+    /// getSalt, getIV, getRandomBytes
+
+    const getSalt = () => getRandomBytes(24);
+
+    const getIV = () => getRandomBytes(12);
+
+    const getRandomBytes = (size) => crypto.getRandomValues(new Uint8Array(size));
 
     /// getKey
 
-    const getKey = async (salt, passphrase, isExport, onGotKey) => {
+    const getKey = async (salt, passphrase, onGotKey) => {
       const encoder = new TextEncoder();
 
       const keyMaterial = await crypto.subtle.importKey(
@@ -1945,7 +1959,7 @@ or close this app.`);
           name: "PBKDF2",
           hash: "SHA-256",
           salt,
-          iterations: 600000,
+          iterations: 1000000,
         },
         keyMaterial,
         {
@@ -1956,16 +1970,33 @@ or close this app.`);
         ["encrypt", "decrypt"],
       );
 
-      if (isExport) return onGotKey(
-        await crypto.subtle.exportKey("raw", key)
+      onGotKey(key);
+    };
+
+    /// getEncrypted
+
+    const getEncrypted = async (key, data, onGotEncrypted) => {
+      const iv = getIV();
+      const dataBlob = new Blob([data]);
+      const dataBuffer = await dataBlob.arrayBuffer();
+
+      const encrypted = await crypto.subtle.encrypt(
+        {
+          name: "AES-GCM",
+          iv,
+        },
+        key,
+        dataBuffer,
       );
 
-      onGotKey(key);
+      onGotEncrypted(iv, encrypted);
     };
 
     /// uploadBackup
 
     const uploadBackup = () => {
+      return todo(); // decrypt, detect gzip, decompress
+
       getUploadedText((text) => {
         importText(text, (report) => {
           alert(`Success:
@@ -1982,7 +2013,7 @@ Skipped:
 
     /// downloadBackup
 
-    const downloadBackup = () => {
+    const downloadBackup = () => withBackupPassphrase(() => {
       getPages((pages) => {
         const lines = [];
         for (const page of pages) {
@@ -1998,14 +2029,26 @@ Skipped:
             {headers: {"Content-Type": "application/octet-stream"}},
           );
 
-          gzipped.blob().then((blob) => {
-            const url = URL.createObjectURL(blob);
-            downloadURL(url, menu.backupFileName);
-            setTimeout(() => {
-              URL.revokeObjectURL(url);
-            }, 1000);
-          });
-        } else downloadText(text, menu.backupFileName);
+          gzipped.blob().then(encryptAndDownloadBackup);
+        } else encryptAndDownloadBackup(text);
+      });
+    });
+
+    const encryptAndDownloadBackup = (data) => {
+      const salt = getSalt();
+      const key = getKey(salt, current.backupPassphrase, (key) => {
+        getEncrypted(key, data, (iv, encrypted) => {
+          const blob = new Blob(
+            [salt, iv, encrypted],
+            {"type": "application/octet-stream"},
+          );
+
+          const url = URL.createObjectURL(blob);
+          downloadURL(url, menu.backupFileName);
+          setTimeout(() => {
+            URL.revokeObjectURL(url);
+          }, 1000);
+        });
       });
     };
 
