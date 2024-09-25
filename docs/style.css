@@ -80,6 +80,14 @@ input::placeholder {
   color: var(--hint);
 }
 
+input[type=date]::-webkit-datetime-edit {
+  visibility: hidden;
+}
+
+input[type=date]::-webkit-calendar-picker-indicator {
+  color: var(--tool);
+}
+
 input.small {
   display: inline;
   width: 4rem;

@@ -92,7 +92,7 @@ Thank you!`
 
   /// main
 
-  const main = () => {
+  const main = async () => {
 
     /// elements
 
@@ -254,15 +254,15 @@ Thank you!`
       db = event.target.result;
       db.onerror = onDbError;
       db.onversionchange = updateAppVersion;
-      getZoom();
+      initZoom(); // Not awaiting.
       goTag(getTodayPlus(0), true);
     };
 
     /// goTag
 
-    const goTag = (tag, isReplace) => {
+    const goTag = async (tag, isReplace) => {
       const hash = toHash(tag);
-      if (location.hash === hash) return onHashChange();
+      if (location.hash === hash) return await onHashChange();
       if (isReplace) return location.replace(hash);
       location.assign(hash);
     };
@@ -271,15 +271,13 @@ Thank you!`
 
    let historyStateOnStart = null;
 
-    const onHashChange = () => {
+    const onHashChange = async () => {
       if (saveTimerId) {
         clearTimeout(saveTimerId);
         saveTimerId = 0;
-        save(false, doHashChange);
-      } else doHashChange();
-    };
+        await save();
+      }
 
-    const doHashChange = () => {
       const tag = toTag(location.hash);
 
       if (!history.state) {
@@ -324,7 +322,7 @@ Thank you!`
 
     /// showPage
 
-    const showPage = (tag) => {
+    const showPage = async (tag) => {
       show(findReplaceButton);
       if (current.findReplaceOnShowPage) {
         // Just show keeping old values.
@@ -336,7 +334,8 @@ Thank you!`
       show(pageBottomRow);
       ta.focus();
 
-      getRecentTags((recentTags) => {
+      // Not awaiting.
+      getRecentTags().then((recentTags) => {
         const i = recentTags.indexOf(tag);
         if (i !== -1) recentTags.splice(i, 1);
         recentTags.unshift(tag);
@@ -350,59 +349,61 @@ Thank you!`
         .put(recentTags, conf.recentTags);
       });
 
-      getPage(tag, (page) => {
-        current.page = page;
-        current.textLength = page.text.length;
-
-        toast(tag, true);
-        ta.value = page.text;
-        ta.readOnly = false;
-
-        if (current.findWhatOnGotPage) {
-          showFindReplaceRow(); // with ^
-          doFind(page, 0, true);
-        } else if (current.lineNumberOnGotPage) {
-          const i = getLineStop(current.lineNumberOnGotPage);
-          current.lineNumberOnGotPage = null;
-          ta.setSelectionRange(i, i);
-        } else {
-          ta.setSelectionRange(page.sel1, page.sel2);
-          ta.scrollTop = page.scro;
-        }
-      });
-
-      getOverdueDate((overdueDate) => {
+      // Not awaiting.
+      getOverdueDate().then((overdueDate) => {
         current.overdueDate = overdueDate;
         if (overdueDate) {
           show(overdueBox);
         } else hide(overdueBox);
       });
+
+      const page = await getPage(tag);
+      current.page = page;
+      current.textLength = page.text.length;
+
+      toast(tag, true);
+      ta.value = page.text;
+      ta.readOnly = false;
+
+      if (current.findWhatOnGotPage) {
+        showFindReplaceRow(); // with ^
+        doFind(page, 0, true);
+      } else if (current.lineNumberOnGotPage) {
+        const i = getLineStop(current.lineNumberOnGotPage);
+        current.lineNumberOnGotPage = null;
+        ta.setSelectionRange(i, i);
+      } else {
+        ta.setSelectionRange(page.sel1, page.sel2);
+        ta.scrollTop = page.scro;
+      }
     };
 
     /// getRecentTags
 
-    const getRecentTags = (onGotRecentTags) => {
-      db
-      .transaction(stores.conf)
-      .objectStore(stores.conf)
-      .get(conf.recentTags)
-      .onsuccess = (event) => {
-        const recentTags = event.target.result || [];
-        onGotRecentTags(recentTags);
-      };
+    const getRecentTags = async () => {
+      const event = await new Promise((done) => {
+        db
+        .transaction(stores.conf)
+        .objectStore(stores.conf)
+        .get(conf.recentTags)
+        .onsuccess = done;
+      });
+
+      return event.target.result || [];
     };
 
     /// getPage
 
-    const getPage = (tag, onGotPage) => {
-      db
-      .transaction(stores.page)
-      .objectStore(stores.page)
-      .get(tag)
-      .onsuccess = (event) => {
-        const page = ensurePage(event.target.result, tag);
-        onGotPage(page);
-      };
+    const getPage = async (tag) => {
+      const event = await new Promise((done) => {
+        db
+        .transaction(stores.page)
+        .objectStore(stores.page)
+        .get(tag)
+        .onsuccess = done;
+      });
+
+      return ensurePage(event.target.result, tag);
     };
 
     /// ensurePage
@@ -421,14 +422,16 @@ Thank you!`
 
     /// getPages
 
-    const getPages = (onGotPages) => {
-      db
-      .transaction(stores.page)
-      .objectStore(stores.page)
-      .getAll()
-      .onsuccess = (event) => {
-        onGotPages(event.target.result);
-      };
+    const getPages = async () => {
+      const event = await new Promise((done) => {
+        db
+        .transaction(stores.page)
+        .objectStore(stores.page)
+        .getAll()
+        .onsuccess = done;
+      });
+
+      return event.target.result;
     };
 
     /// getSelText
@@ -452,8 +455,8 @@ Thank you!`
       // and to give `ta.scrollTop` time to change.
     });
 
-    const save = (compareTextOnly, onSaved) => {
-      if (!current.page) return;
+    const save = async (compareTextOnly) => {
+      if (!current.page) return null;
 
       if (saveTimerId) clearTimeout(saveTimerId);
 
@@ -475,28 +478,29 @@ Thank you!`
             page.scro === next.scro
           )
         )
-      ) return onSaved && onSaved(page);
+      ) return page;
 
-      getUndoneOpId((undoneOpId) => {
-        if (undoneOpId) {
-          onInputWhileUndone(undoneOpId, () => {
-            doSave(page, next, onSaved);
-          });
-        } else doSave(page, next, onSaved);
-      });
+      const undoneOpId = await getUndoneOpId();
+      if (undoneOpId) {
+        await onInputWhileUndone(undoneOpId);
+      }
+
+      return await doSave(page, next);
     };
 
-    const doSave = (page, next, onSaved) => {
+    const doSave = async (page, next) => {
       const op = createOp(page, next);
       Object.assign(page, next);
 
-      const txn = db.transaction([stores.op, stores.page], "readwrite");
-      txn.objectStore(stores.op).add(op);
-      txn.objectStore(stores.page).put(page);
-      txn.oncomplete = () => {
-        if (onSaved) onSaved(page);
-        trimOps();
-      };
+      await new Promise((done) => {
+        const txn = db.transaction([stores.op, stores.page], "readwrite");
+        txn.objectStore(stores.op).add(op);
+        txn.objectStore(stores.page).put(page);
+        txn.oncomplete = done;
+      });
+
+      trimOps();
+      return page;
     };
 
     const createOp = (page, next) => {
@@ -559,7 +563,7 @@ Thank you!`
         ta
       );
 
-      const clickHandler = () => {
+      const clickHandler = async () => {
         if (!clickTimerId) prevFocused = getPrevFocused();
         if (prevFocused) prevFocused.focus();
 
@@ -567,11 +571,13 @@ Thank you!`
 
         if (clickTimerId && longPressHandler) {
           stop();
-          save(compareTextOnly, longPressHandler);
+          const page = await save(compareTextOnly);
+          longPressHandler(page);
           return;
         }
 
-        save(compareTextOnly, handler);
+        const page = await save(compareTextOnly);
+        handler(page);
       };
 
       onClick(el, clickHandler);
@@ -600,7 +606,7 @@ Thank you!`
 
     /// hash
 
-    onSavedClick("hash", "", (page) => {
+    onSavedClick("hash", "", async (page) => {
       const text = page.text;
       let i = page.sel1;
 
@@ -619,7 +625,8 @@ Thank you!`
         ta.setRangeText("#", start, start);
       }
 
-      save(false, () => goTag(tag));
+      await save();
+      goTag(tag);
     });
 
     const isTag = (text, charIndex) => /\S/.test(text.charAt(charIndex));
@@ -639,18 +646,19 @@ Thank you!`
 
     /// undo
 
-    const getUndoneOpId = (onGotUndoneOpId) => {
-      db
-      .transaction(stores.conf)
-      .objectStore(stores.conf)
-      .get(conf.undoneOpId)
-      .onsuccess = (event) => {
-        const undoneOpId = event.target.result;
-        onGotUndoneOpId(undoneOpId);
-      };
+    const getUndoneOpId = async () => {
+      const event = await new Promise((done) => {
+        db
+        .transaction(stores.conf)
+        .objectStore(stores.conf)
+        .get(conf.undoneOpId)
+        .onsuccess = done;
+      });
+
+      return event.target.result;
     };
 
-    onSavedClick("undo", "t", () => {
+    onSavedClick("undo", "t", async () => {
       // `undo` should use `"t" = compareTextOnly` because:
       // imagine the `save` detects a diff of `scrollTop` or cursor,
       // so `onInputWhileUndone` may add multiple `ops`,
@@ -660,136 +668,180 @@ Thank you!`
       // so they keep clicking `undo` without any visual result,
       // just growing oplog silently.
 
-      getUndoneOpId((undoneOpId) => {
-        const query = IDBKeyRange
-        .upperBound(undoneOpId || Infinity, true);
+      const undoneOpId = await getUndoneOpId();
+      const query = IDBKeyRange
+      .upperBound(undoneOpId || Infinity, true);
 
+      const event = await new Promise((done) => {
         db
         .transaction(stores.op)
         .objectStore(stores.op)
         .openCursor(query, "prev")
-        .onsuccess = onOpToUndo;
+        .onsuccess = done;
       });
-    });
 
-    const onOpToUndo = (event) => {
       const cursor = event.target.result;
       if (!cursor) return toast("This is the oldest!");
 
       const op = cursor.value;
+      const page = await getPage(op.tag);
 
-      getPage(op.tag, (page) => {
-        if (op.at !== null) page.text = (
-          page.text.slice(0, op.at) +
-          op.del +
-          page.text.slice(op.at + op.ins.length)
-        );
+      if (op.at !== null) page.text = (
+        page.text.slice(0, op.at) +
+        op.del +
+        page.text.slice(op.at + op.ins.length)
+      );
 
-        page.sel1 = op.p1;
-        page.sel2 = op.p2;
-        page.scro = op.ps;
+      page.sel1 = op.p1;
+      page.sel2 = op.p2;
+      page.scro = op.ps;
 
-        saveAndShowPage(page, op.id);
-      });
-    };
+      await saveAndShowPage(page, op.id);
+    });
 
-    const saveAndShowPage = (page, undoneOpId) => {
+    const saveAndShowPage = async (page, undoneOpId) => {
       page.upd = getNow();
-      const txn = db.transaction([stores.page, stores.conf], "readwrite");
-      txn.objectStore(stores.page).put(page);
-      txn.objectStore(stores.conf).put(undoneOpId, conf.undoneOpId);
-      txn.oncomplete = () => goTag(page.tag);
+
+      await new Promise((done) => {
+        const txn = db.transaction([stores.page, stores.conf], "readwrite");
+        txn.objectStore(stores.page).put(page);
+        txn.objectStore(stores.conf).put(undoneOpId, conf.undoneOpId);
+        txn.oncomplete = done;
+      });
+
+      goTag(page.tag);
     };
 
     /// input while undone
 
-    const onInputWhileUndone = (undoneOpId, onComplete) => {
-      const ops = [];
-      const query = IDBKeyRange.lowerBound(undoneOpId);
-
-      db
-      .transaction(stores.op)
-      .objectStore(stores.op)
-      .openCursor(query, "next")
-      .onsuccess = (event) => {
-        const cursor = event.target.result;
-
-        if (cursor) {
-          const op = cursor.value;
-          ops.push(op);
-          cursor.continue();
-
-        } else {
-          const txn = db.transaction([stores.op, stores.conf], "readwrite");
-          const opStore = txn.objectStore(stores.op);
-
-          ops.reverse();
-          for (const op of ops) {
-            const undoneOp = {
-              tag: op.tag,
-
-              // prev:
-              p1: op.n1,
-              p2: op.n2,
-              ps: op.ns,
-
-              // next:
-              n1: op.p1,
-              n2: op.p2,
-              ns: op.ps,
-
-              // text:
-              at: op.at,
-            };
-
-            if (op.at !== null) {
-              undoneOp.del = op.ins;
-              undoneOp.ins = op.del;
-            }
-
-            opStore.add(undoneOp);
-          }
-
-          txn.objectStore(stores.conf).put(null, conf.undoneOpId);
-          txn.oncomplete = () => {
-            onComplete();
-            trimOps();
-          };
-        }
-      };
-    };
-
-    /// redo
-
-    onSavedClick("redo", "t", () => {
-      // `redo` should use "t" for a similar reason `undo` has.
-
-      getUndoneOpId((undoneOpId) => {
-        if (!undoneOpId) return toast("This is the newest!");
+    const onInputWhileUndone = async (undoneOpId) => {
+      const ops = await new Promise((done) => {
+        const ops = [];
+        const query = IDBKeyRange.lowerBound(undoneOpId);
 
         db
         .transaction(stores.op)
         .objectStore(stores.op)
-        .get(undoneOpId)
-        .onsuccess = onOpToRedo;
+        .openCursor(query, "next")
+        .onsuccess = (event) => {
+          const cursor = event.target.result;
+
+          if (cursor) {
+            const op = cursor.value;
+            ops.push(op);
+            cursor.continue();
+          } else done(ops);
+        };
       });
+
+      await new Promise((done) => {
+        const txn = db.transaction([stores.op, stores.conf], "readwrite");
+        const opStore = txn.objectStore(stores.op);
+
+        ops.reverse();
+        for (const op of ops) {
+          const undoneOp = {
+            tag: op.tag,
+
+            // prev:
+            p1: op.n1,
+            p2: op.n2,
+            ps: op.ns,
+
+            // next:
+            n1: op.p1,
+            n2: op.p2,
+            ns: op.ps,
+
+            // text:
+            at: op.at,
+          };
+
+          if (op.at !== null) {
+            undoneOp.del = op.ins;
+            undoneOp.ins = op.del;
+          }
+
+          opStore.add(undoneOp);
+        }
+
+        txn.objectStore(stores.conf).put(null, conf.undoneOpId);
+        txn.oncomplete = done;
+      });
+
+      trimOps();
+    };
+
+    /// redo
+
+    onSavedClick("redo", "t", async () => {
+      // `redo` should use "t" for a similar reason `undo` has.
+
+      const undoneOpId = await getUndoneOpId();
+      if (!undoneOpId) return toast("This is the newest!");
+
+      const undoneOpIdEvent = await new Promise((done) => {
+        db
+        .transaction(stores.op)
+        .objectStore(stores.op)
+        .get(undoneOpId)
+        .onsuccess = done;
+      });
+
+      const op = undoneOpIdEvent.target.result;
+      const page = await getPage(op.tag);
+
+      if (op.at !== null) page.text = (
+        page.text.slice(0, op.at) +
+        op.ins +
+        page.text.slice(op.at + op.del.length)
+      );
+
+      page.sel1 = op.n1;
+      page.sel2 = op.n2;
+      page.scro = op.ns;
+
+      const query = IDBKeyRange.lowerBound(op.id, true);
+
+      const nextOpIdEvent = await new Promise((done) => {
+        db
+        .transaction(stores.op)
+        .objectStore(stores.op)
+        .openKeyCursor(query, "next")
+        .onsuccess = done;
+      });
+
+      const cursor = nextOpIdEvent.target.result;
+      const nextOpId = cursor ? cursor.key : null;
+      await saveAndShowPage(page, nextOpId);
     });
 
-    const onOpToRedo = (event) => {
-      const op = event.target.result;
+    /// trimOps
 
-      getPage(op.tag, (page) => {
-        if (op.at !== null) page.text = (
-          page.text.slice(0, op.at) +
-          op.ins +
-          page.text.slice(op.at + op.del.length)
-        );
+    const maxOps = 1000;
+    let trimOpsTimerId;
 
-        page.sel1 = op.n1;
-        page.sel2 = op.n2;
-        page.scro = op.ns;
+    const trimOps = () => {
+      if (trimOpsTimerId) clearTimeout(trimOpsTimerId);
+      trimOpsTimerId = setTimeout(doTrimOps, 2000);
+    };
 
-        const query = IDBKeyRange.lowerBound(op.id, true);
+    const doTrimOps = async () => {
+      const totalOpsEvent = await new Promise((done) => {
+        db
+        .transaction(stores.op)
+        .objectStore(stores.op)
+        .count()
+        .onsuccess = done;
+      });
+
+      const totalOps = totalOpsEvent.target.result;
+      var numOps = totalOps - maxOps;
+      if (numOps <= 0) return;
+
+      const maxOpIdToTrim = await new Promise((done) => {
+        let maxOpIdToTrim;
+        const query = IDBKeyRange.lowerBound(0);
 
         db
         .transaction(stores.op)
@@ -797,60 +849,24 @@ Thank you!`
         .openKeyCursor(query, "next")
         .onsuccess = (event) => {
           const cursor = event.target.result;
-          const nextOpId = cursor ? cursor.key : null;
-          saveAndShowPage(page, nextOpId);
+          if (!cursor) return done(maxOpIdToTrim);
+
+          if (numOps > 1) {
+            numOps--;
+            cursor.continue();
+            return;
+          }
+
+          maxOpIdToTrim = cursor.key;
         };
       });
-    };
 
-    /// trimOps
-
-    const maxOps = 1000;
-
-    const trimOps = () => {
-      setTimeout(() => {
-        db
-        .transaction(stores.op)
-        .objectStore(stores.op)
-        .count()
-        .onsuccess = (event) => {
-          const totalOps = event.target.result;
-          if (totalOps <= maxOps) return;
-
-          getMaxOpIdToTrim(totalOps - maxOps);
-        };
-      }, 2000);
-    };
-
-    const getMaxOpIdToTrim = (numOps) => {
-      const query = IDBKeyRange.lowerBound(0);
-
-      db
-      .transaction(stores.op)
-      .objectStore(stores.op)
-      .openKeyCursor(query, "next")
-      .onsuccess = (event) => {
-        const cursor = event.target.result;
-        if (!cursor) return;
-
-        if (numOps > 1) {
-          numOps--;
-          cursor.continue();
-          return;
-        }
-        
-        const maxOpIdToTrim = cursor.key;
-        doTrimOps(maxOpIdToTrim);
-      };
-    };
-
-    const doTrimOps = (maxOpIdToTrim) => {
       const query = IDBKeyRange.upperBound(maxOpIdToTrim);
-  
+
       db
       .transaction(stores.op, "readwrite")
       .objectStore(stores.op)
-      .delete(query);
+      .delete(query); // Not awaiting.
     };
 
     /// move-up, move-down
@@ -869,7 +885,8 @@ Thank you!`
 
       ta.setRangeText(thisLine + prevLine, prevStart, nextStart);
       ta.setSelectionRange(prevStart, prevStart + thisLength);
-      save();
+
+      save(); // Not awaiting.
     });
 
     onSavedClick("move-down", "", (page) => {
@@ -887,7 +904,8 @@ Thank you!`
       ta.setRangeText(nextLine + thisLine, thisStart, nextNextStart);
       const newThisStart = thisStart + nextLine.length;
       ta.setSelectionRange(newThisStart, newThisStart + thisLength);
-      save();
+
+      save(); // Not awaiting.
     });
 
     const getPrevLineStartIndex = (text, charIndex) => {
@@ -975,7 +993,8 @@ Thank you!`
       const thisStart = getThisLineStartIndex(page.text, page.sel1);
       const nextStart = getNextLineStartIndex(page.text, page.sel2);
       ta.setRangeText("", thisStart, nextStart, "start");
-      save();
+
+      save(); // Not awaiting.
     };
 
     onSavedClick("delete", "a", doDelete);
@@ -985,15 +1004,17 @@ Thank you!`
     const minZoom = 10, maxZoom = 1000;
     let saveZoomTimerId;
 
-    const getZoom = () => {
-      db
-      .transaction(stores.conf)
-      .objectStore(stores.conf)
-      .get(conf.zoom)
-      .onsuccess = (event) => {
-        current.zoom = event.target.result || current.zoom;
-        ta.style.fontSize = `${current.zoom}%`;
-      };
+    const initZoom = async () => {
+      const event = await new Promise((done) => {
+        db
+        .transaction(stores.conf)
+        .objectStore(stores.conf)
+        .get(conf.zoom)
+        .onsuccess = done;
+      });
+
+      current.zoom = event.target.result || current.zoom;
+      ta.style.fontSize = `${current.zoom}%`;
     };
 
     const saveZoom = (newZoom) => {
@@ -1010,7 +1031,10 @@ Thank you!`
       .transaction(stores.conf, "readwrite")
       .objectStore(stores.conf)
       .put(current.zoom, conf.zoom);
+      // Not awaiting.
     };
+
+    /// getLineNumbers, getLineStop
 
     const getLineNumbers = () => {
       const text = ta.value;
@@ -1085,7 +1109,7 @@ Thank you!`
       saveZoom(Math.min(maxZoom, current.zoom + dZoom));
     });
 
-    const onFingerCancel = (event) => {
+    const onFingerCancel = async (event) => {
 
       if (
         !fingersByIds.delete(event.pointerId) ||
@@ -1106,10 +1130,9 @@ Thank you!`
 
       if (Math.abs(dx) < minDx) return;
 
-      save(false, (page) => {
-        if (dx < 0) doDelete(page);
-        else moveToDate();
-      });
+      const page = await save();
+      if (dx < 0) doDelete(page);
+      else moveToDate(); // Not awaiting.
     };
 
     for (const action of ["cancel", "leave", "out", "up"]) {
@@ -1118,7 +1141,7 @@ Thank you!`
 
     /// copy, paste
 
-    onSavedClick("copy", "a", () => {
+    onSavedClick("copy", "a", async () => {
       const focused = document.activeElement;
       if (!focused) return;
 
@@ -1137,7 +1160,7 @@ Thank you!`
           stop = focused.value.length;
         }
         focused.setSelectionRange(start, stop);
-        if (isTa) save();
+        if (isTa) await save();
       }
 
       if ("clipboard" in navigator) {
@@ -1151,25 +1174,23 @@ Thank you!`
       }
     });
 
-    onSavedClick("paste", "a", () => {
+    onSavedClick("paste", "a", async () => {
       const focused = document.activeElement;
       if (!focused) return;
 
       if ("clipboard" in navigator) {
-        navigator.clipboard.readText()
-        .then((text) => {
-          focused.setRangeText(
-            text,
-            focused.selectionStart,
-            focused.selectionEnd,
-            "end",
-          );
-        });
+        const text = await navigator.clipboard.readText();
+        focused.setRangeText(
+          text,
+          focused.selectionStart,
+          focused.selectionEnd,
+          "end",
+        );
       } else if ("execCommand" in document) {
         document.execCommand("paste", false, null);
       }
 
-      if (focused.id === "ta") save();
+      if (focused.id === "ta") save(); // Not awaiting.
     });
 
     /// autoindent
@@ -1260,7 +1281,7 @@ Thank you!`
         page.sel2 + totalAdded,
       );
 
-      save();
+      save(); // Not awaiting.
     };
 
     /// strike
@@ -1294,7 +1315,7 @@ Thank you!`
         : text.replaceAll("", strikeChar).slice(1);
 
       focused.setRangeText(text, start, stop, "end");
-      if (isTa) save();
+      if (isTa) save(); // Not awaiting.
     });
 
     /// find-replace
@@ -1335,7 +1356,7 @@ Thank you!`
     });
 
     onSavedClick("find-next", "", (page) => {
-      doFind(page, page.sel2, true);
+      doFind(page, page.sel1 + 1, true);
     });
 
     const doFind = (page, start, forward) => {
@@ -1355,7 +1376,7 @@ Thank you!`
       if (found === -1) return toast("Not found!");
 
       ta.setSelectionRange(found, found + what.length);
-      save();
+      save(); // Not awaiting.
     };
 
     const getFindWhat = () => {
@@ -1370,7 +1391,7 @@ Thank you!`
     onSavedClick("replace", "n", (page) => {
       ta.focus();
       ta.setRangeText(replaceWith.value, page.sel1, page.sel2, "select");
-      save();
+      save(); // Not awaiting.
       // Do not auto find next or prev: to verify replacement.
     }, (page) => { // Long press.
       const what = getFindWhat();
@@ -1385,7 +1406,7 @@ Thank you!`
       const i = getLineStop(lineNumbers.cur);
       ta.setSelectionRange(i, i);
       ta.focus();
-      save();
+      save(); // Not awaiting.
     });
 
     /// find-all
@@ -1394,7 +1415,7 @@ Thank you!`
 
     onClick("find-all", goFindAll);
 
-    reservedActions[reservedTags.find] = () => {
+    reservedActions[reservedTags.find] = async () => {
       findAllWhat.value = findWhat.value || getSelText();
       show(findAllRow);
       findAllWhat.focus();
@@ -1402,39 +1423,34 @@ Thank you!`
       itemsRow.textContent = "";
       show(itemsRow);
 
-      getPages(onGotPagesForFind);
-    };
-
-    const onGotPagesForFind = (pages) => {
-      if (isHidden(findAllRow)) return;
-  
+      const pages = await getPages();
       current.pages = pages;
+
       for (const page of pages) {
         page.lowerTag = page.tag.toLowerCase();
         page.lowerText = page.text.toLowerCase();
       }
 
-      doFindAll();
+      doFindAll(); // Not awaiting.
     };
 
-    const doFindAll = () => {
+    const doFindAll = async () => {
       const what = findAllWhat.value.toLowerCase();
       itemsRow.textContent = "";
 
       if (!what) {
-        getRecentTags((recentTags) => {
-          for (const tag of recentTags) {
-            const item = (
-              o("div", "mid row start button item",
-                o("div", "gap"),
-                o("div", "mid found-tag", tag),
-                o("div", "gap"),
-              )
-            );
-            onClick(item, onFindResultClick);
-            itemsRow.appendChild(item); 
-          }
-        });
+        const recentTags = await getRecentTags();
+        for (const tag of recentTags) {
+          const item = (
+            o("div", "mid row start button item",
+              o("div", "gap"),
+              o("div", "mid found-tag", tag),
+              o("div", "gap"),
+            )
+          );
+          onClick(item, onFindResultClick);
+          itemsRow.appendChild(item);
+        }
         return;
       }
 
@@ -1535,7 +1551,8 @@ Thank you!`
         )
       );
 
-      getPersisted((persisted) => {
+      // Not awaiting.
+      getPersisted().then((persisted) => {
         menu.localItem
         .children[1].children[0]
         .textContent = persisted
@@ -1732,7 +1749,8 @@ Thank you!`
       const tagsSection = o("div", "section");
       menu.tagsItem = o("div", "big block", tagsSection);
 
-      getTags((tags) => {
+      // Not awaiting.
+      getTags().then((tags) => {
         for (const tag of tags) {
           const tagButton = o("span", "found-tag button", `#${tag}`);
           onClick(tagButton, () => goTag(tag));
@@ -1762,13 +1780,10 @@ Thank you!`
         menu.tagsItem,
       ];
 
-      const fragment = document.createDocumentFragment();
-      for (const item of items) {
-        fragment.appendChild(item);
-      }
-
       itemsRow.textContent = "";
-      itemsRow.appendChild(fragment);
+      for (const item of items) {
+        itemsRow.appendChild(item);
+      }
       show(itemsRow);
     };
 
@@ -1781,45 +1796,44 @@ Thank you!`
     };
 
     const saveLineMenuItem = () => {
-      saveIntMenuItem(
+      current.lineNumberOnGotPage = saveIntMenuItem(
         menu.lineInput,
         menu.lineNumbers.cur,
         1,
         menu.lineNumbers.max,
         "",
-        (lineNumber) => {
-          current.lineNumberOnGotPage = lineNumber;
-        },
       );
     };
 
     const saveZoomMenuItem = () => {
-      saveIntMenuItem(
+      const newZoom = saveIntMenuItem(
         menu.zoomInput,
         current.zoom,
         minZoom,
         maxZoom,
         "%",
-        saveZoom,
       );
+      if (newZoom) saveZoom(newZoom);
     };
 
     const saveIntMenuItem = (
       input, cur, min, max, unit,
-      useNewValue
     ) => {
       let newValue = input.value;
-      if (!newValue) return;
+      if (!newValue) return null;
 
       newValue = parseInt(newValue, 10);
-      if (newValue === cur) return;
+      if (newValue === cur) return null;
 
       if (
         newValue < min ||
         newValue > max
-      ) return toast(`From ${min}${unit} to ${max}${unit}`);
+      ) {
+        toast(`From ${min}${unit} to ${max}${unit}`);
+        return null;
+      }
 
-      useNewValue(newValue);
+      return newValue;
     };
 
     onClick("menu-close", () => {
@@ -1841,39 +1855,32 @@ Thank you!`
       "persist" in navigator.storage
     );
 
-    const getPersisted = (onGotPersisted) => {
+    const getPersisted = async () => {
       if (isPersistSupported) {
-        navigator.storage.persisted()
-        .then(onGotPersisted);
-      } else onGotPersisted(false);
-    };
-
-    const tryPersist = (onGotPersisted) => {
-      if (onGotPersisted === undefined) {
-        onGotPersisted = () => {};
+        return await navigator.storage.persisted();
       }
-      if (isPersistSupported) {
-        navigator.storage.persist()
-        .then(onGotPersisted);
-      } else onGotPersisted(false);
+      return false;
     };
 
-    reservedActions[reservedTags.local]  = () => {
+    const tryPersist = async () => {
+      if (isPersistSupported) {
+        return await navigator.storage.persist();
+      }
+      return false;
+    };
+
+    reservedActions[reservedTags.local] = async () => {
       menuHeader.textContent = "Local data";
       show(menuTopRow);
 
-      getPersisted((persisted) => {
-        if (persisted) return show(localOkRow);
+      let persisted = await getPersisted();
+      if (persisted) return show(localOkRow);
 
-        tryPersist((persisted) => show(
-          persisted
-          ? localOkRow
-          : localProblemRow
-        ));
-      });
+      persisted = await tryPersist();
+      show(persisted ? localOkRow : localProblemRow);
     };
 
-    onClick("local-request-button", () => {
+    onClick("local-request-button", async () => {
       if (!isPersistSupported) {
         alert("Persistence is not supported, get a new browser!");
         return;
@@ -1889,32 +1896,29 @@ Thank you!`
         return;
       }
 
-      Notification.requestPermission()
-      .then((permission) => {
-        if (permission !== "granted") {
-          alert("Notification is NOT allowed! Please try again.");
-          return;
-        }
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") {
+        alert("Notification is NOT allowed! Please try again.");
+        return;
+      }
 
-        tryPersist((persisted) => {
-          if (!persisted) {
-            alert("Notification is allowed, but it does not help. Try another browser.");
-            return;
-          }
+      const persisted = await tryPersist();
+      if (!persisted) {
+        alert("Notification is allowed, but it does not help. Try another browser.");
+        return;
+      }
 
-          alert("Success! 🐱");
-          history.back();
-        });
-      });
+      alert("Success!");
+      history.back();
     });
 
     /// setBackupPassphrase
 
-    const setBackupPassphrase = (onSuccess) => {
+    const setBackupPassphrase = () => {
       const newPassphrase = prompt(`A passphrase (few words)
 to encrypt and decrypt
 Backup and Sync files:`);
-      if (newPassphrase === null) return;
+      if (newPassphrase === null) return false;
 
       current.backupPassphrase = newPassphrase;
 
@@ -1922,15 +1926,17 @@ Backup and Sync files:`);
 until you set a new passphrase
 or close this app.`);
 
-      if (onSuccess) onSuccess();
+      return true;
     };
 
     /// withBackupPassphrase
 
     const withBackupPassphrase = (onSuccess) => {
-      if (current.backupPassphrase === null) {
-        setBackupPassphrase(onSuccess);
-      } else onSuccess();
+      if (
+        current.backupPassphrase === null &&
+        !setBackupPassphrase()
+      ) return;
+      onSuccess();
     };
 
     /// getSalt, getIV, getRandomBytes
@@ -1943,7 +1949,7 @@ or close this app.`);
 
     /// getKey
 
-    const getKey = async (salt, passphrase, onGotKey) => {
+    const getKey = async (salt, passphrase) => {
       const encoder = new TextEncoder();
 
       const keyMaterial = await crypto.subtle.importKey(
@@ -1970,12 +1976,12 @@ or close this app.`);
         ["encrypt", "decrypt"],
       );
 
-      onGotKey(key);
+      return key;
     };
 
     /// getEncrypted
 
-    const getEncrypted = async (key, data, onGotEncrypted) => {
+    const getEncrypted = async (key, data) => {
       const iv = getIV();
       const dataBlob = new Blob([data]);
       const dataBuffer = await dataBlob.arrayBuffer();
@@ -1989,90 +1995,82 @@ or close this app.`);
         dataBuffer,
       );
 
-      onGotEncrypted(iv, encrypted);
+      return {iv, encrypted};
     };
 
     /// uploadBackup
 
-    const uploadBackup = () => {
+    const uploadBackup = async () => {
       return todo(); // decrypt, detect gzip, decompress
 
-      getUploadedText((text) => {
-        importText(text, (report) => {
-          alert(`Success:
-* Created: ${report.created}
-* Updated: ${report.updated}
+      const text = await getUploadedText();
+      if (text === null) return;
 
-Skipped:
-* Outdated: ${report.outdated}
-* Not changed: ${report.notChanged}
-`);
-        });
-      });
+      importText(text); // Not awaiting.
     };
 
     /// downloadBackup
 
-    const downloadBackup = () => withBackupPassphrase(() => {
-      getPages((pages) => {
-        const lines = [];
-        for (const page of pages) {
-          lines.push(JSON.stringify(page));
-        }
-        const text = `[\n${lines.join(",\n")}\n]\n`;
+    const downloadBackup = () => withBackupPassphrase(async () => {
+      const pages = await getPages();
+      const lines = [];
+      for (const page of pages) {
+        lines.push(JSON.stringify(page));
+      }
+      const text = `[\n${lines.join(",\n")}\n]\n`;
 
-        if ("CompressionStream" in window) {
-          const jsonified = new Response(text);
+      const data = await tryCompress(text);
 
-          const gzipped = new Response(
-            jsonified.body.pipeThrough(new CompressionStream("gzip")),
-            {headers: {"Content-Type": "application/octet-stream"}},
-          );
+      const salt = getSalt();
+      const key = await getKey(salt, current.backupPassphrase);
+      const {iv,  encrypted} = await getEncrypted(key, data);
+      const blob = new Blob(
+        [salt, iv, encrypted],
+        {"type": "application/octet-stream"},
+      );
 
-          gzipped.blob().then(encryptAndDownloadBackup);
-        } else encryptAndDownloadBackup(text);
-      });
+      const url = URL.createObjectURL(blob);
+      downloadURL(url, menu.backupFileName);
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
     });
 
-    const encryptAndDownloadBackup = (data) => {
-      const salt = getSalt();
-      const key = getKey(salt, current.backupPassphrase, (key) => {
-        getEncrypted(key, data, (iv, encrypted) => {
-          const blob = new Blob(
-            [salt, iv, encrypted],
-            {"type": "application/octet-stream"},
-          );
+    /// tryCompress
 
-          const url = URL.createObjectURL(blob);
-          downloadURL(url, menu.backupFileName);
-          setTimeout(() => {
-            URL.revokeObjectURL(url);
-          }, 1000);
-        });
-      });
+    const tryCompress = async (text) => {
+      if (!("CompressionStream" in window)) return text;
+
+      const plain = new Response(text);
+
+      const gzipped = new Response(
+        plain.body.pipeThrough(new CompressionStream("gzip")),
+        {headers: {"Content-Type": "application/octet-stream"}},
+      );
+
+      return await gzipped.blob();
     };
 
     /// uploadPage
 
-    const uploadPage = () => {
+    const uploadPage = async () => {
       if (!current.page) return;
 
       const page = current.page;
+      const text = await getUploadedText();
+      if (text === null) return;
 
-      getUploadedText((text) => {
-        const next = {
-          tag: page.tag,
-          text,
-          sel1: 0,
-          sel2: 0,
-          scro: 0,
-          upd: getNow(),
-        };
+      const next = {
+        tag: page.tag,
+        text,
+        sel1: 0,
+        sel2: 0,
+        scro: 0,
+        upd: getNow(),
+      };
 
-        doSave(page, next, () => {
-          history.back();
-        });
-      });
+      await doSave(page, next);
+      history.back();
     };
 
     /// downloadPage
@@ -2083,27 +2081,27 @@ Skipped:
 
     /// getUploadedText
 
-    const getUploadedText = (onGotUploadedText) => {
+    const getUploadedText = async () => await new Promise((done) => {
       const fileInput = o("input", {
         "class": "hidden",
         "type": "file",
       });
 
+      on(fileInput, "cancel", () => done(null));
+
       on(fileInput, "change", () => {
         const file = fileInput.files[0];
         const reader = new FileReader();
-
-        on(reader, "load", () => {
-          onGotUploadedText(reader.result);
-        });
-
+        on(reader, "abort", () => done(null));
+        on(reader, "error", () => done(null));
+        on(reader, "load", () => done(reader.result));
         reader.readAsText(file);
       });
 
       document.body.appendChild(fileInput);
       fileInput.click();
       document.body.removeChild(fileInput);
-    };
+    });
 
     /// downloadURL
 
@@ -2128,7 +2126,7 @@ Skipped:
 
     /// importText
 
-    const importText = (text, onImported) => {
+    const importText = async (text) => {
       let importedPages;
       try {
         importedPages = JSON.parse(text);
@@ -2138,54 +2136,55 @@ Skipped:
 
       if (!Array.isArray(importedPages)) return importFailed();
 
-      getPages((localPages) => {
-        let created = 0, updated = 0;
-        let outdated = 0, notChanged = 0;
+      const localPages = await getPages();
+      let created = 0, updated = 0;
+      let outdated = 0, notChanged = 0;
 
-        const localPagesByTag = {};
-        for (const localPage of localPages) {
-          localPagesByTag[localPage.tag] = localPage;
-        }
+      const localPagesByTag = {};
+      for (const localPage of localPages) {
+        localPagesByTag[localPage.tag] = localPage;
+      }
 
-        for (const importedPage of importedPages) {
-          if (!(
-            "tag" in importedPage &&
-            typeof importedPage.tag === "string"
-          )) return importFailed();
+      for (const importedPage of importedPages) {
+        if (!(
+          "tag" in importedPage &&
+          typeof importedPage.tag === "string"
+        )) return importFailed();
 
-          const tag = importedPage.tag;
-          const localPage = localPagesByTag[tag];
+        const tag = importedPage.tag;
+        const localPage = localPagesByTag[tag];
 
-          if (localPage) {
-            const localUpd = localPage.upd || "";
-            const importedUpd = importedPage.upd || "";
+        if (localPage) {
+          const localUpd = localPage.upd || "";
+          const importedUpd = importedPage.upd || "";
 
-            if (localUpd === importedUpd) {
-              notChanged++;
-              continue;
-            }
+          if (localUpd === importedUpd) {
+            notChanged++;
+            continue;
+          }
 
-            if (localUpd > importedUpd) {
-              outdated++;
-              continue;
-            }
+          if (localUpd > importedUpd) {
+            outdated++;
+            continue;
+          }
 
-            updated++;
-          } else created++;
+          updated++;
+        } else created++;
 
-          doSave(
-            ensurePage(localPage, tag),
-            ensurePage(importedPage, tag),
-          );
-        }
+        await doSave(
+          ensurePage(localPage, tag),
+          ensurePage(importedPage, tag),
+        );
+      }
 
-        if (onImported) onImported({
-          created,
-          updated,
-          outdated,
-          notChanged,
-        });
-      });
+      alert(`Success:
+* Created: ${created}
+* Updated: ${updated}
+
+Skipped:
+* Outdated: ${outdated}
+* Not changed: ${notChanged}
+`);
     };
 
     const importFailed = () => {
@@ -2194,20 +2193,19 @@ Skipped:
 
     /// getTags
 
-    const getTags = (onGotTags) => {
-      getPages((pages) => {
-        const tags = [], dateTags = [];
-        for (const page of pages) {
-          if (!page.text) continue;
+    const getTags = async () => {
+      const pages = await getPages();
+      const tags = [], dateTags = [];
+      for (const page of pages) {
+        if (!page.text) continue;
 
-          const tag = page.tag;
-          if (isDate(tag)) {
-            dateTags.push(tag);
-          } else tags.push(tag);
-        }
-        tags.push(...dateTags);
-        onGotTags(tags);
-      });
+        const tag = page.tag;
+        if (isDate(tag)) {
+          dateTags.push(tag);
+        } else tags.push(tag);
+      }
+      tags.push(...dateTags);
+      return tags;
     };
 
     /// move-to-date
@@ -2235,7 +2233,7 @@ Skipped:
       return date.toISOString().split("T")[0];
     };
 
-    const moveToDate = (date) => {
+    const moveToDate = async (date) => {
       const page = current.page;
       if (!page) return;
 
@@ -2256,63 +2254,60 @@ Skipped:
       toast(`▷ ${date}`);
       ta.setRangeText("", thisStart, nextStart, "start");
 
-      save(false, () => {
-        getPage(date, (datePage) => {
-          const next = Object.assign({}, datePage);
-          next.text = ensureTextEndsWithNewline(next.text) + movedText;
-          next.upd = getNow();
-          doSave(datePage, next);
-        });
-      });
+      await save();
+      const datePage = await getPage(date);
+      const next = Object.assign({}, datePage);
+      next.text = ensureTextEndsWithNewline(next.text) + movedText;
+      next.upd = getNow();
+      await doSave(datePage, next);
     };
 
     /// getOverdueDate, overdueButton
 
-    const getOverdueDate = (onGotOverdueDate) => {
+    const getOverdueDate = async () => {
       const query = IDBKeyRange.bound("0", getTodayPlus(-1));
       
-      db
-      .transaction(stores.page)
-      .objectStore(stores.page)
-      .getAll(query)
-      .onsuccess = (event) => {
-        for (const page of event.target.result) {
-          if (!isDate(page.tag)) continue;
+      const event = await new Promise((done) => {
+        db
+        .transaction(stores.page)
+        .objectStore(stores.page)
+        .getAll(query)
+        .onsuccess = done;
+      });
 
-          // Blank (with spaces) page is not empty.
-          // "Undo" will be broken if we delete not empty page.
-          if (page.text) return onGotOverdueDate(page.tag);
+      for (const page of event.target.result) {
+        if (!isDate(page.tag)) continue;
 
-          db
-          .transaction(stores.page, "readwrite")
-          .objectStore(stores.page)
-          .delete(page.tag);
-        }
-        onGotOverdueDate(null);
-      };
+        // Blank (with spaces) page is not empty.
+        // "Undo" will be broken if we delete not empty page.
+        if (page.text) return page.tag;
+
+        db
+        .transaction(stores.page, "readwrite")
+        .objectStore(stores.page)
+        .delete(page.tag); // Not awaiting.
+      }
+      return null;
     };
 
-    onClick(overdueButton, () => {
+    onClick(overdueButton, async () => {
       if (!current.page) return;
 
       if (current.page.tag !== current.overdueDate) return goTag(current.overdueDate);
 
-      getOverdueDate((overdueDate) => {
-        current.overdueDate = overdueDate;
-        goTag(overdueDate || getTodayPlus(0));
-      });
+      current.overdueDate = await getOverdueDate();
+      goTag(current.overdueDate || getTodayPlus(0));
     });
 
     /// try
 
     if (!isHidden(pageMainRow)) ta.focus();
 
-    getPersisted((persisted) => {
-      if (!persisted) tryPersist();
-    });
-
-    /// call main
+    const persisted = await getPersisted();
+    if (!persisted) await tryPersist();
   };
+
+  /// call main
 
   if (document.readyState === "complete") return main();
   on(document, "DOMContentLoaded", main);
