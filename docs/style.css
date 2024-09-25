@@ -164,7 +164,7 @@ input.small,
 
 .found-text {
   align-self: start;
-  height: var(--mid);
+  min-height: var(--mid);
   overflow: hidden;
 }
 
