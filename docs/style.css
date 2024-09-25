@@ -240,7 +240,7 @@ a,
 a:active,
 .button:active,
 .button:active .icon,
-.button:active .tag,
+.button:active .found-tag,
 ::selection {
   color: var(--back);
   background-color: var(--text);
