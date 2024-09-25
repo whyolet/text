@@ -5,7 +5,7 @@
   "short_name": "Whyolet Text",
   "display": "standalone",
   "background_color": "#FFF",
-  "theme_color": "#639",
+  "theme_color": "#325",
   "icons": [
     {
       "src": "icons/Icon-192.png",
