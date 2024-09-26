@@ -1493,7 +1493,7 @@ Thank you!`
     const onFindResultClick = (event) => {
       const kids = event.currentTarget.children;
       const tag = kids[1]. textContent;
-      if (kids.length > 1) {
+      if (kids.length > 3) {
         current.findWhatOnGotPage = findAllWhat.value;
       }
 
