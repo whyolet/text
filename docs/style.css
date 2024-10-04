@@ -1,4 +1,5 @@
 :root {
+  --high: #DDCCFF;
   --text:  #BBAADD;
   --none: #9988BB;
   --tool:  #776699;
@@ -239,11 +240,10 @@ a,
 
 a:active,
 .button:active,
-.button:active .icon,
-.button:active .found-tag,
+.button:active div,
 ::selection {
-  color: var(--back);
-  background-color: var(--text);
+  color: var(--high);
+  background-color: var(--hint);
 }
 
 .icon:active {
