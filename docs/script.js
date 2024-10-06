@@ -1,9 +1,9 @@
 "use strict";
 (() => {
 
-  /// error
+  /// onError
 
-  addEventListener("error", (event) => {
+  const onError = (event) => {
     const banner = "Error! Please help to fix it by writing a line how it happened and/or sending this info";
 
     location.assign(
@@ -13,16 +13,24 @@
       encodeURIComponent(
         `${banner}:
 
-${event.message || ""}
+${event.message || event.reason || ""}
+
 ${event.filename || ""}:${event.lineno || ""}:${event.colno || ""}
 
-${event.error && event.error.stack || ""}
+${
+  event.error && event.error.stack ||
+  event.reason && event.reason.stack ||
+  ""
+}
 
 ${banner} above.
 Thank you!`
       )
     ); 
-  });
+  };
+
+  addEventListener("error", onError);
+  addEventListener("unhandledrejection", onError);
 
   /// serviceWorker
 
@@ -1996,29 +2004,93 @@ or close this app.`);
       );
 
       return {iv, encrypted};
+      // It is tempting to pass `iv` as an argument, but returning it ensures it is unique each time.
+    };
+
+    /// tryCompress
+
+    const tryCompress = async (text) => {
+      if (!("CompressionStream" in window)) return text;
+
+      const plain = new Blob([text]);
+      const gzip = new CompressionStream("gzip");
+      const gzipped = plain.stream().pipeThrough(gzip);
+      const response = new Response(gzipped);
+      return await response.blob();
+    };
+
+    /// tryDecompress
+    // buffer: ArrayBuffer
+    // return: ArrayBuffer || null
+
+    const tryDecompress = async (buffer) => {
+      if (buffer.byteLength < 2) return buffer;
+
+      const header = new Uint8Array(buffer, 0, 2);
+      if (
+        header[0] !== 31 ||
+        header[1] !== 139
+      ) return buffer;
+
+      if (!("DecompressionStream" in window)) {
+        alert("This browser cannot decompress data. Try another browser.");
+        return null;
+      }
+
+      const gzipped = new Blob([buffer]);
+      const gunzip = new DecompressionStream("gzip");
+      const plain = gzipped.stream().pipeThrough(gunzip);
+      const response = new Response(plain);
+      return await response.arrayBuffer();
     };
 
     /// uploadBackup
 
-    const uploadBackup = async () => {
-      return todo(); // decrypt, detect gzip, decompress
+    const uploadBackup = () => withBackupPassphrase(async () => {
+      const uploaded = await getUploaded(false);
+      if (uploaded === null) return;
 
-      const text = await getUploadedText();
-      if (text === null) return;
+      const salt = new Uint8Array(uploaded, 0, 24);
+      const iv = new Uint8Array(uploaded, 24, 12);
+      const encrypted = new Uint8Array(uploaded, 24 + 12);
+
+      const key = await getKey(salt, current.backupPassphrase);
+
+      let decrypted;
+      try {
+        decrypted  = await crypto.subtle.decrypt(
+          {
+            name: "AES-GCM",
+            iv,
+          },
+          key,
+          encrypted,
+        );
+      } catch (error) {
+        if (
+          error.name === "OperationError" ||
+          error.name === "InvalidAccessError"
+        ) {
+          alert("Decryption failed.\nTry another passphrase.");
+          return;
+        }
+        throw error;
+      }
+
+      const decompressed = await tryDecompress(decrypted);
+      if (decompressed === null) return;
+
+      const decoder = new TextDecoder();
+      const text = decoder.decode(decompressed);
 
       importText(text); // Not awaiting.
-    };
+    });
 
     /// downloadBackup
 
     const downloadBackup = () => withBackupPassphrase(async () => {
       const pages = await getPages();
-      const lines = [];
-      for (const page of pages) {
-        lines.push(JSON.stringify(page));
-      }
-      const text = `[\n${lines.join(",\n")}\n]\n`;
-
+      const text = JSON.stringify(pages);
       const data = await tryCompress(text);
 
       const salt = getSalt();
@@ -2036,28 +2108,13 @@ or close this app.`);
       }, 1000);
     });
 
-    /// tryCompress
-
-    const tryCompress = async (text) => {
-      if (!("CompressionStream" in window)) return text;
-
-      const plain = new Response(text);
-
-      const gzipped = new Response(
-        plain.body.pipeThrough(new CompressionStream("gzip")),
-        {headers: {"Content-Type": "application/octet-stream"}},
-      );
-
-      return await gzipped.blob();
-    };
-
     /// uploadPage
 
     const uploadPage = async () => {
       if (!current.page) return;
 
       const page = current.page;
-      const text = await getUploadedText();
+      const text = await getUploaded(true);
       if (text === null) return;
 
       const next = {
@@ -2079,9 +2136,9 @@ or close this app.`);
       downloadText(current.page.text, menu.pageFileName);
     };
 
-    /// getUploadedText
+    /// getUploaded
 
-    const getUploadedText = async () => await new Promise((done) => {
+    const getUploaded = async (isText) => await new Promise((done) => {
       const fileInput = o("input", {
         "class": "hidden",
         "type": "file",
@@ -2095,7 +2152,10 @@ or close this app.`);
         on(reader, "abort", () => done(null));
         on(reader, "error", () => done(null));
         on(reader, "load", () => done(reader.result));
-        reader.readAsText(file);
+
+        if (isText) {
+          reader.readAsText(file);
+        } else reader.readAsArrayBuffer(file);
       });
 
       document.body.appendChild(fileInput);
