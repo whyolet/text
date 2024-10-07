@@ -1600,11 +1600,11 @@ Thank you!`
 
       menu.backupFileName = "whyolet-text.db";
 
-      menu.uploadBackupIcon = o("div", "icon button", "west");
-      onClick(menu.uploadBackupIcon, uploadBackup);
+      menu.importBackupIcon = o("div", "icon button", "west");
+      onClick(menu.importBackupIcon, importBackup);
 
-      menu.downloadBackupIcon = o("div", "icon button", "east");
-      onClick(menu.downloadBackupIcon, downloadBackup);
+      menu.exportBackupIcon = o("div", "icon button", "east");
+      onClick(menu.exportBackupIcon, exportBackup);
 
       menu.backupKeyIcon = o("div", "icon button", "key");
       onClick(menu.backupKeyIcon, () => setBackupPassphrase());
@@ -1618,8 +1618,8 @@ Thank you!`
           o("div", "gap"),
           o("div", "mid mid-label", "Data"),
           o("div", "gap"),
-          o("div", "ibox", menu.uploadBackupIcon),
-          o("div", "ibox", menu.downloadBackupIcon),
+          o("div", "ibox", menu.importBackupIcon),
+          o("div", "ibox", menu.exportBackupIcon),
           o("div", "gap"),
           o("div", "mid", "Backup"),
           o("div", "gap"),
@@ -1636,11 +1636,11 @@ Thank you!`
         .replace(/^.*[\/\\]/, "")
         + (menu.tag.includes(".") ? "" : ".txt");
 
-        menu.uploadPageIcon = o("div", "icon button", "west");
-        onClick(menu.uploadPageIcon, uploadPage);
+        menu.importPageIcon = o("div", "icon button", "west");
+        onClick(menu.importPageIcon, importPage);
 
-        menu.downloadPageIcon = o("div", "icon button", "east");
-        onClick(menu.downloadPageIcon, downloadPage);
+        menu.exportPageIcon = o("div", "icon button", "east");
+        onClick(menu.exportPageIcon, exportPage);
 
         menu.onePageItem = (
           o("div", "mid row start item",
@@ -1651,8 +1651,8 @@ Thank you!`
             o("div", "gap"),
             o("div", "mid mid-label", "Page"),
             o("div", "gap"),
-            o("div", "ibox", menu.uploadPageIcon),
-            o("div", "ibox", menu.downloadPageIcon),
+            o("div", "ibox", menu.importPageIcon),
+            o("div", "ibox", menu.exportPageIcon),
             o("div", "gap"),
             o("div", "big start", "File"),
           )
@@ -2044,9 +2044,9 @@ or close this app.`);
       return await response.arrayBuffer();
     };
 
-    /// uploadBackup
+    /// importBackup
 
-    const uploadBackup = () => withBackupPassphrase(async () => {
+    const importBackup = () => withBackupPassphrase(async () => {
       const uploaded = await getUploaded(false);
       if (uploaded === null) return;
 
@@ -2083,12 +2083,12 @@ or close this app.`);
       const decoder = new TextDecoder();
       const text = decoder.decode(decompressed);
 
-      importText(text); // Not awaiting.
+      importPagesText(text); // Not awaiting.
     });
 
-    /// downloadBackup
+    /// exportBackup
 
-    const downloadBackup = () => withBackupPassphrase(async () => {
+    const exportBackup = () => withBackupPassphrase(async () => {
       const pages = await getPages();
       const text = JSON.stringify(pages);
       const data = await tryCompress(text);
@@ -2108,9 +2108,9 @@ or close this app.`);
       }, 1000);
     });
 
-    /// uploadPage
+    /// importPage
 
-    const uploadPage = async () => {
+    const importPage = async () => {
       if (!current.page) return;
 
       const page = current.page;
@@ -2130,9 +2130,9 @@ or close this app.`);
       history.back();
     };
 
-    /// downloadPage
+    /// exportPage
 
-    const downloadPage = () => {
+    const exportPage = () => {
       downloadText(current.page.text, menu.pageFileName);
     };
 
@@ -2184,9 +2184,9 @@ or close this app.`);
       fileName,
     );
 
-    /// importText
+    /// importPagesText
 
-    const importText = async (text) => {
+    const importPagesText = async (text) => {
       let importedPages;
       try {
         importedPages = JSON.parse(text);
