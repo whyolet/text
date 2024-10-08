@@ -1217,7 +1217,7 @@ Thank you!`
       if (
         i !== ta.selectionEnd ||
         i === 0 ||
-        !/[\r\n]/.test(text.charAt(i - 1))
+        !"\r\n".includes(text.charAt(i - 1))
       ) return;
 
       const head = text.slice(0, i);
