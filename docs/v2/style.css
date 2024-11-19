@@ -1,0 +1,204 @@
+:root {
+  --high: #DDCCFF;
+  --text: #BBAADD;
+  --none: #9988BB;
+  --tool: #776699;
+  --hint: #554477;
+  --back: #332255;
+
+  --icon: 2rem;
+}
+
+@font-face {
+  font-family: "Ubuntu";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src:
+    local("Ubuntu Light"),
+    local("Ubuntu-Light"),
+    url("fonts/Ubuntu-Light.woff2") format("woff2"),
+    url("fonts/Ubuntu-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Ubuntu";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local("Ubuntu Bold"),
+    local("Ubuntu-Bold"),
+    url("fonts/Ubuntu-Bold.woff2") format("woff2"),
+    url("fonts/Ubuntu-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-display: block;
+  src:
+    local("Material Symbols Outlined"),
+    local("MaterialSymbols-Outlined"),
+    url("fonts/MaterialSymbolsOutlined.woff2") format("woff2"),
+    url("fonts/MaterialSymbolsOutlined.ttf") format("truetype");
+}
+
+* {
+  box-sizing: border-box;
+
+  margin: 0;
+  outline: 0;  /* Avoid outline on focus */
+  border: 0;
+  padding: 0;
+
+  color: var(--text);
+  background-color: var(--back);
+  -webkit-tap-highlight-color: transparent;
+
+  font-family: "Ubuntu", sans-serif;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 1rem;
+}
+
+a,
+b {
+  font-weight: 700;
+}
+
+.icon {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  /* Let's inherit `font-weight` from text. */
+  font-size: 24px;
+  font-variation-settings: "opsz" 24, "GRAD" -25; /* Dark Mode */
+
+  display: inline-block;
+  line-height: 1;
+  vertical-align: middle;
+
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  text-rendering: optimizeLegibility;
+}
+
+html,
+body,
+.banner,
+.page,
+textarea {
+  width: 100%;
+  height: 100%;
+}
+
+input::placeholder {
+  color: var(--hint);
+}
+
+input[type=date]::-webkit-datetime-edit {
+  visibility: hidden;
+}
+
+input[type=date]::-webkit-calendar-picker-indicator {
+  color: var(--tool);
+}
+
+ul {
+  list-style-type: square;
+  padding-left: 1em;
+}
+
+li::marker {
+  color: var(--hint);
+}
+
+a {
+  text-decoration: none;
+}
+
+a,
+.icon {
+  color: var(--tool);
+}
+
+.button {
+  cursor: pointer;
+  user-select: none;
+}
+
+a:active,
+a:active > .icon,
+.button:active,
+.button:active > .icon,
+::selection {
+  color: var(--high);
+  background-color: var(--hint);
+  border-radius: var(--icon);
+}
+
+.banner {
+  display: grid;
+  place-items: center;
+}
+
+.banner > .content > * {
+  padding: 1rem;
+  font-size: 1.2rem;
+}
+
+.banner > .content > .header {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.page {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, var(--icon))
+    1fr
+    repeat(2, var(--icon))
+    1fr
+    repeat(3, var(--icon));
+
+  grid-template-rows:
+    var(--icon)
+    1fr
+    repeat(3, var(--icon))
+    1fr
+    repeat(2, var(--icon));
+
+  /* Areas/shortcuts, except `q` and `w` */
+  grid-template-areas:
+    "m o q q q q q q f s"
+    ". w w w w w w w w ."
+    "t w w w w w w w w u"
+    "b w w w w w w w w l"
+    "h w w w w w w w w d"
+    ". w w w w w w w w ."
+    "y w w w w w w w w v"
+    "k e i . z r . x c a";
+
+  place-items: center;
+}
+
+.page > .header {
+  grid-area: q;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--tool);
+  overflow-x: hidden;
+}
+
+textarea {
+  grid-area: w;
+  display: block;  /* Avoid parent scrollbar and visible background */
+  scrollbar-color: var(--hint) var(--back);
+  touch-action: pan-y;  /* Custom x-swipes */
+  resize: none;
+}
