@@ -75,9 +75,7 @@ export const showBanner = (...kids) => {
   db.close();
 
   document.body.textContent = "";
-  document.body.appendChild(
-    o(".banner", o(".content", ...kids)),
-  );
+  document.body.appendChild(o(".banner", ...kids));
 };
 
 /// restartButton

@@ -141,17 +141,22 @@ a:active > .icon,
 }
 
 .banner {
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.banner > .content > * {
-  padding: 1rem;
+.banner > *,
+.banner .button {
+  padding: 0.5rem;
+}
+
+.banner * {
   font-size: 1.2rem;
 }
 
-.banner > .content > .header {
-  text-align: center;
+.banner .header {
   font-size: 1.4rem;
   font-weight: 700;
 }

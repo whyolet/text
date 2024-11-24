@@ -1,5 +1,7 @@
 import {o, restartButton, showBanner} from "./ui.js";
 
+const Bytes = Uint8Array;
+
 /// Current passphrase, not exported.
 
 let passphrase = "";
@@ -12,11 +14,13 @@ export const setPassphrase = (newValue) => {
 
 /// getSalt, getIV, getRandomBytes
 
-export const getSalt = () => getRandomBytes(24);
+const saltSize = 24, ivSize = 12;
 
-const getIV = () => getRandomBytes(12);
+export const getSalt = () => getRandomBytes(saltSize);
 
-const getRandomBytes = (size) => crypto.getRandomValues(new Uint8Array(size));
+const getIV = () => getRandomBytes(ivSize);
+
+const getRandomBytes = (size) => crypto.getRandomValues(new Bytes(size));
 
 /// getKey
 
@@ -59,27 +63,77 @@ export const getDbName = async () => {
     saltString = JSON.stringify(Array.from(getSalt()));
     localStorage.setItem(saltName, saltString);
   }
-  const salt = new Uint8Array(JSON.parse(saltString));
+  const salt = new Bytes(JSON.parse(saltString));
 
   const key = await getKey(salt);
   const buffer = await crypto.subtle.exportKey("raw", key);
-  const untyped = Array.from(new Uint8Array(buffer));
+  const untyped = Array.from(new Bytes(buffer));
   const hexes = untyped.map(byte => byte.toString(16).padStart(2, "0"));
   return hexes.join("");
 };
 
-/// decrypt: ArrayBuffer -> JSON -> object
+/// encrypt: object -> JSON -> Bytes
+// (data, key) -> [iv, encrypted]
+// (data) -> [salt, iv, compressed+encrypted]
 
-export const decrypt = async (buffer, key) => {
-  let i = 0;
-  if (!key) {
-    i = 24;
-    const salt = new Uint8Array(buffer, 0, i);
-    key = await getKey(salt);
-  }
+const encrypt = async (data, key) => {
+  let salt;
+  if (!key) key = await getKey(salt = getSalt());
 
-  const iv = new Uint8Array(buffer, i, 12);
-  const encrypted = new Uint8Array(buffer, i + 12);
+  const iv = getIV();
+  const jsonified = JSON.stringify(data);
+  const encoder = new TextEncoder();
+  let bytes = encoder.encode(jsonified);
+  if (salt) bytes = tryCompress(bytes);
+
+  const encrypted = await crypto.subtle.encrypt(
+    {
+      name: "AES-GCM",
+      iv,
+    },
+    key,
+    bytes,
+  );
+
+  const saltLength = salt ? salt.length : 0;
+  const result = new Bytes(saltLength + iv.length + encrypted.byteLength);
+  if (salt) result.set(salt);
+  result.set(iv, saltLength);
+  result.set(encrypted, saltLength + iv.length);
+
+  return result;
+};
+
+/// tryCompress
+
+const tryCompress = async (bytes) => {
+  if (!("CompressionStream" in window)) return bytes;
+
+  const plain = new Blob([bytes]);
+  const gzip = new CompressionStream("gzip");
+  const gzipped = plain.stream().pipeThrough(gzip);
+  const response = new Response(gzipped);
+  const blob = await response.blob();
+  return await blob.bytes();
+};
+
+/// decrypt: Bytes -> JSON -> object
+
+export const decrypt = async (bytes, key) => {
+  const buffer = bytes.buffer;
+  let i = bytes.byteOffset;
+
+  const cut = (length) => {
+    const part = new Bytes(buffer, i, length);
+    i += length;
+    return part;
+  };
+
+  if (!key) key = await getKey(cut(saltSize));
+  const iv = cut(ivSize);
+  const encrypted = cut(bytes.length - (
+    i - bytes.byteOffset
+  ));
 
   let decrypted;
   try {
@@ -110,18 +164,16 @@ export const decrypt = async (buffer, key) => {
   if (decompressed === null) return null;
 
   const decoder = new TextDecoder();
-  const text = decoder.decode(decompressed);
-  return JSON.parse(text);
+  const jsonified = decoder.decode(decompressed);
+  return JSON.parse(jsonified);
 };
 
 /// tryDecompress
-// buffer: ArrayBuffer
-// return: ArrayBuffer || null
 
 const tryDecompress = async (buffer) => {
   if (buffer.byteLength < 2) return buffer;
 
-  const header = new Uint8Array(buffer, 0, 2);
+  const header = new Bytes(buffer, 0, 2);
   if (
     header[0] !== 31 ||
     header[1] !== 139
@@ -142,39 +194,3 @@ const tryDecompress = async (buffer) => {
   const response = new Response(plain);
   return await response.arrayBuffer();
 };
-
-/*
-
-/// getEncrypted
-
-const getEncrypted = async (key, data) => {
-  const iv = getIV();
-  const dataBlob = new Blob([data]);
-  const dataBuffer = await dataBlob.arrayBuffer();
-
-  const encrypted = await crypto.subtle.encrypt(
-    {
-      name: "AES-GCM",
-      iv,
-    },
-    key,
-    dataBuffer,
-  );
-
-  return {iv, encrypted};
-  // It is tempting to pass `iv` as an argument, but returning it ensures it is unique each time.
-};
-
-/// tryCompress
-
-const tryCompress = async (text) => {
-  if (!("CompressionStream" in window)) return text;
-
-  const plain = new Blob([text]);
-  const gzip = new CompressionStream("gzip");
-  const gzipped = plain.stream().pipeThrough(gzip);
-  const response = new Response(gzipped);
-  return await response.blob();
-};
-
-*/

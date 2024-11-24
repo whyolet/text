@@ -20,9 +20,10 @@ showBanner(o(".header", "Loading..."));
     o(".header", "Paused!"),
     o("",
       "You've opened Whyolet Text", o("br"),
-      "in another tab.",
+      "in another tab.", o("br"),
+      o("br"),
+      "Please either close this one or:"
     ),
-    o("", "Please either close this one or:"),
     restartButton,
   );
 })();

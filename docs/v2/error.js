@@ -52,9 +52,11 @@ event.reason && event.reason.stack ||
       "by sending details to", o("br"),
       o("b", "support@whyolet.com"),
     ),
-    copyButton,
-    sendButton,
-    restartButton,
+    o("",
+      copyButton,
+      sendButton,
+      restartButton,
+    ),
   );
 };
 
