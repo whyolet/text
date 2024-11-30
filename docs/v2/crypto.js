@@ -78,7 +78,10 @@ export const getDbName = async () => {
 
 const encrypt = async (data, key) => {
   let salt;
-  if (!key) key = await getKey(salt = getSalt());
+  if (!key) {
+    salt = getSalt();
+    key = await getKey(salt);
+  }
 
   const iv = getIV();
   const jsonified = JSON.stringify(data);
