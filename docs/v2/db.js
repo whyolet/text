@@ -1,9 +1,9 @@
 import {decrypt, getDbName, getKey, getSalt} from "./crypto.js";
 import {o, showBanner} from "./ui.js";
 
-/// db, stores, conf, mem, onDbError
+/// idb, stores, conf, mem, onDbError
 
-let db;
+let idb;
 
 const stores = {
   page: "page",
@@ -35,7 +35,7 @@ const updateAppVersion = () => {
 
 /// Load from db to mem.
 
-export const load = async () => {
+export const load = async () => await new Promise(async (doneLoading) => {
   const dbName = await getDbName();
   const openingDb = indexedDB.open(dbName, 1);
 
@@ -51,15 +51,15 @@ export const load = async () => {
   /// onupgradeneeded
 
   openingDb.onupgradeneeded = (event) => {
-    db = event.target.result;
-    db.onerror = onDbError;
+    const idb = event.target.result;
+    idb.onerror = onDbError;
     const oldVersion = event.oldVersion || 0;
 
     if (oldVersion < 1) {
-      db.createObjectStore(stores.conf);
-      db.createObjectStore(stores.page);
+      idb.createObjectStore(stores.conf);
+      idb.createObjectStore(stores.page);
 
-      db.createObjectStore(stores.op, {
+      idb.createObjectStore(stores.op, {
         autoIncrement: true,
       });
     }
@@ -68,9 +68,9 @@ export const load = async () => {
   /// onsuccess of openingDb
 
   openingDb.onsuccess = async (event) => {
-    db = event.target.result;
-    db.onerror = onDbError;
-    db.onversionchange = updateAppVersion;
+    idb = event.target.result;  // module-level
+    idb.onerror = onDbError;
+    idb.onversionchange = updateAppVersion;
 
     await loadConf(conf.salt, getSalt, true);
     mem.key = await getKey(mem.salt);
@@ -87,14 +87,16 @@ export const load = async () => {
 
       loadPages(),
     ]);
+
+    doneLoading();
   };
-};
+});
 
 /// loadConf
 
-const loadConf = async (id, defaultFn, isPlain) => {
+const loadConf = async (id, getDefault, isPlain) => {
   const event = await new Promise(done => {
-    db
+    idb
     .transaction(stores.conf)
     .objectStore(stores.conf)
     .get(id)
@@ -107,7 +109,7 @@ const loadConf = async (id, defaultFn, isPlain) => {
       isPlain ? value
       : await decrypt(value, mem.key)
     )
-    : defaultFn()
+    : getDefault()
   );
 };
 
@@ -115,14 +117,14 @@ const loadConf = async (id, defaultFn, isPlain) => {
 
 const loadPages = async () => {
   const event = await new Promise(done => {
-    db
+    idb
     .transaction(stores.page)
     .objectStore(stores.page)
     .getAll()
     .onsuccess = done;
   });
 
-  const buffers  = event.target.result;
+  const buffers = event.target.result;
 
   const pages = await Promise.all(
     buffers.map(buffer => decrypt(buffer, mem.key))
@@ -137,6 +139,6 @@ const loadPages = async () => {
 /// close
 
 export const close = () => {
-  if (!db) return;
-  db.close();
+  if (!idb) return;
+  idb.close();
 };
