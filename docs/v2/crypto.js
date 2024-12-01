@@ -2,6 +2,17 @@ import {o, restartButton, showBanner} from "./ui.js";
 
 const Bytes = Uint8Array;
 
+/// hexify / dehexify
+
+const hexify = (bytes) => Array.from(bytes).map(
+  byte => byte.toString(16).padStart(2, "0")
+).join("");
+
+const dehexify = (hexes) => new Bytes(
+  Array.from(hexes.matchAll(/../g))
+  .map(match => parseInt(match[0], 16))
+);
+
 /// Current passphrase, not exported.
 
 let passphrase = "";
@@ -58,18 +69,16 @@ export const getKey = async (salt) => {
 
 export const getDbName = async () => {
   const saltName = "dbNameSalt";
-  let saltString = localStorage.getItem(saltName);
-  if (!saltString) {
-    saltString = JSON.stringify(Array.from(getSalt()));
-    localStorage.setItem(saltName, saltString);
+  let hexSalt = localStorage.getItem(saltName);
+  if (!hexSalt) {
+    hexSalt = hexify(getSalt());
+    localStorage.setItem(saltName, hexSalt);
   }
-  const salt = new Bytes(JSON.parse(saltString));
+  const salt = dehexify(hexSalt);
 
   const key = await getKey(salt);
   const buffer = await crypto.subtle.exportKey("raw", key);
-  const untyped = Array.from(new Bytes(buffer));
-  const hexes = untyped.map(byte => byte.toString(16).padStart(2, "0"));
-  return hexes.join("");
+  return hexify(new Bytes(buffer));
 };
 
 /// encrypt: object -> JSON -> Bytes
