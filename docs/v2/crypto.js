@@ -15,14 +15,19 @@ Bytes.fromHex ??= (hexes) => new Bytes(
   .map(match => parseInt(match[0], 16))
 );
 
-/// Current passphrase, not exported.
+/// Current DB passphrase and key, not exported.
 
-let passphrase = "";
+let dbPassphrase = "";
+let dbKey = null;
 
-/// Set new passphrase.
+/// Set DB passphrase and key.
 
 export const setPassphrase = (newValue) => {
-  passphrase = newValue;
+  dbPassphrase = newValue;
+};
+
+export const setKey = (newValue) => {
+  dbKey = newValue;
 };
 
 /// getSalt, getIV, getRandomBytes
@@ -42,7 +47,7 @@ export const getKey = async (salt) => {
 
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
-    encoder.encode(passphrase),
+    encoder.encode(dbPassphrase),
     "PBKDF2",
     false,
     ["deriveKey"],
@@ -78,28 +83,26 @@ export const getDbName = async () => {
   }
   const salt = Bytes.fromHex(hexSalt);
 
-  const key = await getKey(salt);
-  const buffer = await crypto.subtle.exportKey("raw", key);
+  // Non-secret dbNameKey != secret dbKey.
+  const dbNameKey = await getKey(salt);
+  const buffer = await crypto.subtle.exportKey("raw", dbNameKey);
   const bytes = new Bytes(buffer);
   return bytes.toHex();
 };
 
 /// encrypt: object -> JSON -> Bytes
-// (data, key) -> [iv, encrypted]
-// (data) -> [salt, iv, compressed+encrypted]
+// (data) -> [iv, encrypted]
+// (data, true) -> [salt, iv, compressed+encrypted]
 
-const encrypt = async (data, key) => {
-  let salt;
-  if (!key) {
-    salt = getSalt();
-    key = await getKey(salt);
-  }
-
+const encrypt = async (data, isExport) => {
+  const salt = isExport ? getSalt() : null;
+  const key = isExport ? await getKey(salt) : dbKey;
   const iv = getIV();
+
   const jsonified = JSON.stringify(data);
   const encoder = new TextEncoder();
   let bytes = encoder.encode(jsonified);
-  if (salt) bytes = tryCompress(bytes);
+  if (isExport) bytes = tryCompress(bytes);
 
   const encrypted = await crypto.subtle.encrypt(
     {
@@ -134,7 +137,7 @@ const tryCompress = async (bytes) => {
 
 /// decrypt: Bytes -> JSON -> object
 
-export const decrypt = async (bytes, key) => {
+export const decrypt = async (bytes, isImport) => {
   const buffer = bytes.buffer;
   let i = bytes.byteOffset;
 
@@ -144,11 +147,9 @@ export const decrypt = async (bytes, key) => {
     return part;
   };
 
-  if (!key) key = await getKey(cut(saltSize));
+  const key = isImport ? await getKey(cut(saltSize)) : dbKey;
   const iv = cut(ivSize);
-  const encrypted = cut(bytes.length - (
-    i - bytes.byteOffset
-  ));
+  const encrypted = cut(bytes.length - (i - bytes.byteOffset));
 
   let decrypted;
   try {
