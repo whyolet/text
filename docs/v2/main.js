@@ -22,7 +22,7 @@ showBanner(o(".header", "Loading..."));
       "You've opened Whyolet Text", o("br"),
       "in another tab.", o("br"),
       o("br"),
-      "Please either close or:"
+      "Please close it here or:"
     ),
     restartButton,
   );
