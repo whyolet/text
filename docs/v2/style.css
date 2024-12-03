@@ -180,10 +180,10 @@ a:active > .icon,
 
   /* Areas/shortcuts, except `q` and `w` */
   grid-template-areas:
-    "m o q q q q q q f s"
+    "m . q q q q q q f s"
     ". w w w w w w w w l"
     ". w w w w w w w w ."
-    "t w w w w w w w w u"
+    "o w w w w w w w w u"
     "b w w w w w w w w r"
     "h w w w w w w w w d"
     ". w w w w w w w w ."
