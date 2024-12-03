@@ -10,27 +10,11 @@
 }
 
 @font-face {
-  font-family: "Ubuntu";
-  font-style: normal;
-  font-weight: 300;
+  font-family: "SourceCodePro";
   font-display: swap;
   src:
-    local("Ubuntu Light"),
-    local("Ubuntu-Light"),
-    url("fonts/Ubuntu-Light.woff2") format("woff2"),
-    url("fonts/Ubuntu-Light.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "Ubuntu";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src:
-    local("Ubuntu Bold"),
-    local("Ubuntu-Bold"),
-    url("fonts/Ubuntu-Bold.woff2") format("woff2"),
-    url("fonts/Ubuntu-Bold.ttf") format("truetype");
+    local("Source Code Pro"),
+    url("fonts/SourceCodePro-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
@@ -56,9 +40,8 @@
   background-color: var(--back);
   -webkit-tap-highlight-color: transparent;
 
-  font-family: "Ubuntu", sans-serif;
-  font-style: normal;
-  font-weight: 300;
+  font-family: "SourceCodePro", monospace;
+  font-weight: 400;
   font-size: 1rem;
 }
 
