@@ -1,30 +1,36 @@
-import {decrypt, getDbName, getKey, getSalt} from "./crypto.js";
+import {decrypt, getDbName, getKey, getSalt, setKey} from "./crypto.js";
 import {o, showBanner} from "./ui.js";
 
-/// idb, stores, conf, mem, onDbError
+/// idb, stores, conf, mem
 
 let idb;
 
-const stores = {
+const stores = Object.seal({
   page: "page",
   op: "op",
   conf: "conf",
-};
+});
 
-const conf = {
+const conf = Object.seal({
   salt: "salt",
   zoom: "zoom",
   recentTags: "recentTags",
   opIds: "opIds",
-};
+});
 
-export const mem = {};
+export const mem = Object.seal({
+  salt: null,
+  zoom: null,
+  recentTags: null,
+  opIds: null,
+  pages: null,
+});
+
+/// onDbError, updateAppVersion
 
 const onDbError = (event) => {
   throw event.target.error;
 };
-
-/// updateAppVersion
 
 const updateAppVersion = () => {
   showBanner(o(".header", "Updating..."));
@@ -73,7 +79,7 @@ export const load = async () => await new Promise(async (doneLoading) => {
     idb.onversionchange = updateAppVersion;
 
     await loadConf(conf.salt, getSalt, true);
-    mem.key = await getKey(mem.salt);
+    setKey(await getKey(mem.salt));
 
     await Promise.all([
       loadConf(conf.zoom, () => 100),
@@ -107,7 +113,7 @@ const loadConf = async (id, getDefault, isPlain) => {
   mem[id] = (
     value ? (
       isPlain ? value
-      : await decrypt(value, mem.key)
+      : await decrypt(value)
     )
     : getDefault()
   );
@@ -127,7 +133,7 @@ const loadPages = async () => {
   const buffers = event.target.result;
 
   const pages = await Promise.all(
-    buffers.map(buffer => decrypt(buffer, mem.key))
+    buffers.map(buffer => decrypt(buffer))
   );
 
   mem.pages = {};
