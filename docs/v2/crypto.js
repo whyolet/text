@@ -1,14 +1,16 @@
 import {o, restartButton, showBanner} from "./ui.js";
 
+/// Bytes
+
 const Bytes = Uint8Array;
 
-/// hexify / dehexify
+Bytes.prototype.toHex ??= function () {
+  return Array.from(this).map(
+    byte => byte.toString(16).padStart(2, "0")
+  ).join("");
+};
 
-const hexify = (bytes) => Array.from(bytes).map(
-  byte => byte.toString(16).padStart(2, "0")
-).join("");
-
-const dehexify = (hexes) => new Bytes(
+Bytes.fromHex ??= (hexes) => new Bytes(
   Array.from(hexes.matchAll(/../g))
   .map(match => parseInt(match[0], 16))
 );
@@ -71,14 +73,15 @@ export const getDbName = async () => {
   const saltName = "dbNameSalt";
   let hexSalt = localStorage.getItem(saltName);
   if (!hexSalt) {
-    hexSalt = hexify(getSalt());
+    hexSalt = getSalt().toHex();
     localStorage.setItem(saltName, hexSalt);
   }
-  const salt = dehexify(hexSalt);
+  const salt = Bytes.fromHex(hexSalt);
 
   const key = await getKey(salt);
   const buffer = await crypto.subtle.exportKey("raw", key);
-  return hexify(new Bytes(buffer));
+  const bytes = new Bytes(buffer);
+  return bytes.toHex();
 };
 
 /// encrypt: object -> JSON -> Bytes
