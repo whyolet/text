@@ -135,12 +135,8 @@ a:active > .icon,
   padding: 0.5rem;
 }
 
-.banner * {
-  font-size: 1.2rem;
-}
-
 .banner .header {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 
