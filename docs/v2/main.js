@@ -42,32 +42,32 @@ const page = o(".page",
   /// top
 
   ib("menu", "m"),
-  ib("history", "o"),  // overdue
   o(".header", "header"),
   ib("find_in_page", "f"),
-  ib("manage_search", "s"),
+  ib("search", "s"),
+  ib("123", "l"),  // Line/s
 
   /// center
 
-  ib("tag", "t"),
+  ib("folder_open", "o"),
   ib("arrow_back", "b"),
   ib("home", "h"),
 
   ui.ta,
 
-  ib("north", "u"),  // up
-  ib("send", "l"),  // later
-  ib("south", "d"),  // down
+  ib("north", "u"),  // Up
+  ib("send", "r"),  // Right to tomoRRow/lateR
+  ib("south", "d"),  // Down
 
   /// bottom
 
   ib("backspace", "y"),
-  ib("remove", "k"),  // strike through
+  ib("remove", "k"),  // striKe through
   ib("format_indent_decrease", "e"),
   ib("format_indent_increase", "i"),
 
-  ib("undo", "z"),
-  ib("redo", "r"),
+  ib("undo", "z"),  // Ctrl+Z
+  ib("redo", "Z"),  // Ctrl+Shift+Z
 
   ib("content_cut", "x"),
   ib("content_copy", "c"),
