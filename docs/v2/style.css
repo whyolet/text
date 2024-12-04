@@ -151,23 +151,25 @@ a:active > .icon,
     repeat(3, var(--icon));
 
   grid-template-rows:
-    repeat(2, var(--icon))
+    repeat(3, var(--icon))
     1fr
     repeat(3, var(--icon))
     1fr
-    repeat(2, var(--icon));
+    repeat(3, var(--icon));
 
-  /* Areas/shortcuts, except `q` and `w` */
   grid-template-areas:
-    "m . q q q q q q f s"
+    /* Areas/shortcuts */
+    "m q q q q q q q f s"
+    ". w w w w w w w w g"
     ". w w w w w w w w l"
     ". w w w w w w w w ."
     "o w w w w w w w w u"
-    "b w w w w w w w w r"
+    "b w w w w w w w w n"
     "h w w w w w w w w d"
     ". w w w w w w w w ."
-    "y w w w w w w w w v"
-    "k e i . z Z . x c a";
+    ". w w w w w w w w ."
+    "e w w w w w w w w v"
+    "k j i . z Z . x c a";
 
   place-items: center;
 }
