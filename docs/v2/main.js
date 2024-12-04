@@ -1,32 +1,13 @@
 import "./error.js";
 import {setPassphrase} from "./crypto.js";
 import * as db from "./db.js";
-import {ib, o, on, onClick, restartButton, showBanner, ui} from "./ui.js";
+import {getAppLock} from "./nav.js";
+import {ib, o, showBanner, ui} from "./ui.js";
+
+/// loading
 
 showBanner(o(".header", "Loading..."));
-
-/// single tab app lock
-
-(async () => {
-  try {
-    await navigator.locks.request(
-      "app",
-      {steal: true},
-      () => new Promise(() => {}),
-    );
-  } catch {}
-
-  showBanner(
-    o(".header", "Paused!"),
-    o("",
-      "You've opened Whyolet Text", o("br"),
-      "in another tab.", o("br"),
-      o("br"),
-      "Please close it here or:"
-    ),
-    restartButton,
-  );
-})();
+getAppLock();
 
 /// db
 
@@ -42,9 +23,12 @@ const page = o(".page",
   /// top
 
   ib("menu", "m"),
+  
   o(".header", "header"),
+  
   ib("find_in_page", "f"),
   ib("search", "s"),
+  ib("calendar_month", "g"),  // Go to date
   ib("123", "l"),  // Line/s
 
   /// center
@@ -56,14 +40,14 @@ const page = o(".page",
   ui.ta,
 
   ib("north", "u"),  // Up
-  ib("send", "r"),  // Right to tomoRRow/lateR
+  ib("send", "n"),  // Next day/s
   ib("south", "d"),  // Down
 
   /// bottom
 
-  ib("backspace", "y"),
+  ib("backspace", "e"),  // Erase
   ib("remove", "k"),  // striKe through
-  ib("format_indent_decrease", "e"),
+  ib("format_indent_decrease", "j"),
   ib("format_indent_increase", "i"),
 
   ib("undo", "z"),  // Ctrl+Z
@@ -77,10 +61,9 @@ const page = o(".page",
 
 /// show app
 
-// TODO: goTag("draft", true);
+// TODO: openPage("draft", true);
 document.body.textContent = "";
 document.body.appendChild(page);
 
 ui.isActive = true;
 // TODO: Check it in events, on navigation.
-
