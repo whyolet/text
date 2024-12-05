@@ -88,3 +88,13 @@ export const restartButton = o(".button",
 onClick(restartButton, () => {
   location.reload();
 });
+
+/// debounced
+
+const timerIds = {};
+
+export const debounced = (timerName, millis, action) => {
+  if (timerIds[timerName]) clearTimeout(timerIds[timerName]);
+
+  timerIds[timerName] = setTimeout(action, millis);
+};
