@@ -1,4 +1,4 @@
-import {o, restartButton, showBanner} from "./ui.js";
+import {debounced, o, on, restartButton, showBanner} from "./ui.js";
 
 /// getAppLock
 ///
@@ -25,3 +25,28 @@ export const getAppLock = async () => {
     restartButton,
   );
 };
+
+/// openPage, onSetState
+
+const openedPages = [];
+
+export const openPage = (id, isTag) => {
+  openedPages.push({id, isTag});
+  const state = openedPages.length;
+  if (history.state !== state) {
+    if (history.state) {
+      history.pushState(state, "");
+    } else history.replaceState(state, "");
+  }
+
+  // `pushState/replaceState` may or may not trigger `popstate`, so we call debounced `onSetState`.
+  onSetState({state});
+};
+
+const onSetState = event => debounced("onSetState", 100, () => {
+  const state = event.state;
+  if (!state) return;
+  alert(`todo ${state}`);
+});
+
+on(window, "popstate", onSetState);
