@@ -1,5 +1,5 @@
-import {mem} from "./db.js";
-import {debounced, o, on, restartButton, showBanner, ui} from "./ui.js";
+import {openPage} from "./page.js";
+import {debounced, o, on, getRestartButton, showBanner, ui} from "./ui.js";
 
 /// getAppLock
 ///
@@ -23,11 +23,11 @@ export const getAppLock = async () => {
       o("br"),
       "Please close it here or:"
     ),
-    restartButton,
+    getRestartButton(),
   );
 };
 
-/// openScreen, screenTypes, onSetState
+/// openScreen, screenTypes
 
 export const screenTypes = Object.seal({
   page: "page",
@@ -47,6 +47,8 @@ export const openScreen = (type, props) => {
   onSetState({state: i});
 };
 
+/// onSetState
+
 const onSetState = (event) => debounced("onSetState", 100, () => {
   const i = event.state;
   if (!i) return;
@@ -58,21 +60,3 @@ const onSetState = (event) => debounced("onSetState", 100, () => {
 });
 
 on(window, "popstate", onSetState);
-
-/// openPage
-
-const openPage = (tag) => {
-  const page = mem.pages[tag] || {
-    tag,
-    text: "",
-    ss: 0,  // selectionStart
-    se: 0,  // selectionEnd
-    st: 0,  // scrollTop
-    tu: (new Date()).toISOString(),
-    // when the Text was Updated, ISO UTC
-  };
-
-  ui.ta.value = page.text;
-  ui.ta.setSelectionRange(page.ss, page.se);
-  ui.ta.scrollTop = page.st;
-};

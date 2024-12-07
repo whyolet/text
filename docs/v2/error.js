@@ -1,4 +1,4 @@
-import {o, onClick, restartButton, showBanner} from "./ui.js";
+import {o, onClick, getRestartButton, showBanner} from "./ui.js";
 
 const onError = (event) => {
 
@@ -55,7 +55,7 @@ event.reason && event.reason.stack ||
     o("",
       copyButton,
       sendButton,
-      restartButton,
+      getRestartButton(),
     ),
   );
 };

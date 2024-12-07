@@ -1,4 +1,4 @@
-import {o, restartButton, showBanner} from "./ui.js";
+import {o, getRestartButton, showBanner} from "./ui.js";
 
 /// Bytes
 
@@ -169,7 +169,7 @@ export const decrypt = async (bytes, isImport) => {
       showBanner(
         o(".header", "Decryption failed!"),
         o("", "Try another passphrase."),
-        restartButton,
+        getRestartButton(),
       );
       return null;
     }
@@ -199,7 +199,7 @@ const tryDecompress = async (buffer) => {
     showBanner(
       o(".header", "Cannot decompress!"),
       o("", "Try another browser."),
-      restartButton,
+      getRestartButton(),
     );
     return null;
   }

@@ -2,66 +2,18 @@ import "./error.js";
 import {setPassphrase} from "./crypto.js";
 import * as db from "./db.js";
 import {getAppLock, openScreen, screenTypes} from "./nav.js";
-import {ib, o, showBanner, ui} from "./ui.js";
-
-/// loading
+import {setPageUI} from "./page.js";
+import {o, showBanner, ui} from "./ui.js";
 
 showBanner(o(".header", "Loading..."));
-getAppLock();
 
-/// db
+getAppLock();
 
 setPassphrase("");
 await db.load();
 
-/// page
-
-ui.ta = o("textarea");
-
-const page = o(".page",
-
-  /// top
-
-  ib("menu", "m"),
-  
-  o(".header", "header"),
-  
-  ib("find_in_page", "f"),
-  ib("search", "s"),
-  ib("calendar_month", "g"),  // Go to date
-  ib("123", "l"),  // Line/s
-
-  /// center
-
-  ib("folder_open", "o"),
-  ib("arrow_back", "b"),
-  ib("home", "h"),
-
-  ui.ta,
-
-  ib("north", "u"),  // Up
-  ib("send", "n"),  // Next day/s
-  ib("south", "d"),  // Down
-
-  /// bottom
-
-  ib("backspace", "e"),  // Erase
-  ib("remove", "k"),  // striKe through
-  ib("format_indent_decrease", "j"),
-  ib("format_indent_increase", "i"),
-
-  ib("undo", "z"),  // Ctrl+Z
-  ib("redo", "Z"),  // Ctrl+Shift+Z
-
-  ib("content_cut", "x"),
-  ib("content_copy", "c"),
-  ib("content_paste", "v"),
-  ib("select_all", "a"),
-);
-
-/// show app
-
+setPageUI();
 openScreen(screenTypes.page, {tag: "draft"});
 
 document.body.textContent = "";
-document.body.appendChild(page);
+document.body.appendChild(ui.page);

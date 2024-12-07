@@ -77,16 +77,20 @@ export const showBanner = (...kids) => {
   document.body.appendChild(o(".banner", ...kids));
 };
 
-/// restartButton
+/// getRestartButton
 
-export const restartButton = o(".button",
-  o(".icon", "refresh"),
-  " Restart",
-);
+export const getRestartButton = () => {
+  const el = o(".button",
+    o(".icon", "refresh"),
+    " Restart",
+  );
 
-onClick(restartButton, () => {
-  location.reload();
-});
+  onClick(el, () => {
+    location.reload();
+  });
+
+  return el;
+};
 
 /// debounced
 
