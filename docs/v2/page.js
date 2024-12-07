@@ -80,16 +80,27 @@ const save = () => debounced("save", null, () => {
   const tag = mem.tag;
   const page = mem.pages[tag];
 
-  const text = ui.ta.value;
-  if (page.text !== text) {
-    page.text = text;
-    page.tu = getNow();
-  }
-  
-  page.ss = ui.ta.selectionStart;
-  page.se = ui.ta.selectionEnd;
-  page.st = ui.ta.scrollTop;
+  const next = {
+    text: ui.ta.value,
+    ss: ui.ta.selectionStart,
+    se: ui.ta.selectionEnd,
+    st: ui.ta.scrollTop,
+  };
 
+  let needSave = (
+    page.ss !== next.ss ||
+    page.se !== next.se ||
+    page.st !== next.st
+  );
+
+  if (page.text !== next.text) {
+    page.tu = getNow();
+    needSave = true;
+  }
+
+  if (!needSave) return;
+
+  Object.assign(page, next);
   alert(JSON.stringify(page));
 });
 
