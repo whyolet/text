@@ -26,27 +26,34 @@ export const getAppLock = async () => {
   );
 };
 
-/// openPage, onSetState
+/// screenTypes, openScreen, onSetState
 
-const openedPages = [];
+export const screenTypes = Object.seal({
+  page: "page",
+});
 
-export const openPage = (id, isTag) => {
-  openedPages.push({id, isTag});
-  const state = openedPages.length;
-  if (history.state !== state) {
-    if (history.state) {
-      history.pushState(state, "");
-    } else history.replaceState(state, "");
-  }
+const screens = [null];
+
+export const openScreen = (type, props) => {
+  const i = (history.state || 0) + 1;
+  screens[i] = {type, props};
+
+  if (history.state) {
+    history.pushState(i, "");
+  } else history.replaceState(i, "");
 
   // `pushState/replaceState` may or may not trigger `popstate`, so we call debounced `onSetState`.
-  onSetState({state});
+  onSetState({state: i});
 };
 
-const onSetState = event => debounced("onSetState", 100, () => {
-  const state = event.state;
-  if (!state) return;
-  alert(`todo ${state}`);
+const onSetState = (event) => debounced("onSetState", 100, () => {
+  const i = event.state;
+  if (!i) return;
+
+  const screen = screens[i];
+  if (screen.type === screenTypes.page) {
+    alert(screen.props.tag);
+  } else throw new Error(screen.type);
 });
 
 on(window, "popstate", onSetState);
