@@ -65,6 +65,3 @@ openScreen(screenTypes.page, {tag: "draft"});
 
 document.body.textContent = "";
 document.body.appendChild(page);
-
-ui.isActive = true;
-// TODO: Check it in events, on navigation.
