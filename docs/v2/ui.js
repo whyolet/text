@@ -71,7 +71,6 @@ export const ib = (name, shortcut, handler) => {
 /// showBanner
 
 export const showBanner = (...kids) => {
-  ui.isActive = false;
   db.close();
 
   document.body.textContent = "";
