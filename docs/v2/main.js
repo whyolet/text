@@ -1,7 +1,7 @@
 import "./error.js";
 import {setPassphrase} from "./crypto.js";
 import * as db from "./db.js";
-import {getAppLock} from "./nav.js";
+import {getAppLock, openScreen, screenTypes} from "./nav.js";
 import {ib, o, showBanner, ui} from "./ui.js";
 
 /// loading
@@ -61,7 +61,8 @@ const page = o(".page",
 
 /// show app
 
-// TODO: openPage("draft", true);
+openScreen(screenTypes.page, {tag: "draft"});
+
 document.body.textContent = "";
 document.body.appendChild(page);
 
