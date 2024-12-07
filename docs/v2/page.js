@@ -1,11 +1,12 @@
 import {mem} from "./db.js";
-import {ib, o, ui} from "./ui.js";
+import {debounced, ib, o, on, ui} from "./ui.js";
 
 /// setPageUI
 
 export const setPageUI = () => {
 
   ui.ta = o("textarea");
+  on(ui.ta, "input", onInput);
 
   ui.page = o(".page",
 
@@ -58,11 +59,37 @@ export const openPage = (tag) => {
     ss: 0,  // selectionStart
     se: 0,  // selectionEnd
     st: 0,  // scrollTop
-    tu: (new Date()).toISOString(),
-    // when the Text was Updated, ISO UTC
+    tu: getNow(),  // when the Text was Updated, ISO UTC
   };
+
+  mem.tag = tag;
+  mem.pages[tag] = page;
 
   ui.ta.value = page.text;
   ui.ta.setSelectionRange(page.ss, page.se);
   ui.ta.scrollTop = page.st;
 };
+
+const getNow = () => (new Date()).toISOString();
+
+/// onInput, save
+
+const onInput = () => debounced("save", 1000, save);
+
+const save = () => debounced("save", null, () => {
+  const tag = mem.tag;
+  const page = mem.pages[tag];
+
+  const text = ui.ta.value;
+  if (page.text !== text) {
+    page.text = text;
+    page.tu = getNow();
+  }
+  
+  page.ss = ui.ta.selectionStart;
+  page.se = ui.ta.selectionEnd;
+  page.st = ui.ta.scrollTop;
+
+  alert(JSON.stringify(page));
+});
+
