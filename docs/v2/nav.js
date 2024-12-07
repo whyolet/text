@@ -1,4 +1,5 @@
-import {debounced, o, on, restartButton, showBanner} from "./ui.js";
+import {mem} from "./db.js";
+import {debounced, o, on, restartButton, showBanner, ui} from "./ui.js";
 
 /// getAppLock
 ///
@@ -26,7 +27,7 @@ export const getAppLock = async () => {
   );
 };
 
-/// screenTypes, openScreen, onSetState
+/// openScreen, screenTypes, onSetState
 
 export const screenTypes = Object.seal({
   page: "page",
@@ -52,8 +53,26 @@ const onSetState = (event) => debounced("onSetState", 100, () => {
 
   const screen = screens[i];
   if (screen.type === screenTypes.page) {
-    alert(screen.props.tag);
+    openPage(screen.props.tag);
   } else throw new Error(screen.type);
 });
 
 on(window, "popstate", onSetState);
+
+/// openPage
+
+const openPage = (tag) => {
+  const page = mem.pages[tag] || {
+    tag,
+    text: "",
+    ss: 0,  // selectionStart
+    se: 0,  // selectionEnd
+    st: 0,  // scrollTop
+    tu: (new Date()).toISOString(),
+    // when the Text was Updated, ISO UTC
+  };
+
+  ui.ta.value = page.text;
+  ui.ta.setSelectionRange(page.ss, page.se);
+  ui.ta.scrollTop = page.st;
+};
