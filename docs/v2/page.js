@@ -1,5 +1,8 @@
-import {mem} from "./db.js";
-import {debounced, ib, o, on, ui} from "./ui.js";
+import {getId} from "./crypto.js";
+import * as db from "./db.js";
+import {debounce, ib, o, on, ui} from "./ui.js";
+
+const mem = db.mem;
 
 /// setPageUI
 
@@ -54,6 +57,7 @@ export const setPageUI = () => {
 
 export const openPage = (tag) => {
   const page = mem.pages[tag] || {
+    id: getId(),  // local, for save
     tag,
     text: "",
     ss: 0,  // selectionStart
@@ -74,9 +78,11 @@ const getNow = () => (new Date()).toISOString();
 
 /// onInput, save
 
-const onInput = () => debounced("save", 1000, save);
+const onInput = () => debounce("save", 1000, save);
 
-const save = () => debounced("save", null, () => {
+const save = async () => {
+  debounce("save");
+
   const tag = mem.tag;
   const page = mem.pages[tag];
 
@@ -101,6 +107,5 @@ const save = () => debounced("save", null, () => {
   if (!needSave) return;
 
   Object.assign(page, next);
-  alert(JSON.stringify(page));
-});
-
+  await db.savePage(page);
+};

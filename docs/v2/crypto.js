@@ -40,6 +40,10 @@ const getIV = () => getRandomBytes(ivSize);
 
 const getRandomBytes = (size) => crypto.getRandomValues(new Bytes(size));
 
+/// getId
+
+export const getId = () => getRandomBytes(32).toHex();
+
 /// getKey
 
 export const getKey = async (salt) => {
@@ -94,7 +98,7 @@ export const getDbName = async () => {
 // (data) -> [iv, encrypted]
 // (data, true) -> [salt, iv, compressed+encrypted]
 
-const encrypt = async (data, isExport) => {
+export const encrypt = async (data, isExport) => {
   const salt = isExport ? getSalt() : null;
   const key = isExport ? await getKey(salt) : dbKey;
   const iv = getIV();
@@ -104,7 +108,7 @@ const encrypt = async (data, isExport) => {
   let bytes = encoder.encode(jsonified);
   if (isExport) bytes = tryCompress(bytes);
 
-  const encrypted = await crypto.subtle.encrypt(
+  const encryptedBuffer = await crypto.subtle.encrypt(
     {
       name: "AES-GCM",
       iv,
@@ -113,8 +117,14 @@ const encrypt = async (data, isExport) => {
     bytes,
   );
 
+  const encrypted = new Bytes(encryptedBuffer);
   const saltLength = salt ? salt.length : 0;
-  const result = new Bytes(saltLength + iv.length + encrypted.byteLength);
+
+  const result = new Bytes(
+    saltLength +
+    iv.length +
+    encrypted.length
+  );
   if (salt) result.set(salt);
   result.set(iv, saltLength);
   result.set(encrypted, saltLength + iv.length);
@@ -166,7 +176,7 @@ export const decrypt = async (bytes, isImport) => {
       error.name === "OperationError" ||
       error.name === "InvalidAccessError"
     ) {
-      showBanner(
+      showBanner({},
         o(".header", "Decryption failed!"),
         o("", "Try another passphrase."),
         getRestartButton(),
@@ -196,7 +206,7 @@ const tryDecompress = async (buffer) => {
   ) return buffer;
 
   if (!("DecompressionStream" in window)) {
-    showBanner(
+    showBanner({},
       o(".header", "Cannot decompress!"),
       o("", "Try another browser."),
       getRestartButton(),

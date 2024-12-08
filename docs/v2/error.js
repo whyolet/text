@@ -45,7 +45,7 @@ event.reason && event.reason.stack ||
 
   /// banner
 
-  showBanner(
+  showBanner({},
     o(".header", "Error!"),
     o("",
       "Please help to fix it", o("br"),

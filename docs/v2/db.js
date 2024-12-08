@@ -1,4 +1,4 @@
-import {decrypt, getDbName, getKey, getSalt, setKey} from "./crypto.js";
+import {decrypt, encrypt, getDbName, getKey, getSalt, setKey} from "./crypto.js";
 import {o, showBanner} from "./ui.js";
 
 /// idb, stores, conf, mem
@@ -34,7 +34,9 @@ const onDbError = (event) => {
 };
 
 const updateAppVersion = () => {
-  showBanner(o(".header", "Updating..."));
+  showBanner({},
+    o(".header", "Updating..."),
+  );
   setTimeout(() => {
     location.reload();
   }, 1000);
@@ -79,7 +81,7 @@ export const load = async () => await new Promise(async (doneLoading) => {
     idb.onerror = onDbError;
     idb.onversionchange = updateAppVersion;
 
-    await loadConf(conf.salt, getSalt, true);
+    await loadOrCreateSalt();
     setKey(await getKey(mem.salt));
 
     await Promise.all([
@@ -99,9 +101,33 @@ export const load = async () => await new Promise(async (doneLoading) => {
   };
 });
 
+/// loadOrCreateSalt
+
+const loadOrCreateSalt = async () => {
+  const event = await new Promise(done => {
+    idb
+    .transaction(stores.conf)
+    .objectStore(stores.conf)
+    .get(conf.salt)
+    .onsuccess = done;
+  });
+
+  mem.salt = event.target.result;
+  if (mem.salt) return;
+
+  mem.salt = getSalt();
+  await new Promise(done => {
+    idb
+    .transaction(stores.conf, "readwrite")
+    .objectStore(stores.conf)
+    .put(mem.salt, conf.salt)
+    .onsuccess = done;
+  });
+};
+
 /// loadConf
 
-const loadConf = async (id, getDefault, isPlain) => {
+const loadConf = async (id, getDefault) => {
   const event = await new Promise(done => {
     idb
     .transaction(stores.conf)
@@ -112,10 +138,7 @@ const loadConf = async (id, getDefault, isPlain) => {
 
   const value = event.target.result;
   mem[id] = (
-    value ? (
-      isPlain ? value
-      : await decrypt(value)
-    )
+    value ? await decrypt(value)
     : getDefault()
   );
 };
@@ -131,16 +154,40 @@ const loadPages = async () => {
     .onsuccess = done;
   });
 
-  const buffers = event.target.result;
+  const encryptedPages = event.target.result;
 
   const pages = await Promise.all(
-    buffers.map(buffer => decrypt(buffer))
+    encryptedPages.map(encryptedPage => decrypt(encryptedPage))
   );
 
   mem.pages = {};
   for (const page of pages) {
     mem.pages[page.tag] = page;
   }
+};
+
+/// savePage
+
+export const savePage = async (page) => {
+  const encryptedPage = await encrypt(page);
+
+  await new Promise(done => {
+    const txn = idb.transaction(
+      [stores.op, stores.page],
+      "readwrite",
+    );
+
+    // TODO:
+    //txn
+    //.objectStore(stores.op)
+    //.add(encryptedPage);
+
+    txn
+    .objectStore(stores.page)
+    .put(encryptedPage, page.id);
+
+    txn.oncomplete = done;
+  });
 };
 
 /// close

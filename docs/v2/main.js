@@ -5,7 +5,9 @@ import {getAppLock, openScreen, screenTypes} from "./nav.js";
 import {setPageUI} from "./page.js";
 import {o, showBanner, ui} from "./ui.js";
 
-showBanner(o(".header", "Loading..."));
+showBanner({isActive: true},
+  o(".header", "Loading..."),
+);
 
 getAppLock();
 

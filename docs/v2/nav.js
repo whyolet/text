@@ -1,5 +1,5 @@
 import {openPage} from "./page.js";
-import {debounced, o, on, getRestartButton, showBanner, ui} from "./ui.js";
+import {debounce, o, on, getRestartButton, showBanner, ui} from "./ui.js";
 
 /// getAppLock
 ///
@@ -15,7 +15,7 @@ export const getAppLock = async () => {
     );
   } catch {}
 
-  showBanner(
+  showBanner({},
     o(".header", "Paused!"),
     o("",
       "You've opened Whyolet Text", o("br"),
@@ -49,7 +49,7 @@ export const openScreen = (type, props) => {
 
 /// onSetState
 
-const onSetState = (event) => debounced("onSetState", 100, () => {
+const onSetState = (event) => debounce("onSetState", 100, () => {
   const i = event.state;
   if (!i) return;
 

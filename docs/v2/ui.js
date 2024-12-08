@@ -38,7 +38,7 @@ export const o = (data, ...kids) => {
 
 /// UI elements and data.
 
-export const ui = {};
+export const ui = {isActive: true};
 
 /// on, onClick
 
@@ -70,11 +70,16 @@ export const ib = (name, shortcut, handler) => {
 
 /// showBanner
 
-export const showBanner = (...kids) => {
+export const showBanner = (props, ...kids) => {
+  if (!ui.isActive) return;
+
+  ui.isActive = props.isActive ?? false;
   db.close();
 
   document.body.textContent = "";
-  document.body.appendChild(o(".banner", ...kids));
+  document.body.appendChild(
+    o(".banner", ...kids)
+  );
 };
 
 /// getRestartButton
@@ -92,12 +97,14 @@ export const getRestartButton = () => {
   return el;
 };
 
-/// debounced
+/// debounce
 
 const timerIds = {};
 
-export const debounced = (timerName, millis, action) => {
+export const debounce = (timerName, millis, action) => {
   if (timerIds[timerName]) clearTimeout(timerIds[timerName]);
+
+  if (millis === undefined) return;
 
   timerIds[timerName] = setTimeout(action, millis);
 };
