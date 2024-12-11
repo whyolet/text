@@ -173,21 +173,52 @@ export const savePage = async (page) => {
 
   await new Promise(done => {
     const txn = idb.transaction(
-      [stores.op, stores.page],
+      [stores.page, stores.op],
       "readwrite",
     );
-
-    // TODO:
-    //txn
-    //.objectStore(stores.op)
-    //.add(encryptedPage);
 
     txn
     .objectStore(stores.page)
     .put(encryptedPage, page.id);
 
+    txn
+    .objectStore(stores.op)
+    .add(encryptedPage)
+    .onsuccess = onOpAdded;
+
     txn.oncomplete = done;
   });
+};
+
+/// onOpAdded
+
+const onOpAdded = async (event) => {
+  const opId = event.target.result;
+  mem.opIds.max = opId;
+  mem.opIds.min ??= opId;
+
+  const opIdToDelete = opId - 1000;
+  if (mem.opIds.min <= opIdToDelete) {
+    mem.opIds.min = opIdToDelete + 1;
+  }
+
+  const encryptedOpIds = await encrypt(mem.opIds);
+  const deleteRange = IDBKeyRange.upperBound(opIdToDelete);
+
+  const txn = idb.transaction(
+    [stores.conf, stores.op],
+    "readwrite",
+  );
+
+  txn
+  .objectStore(stores.conf)
+  .put(encryptedOpIds, conf.opIds);
+
+  txn
+  .objectStore(stores.op)
+  .delete(deleteRange);
+
+  // Not awaiting.
 };
 
 /// close
