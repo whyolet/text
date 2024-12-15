@@ -11,7 +11,7 @@ const stores = Object.seal({
   conf: "conf",
 });
 
-const conf = Object.seal({
+export const conf = Object.seal({
   salt: "salt",
   zoom: "zoom",
   recentTags: "recentTags",
@@ -90,7 +90,7 @@ export const load = async () => await new Promise(async (doneLoading) => {
 
       loadConf(conf.opIds, () => ({
         min: null,
-        undone: null,
+        undo: null,
         max: null,
       })),
 
@@ -117,11 +117,16 @@ const loadOrCreateSalt = async () => {
 
   mem.salt = getSalt();
   await new Promise(done => {
-    idb
-    .transaction(stores.conf, "readwrite")
+    const txn = idb.transaction(
+      stores.conf,
+      "readwrite",
+     );
+
+    txn
     .objectStore(stores.conf)
-    .put(mem.salt, conf.salt)
-    .onsuccess = done;
+    .put(mem.salt, conf.salt);
+
+    txn.oncomplete = done;
   });
 };
 
@@ -141,6 +146,25 @@ const loadConf = async (id, getDefault) => {
     value ? await decrypt(value)
     : getDefault()
   );
+};
+
+/// saveConf
+
+export const saveConf = async (id) => {
+  const encryptedValue = await encrypt(mem[id]);
+
+  await new Promise(done => {
+    const txn = idb.transaction(
+      stores.conf,
+      "readwrite",
+    );
+
+    txn
+    .objectStore(stores.conf)
+    .put(encryptedValue, id);
+
+    txn.oncomplete = done;
+  });
 };
 
 /// loadPages
@@ -168,7 +192,7 @@ const loadPages = async () => {
 
 /// savePage
 
-export const savePage = async (page) => {
+export const savePage = async (page, props) => {
   const encryptedPage = await encrypt(page);
 
   await new Promise(done => {
@@ -181,44 +205,121 @@ export const savePage = async (page) => {
     .objectStore(stores.page)
     .put(encryptedPage, page.id);
 
-    txn
-    .objectStore(stores.op)
-    .add(encryptedPage)
-    .onsuccess = onOpAdded;
+    if (props?.withoutOp) {
+      txn.oncomplete = done;
+      return;
+    }
 
-    txn.oncomplete = done;
+    // op = version of page
+
+    const adding = txn
+    .objectStore(stores.op)
+    .add(encryptedPage);
+
+    finishOpAdding(adding, done);
   });
+};
+
+/// finishOpAdding
+
+const finishOpAdding = (adding, done) => {
+  adding.onsuccess = async (event) => {
+    await Promise.all([
+      onOpAdded(event),
+      new Promise(doneTxn => {
+        adding.transaction.oncomplete = doneTxn;
+      }),
+    ]);
+
+    done();
+  };
 };
 
 /// onOpAdded
 
 const onOpAdded = async (event) => {
   const opId = event.target.result;
-  mem.opIds.max = opId;
+
   mem.opIds.min ??= opId;
+  mem.opIds.undo = null;
+  mem.opIds.max = opId;
 
   const opIdToDelete = opId - 1000;
   if (mem.opIds.min <= opIdToDelete) {
     mem.opIds.min = opIdToDelete + 1;
   }
-
-  const encryptedOpIds = await encrypt(mem.opIds);
   const deleteRange = IDBKeyRange.upperBound(opIdToDelete);
 
-  const txn = idb.transaction(
-    [stores.conf, stores.op],
-    "readwrite",
-  );
+  const encryptedOpIds = await encrypt(mem.opIds);
 
-  txn
-  .objectStore(stores.conf)
-  .put(encryptedOpIds, conf.opIds);
+  await new Promise(done => {
+    const txn = idb.transaction(
+      [stores.conf, stores.op],
+      "readwrite",
+    );
 
-  txn
-  .objectStore(stores.op)
-  .delete(deleteRange);
+    txn
+    .objectStore(stores.conf)
+    .put(encryptedOpIds, conf.opIds);
 
-  // Not awaiting.
+    txn
+    .objectStore(stores.op)
+    .delete(deleteRange);
+
+    txn.oncomplete = done;
+  });
+};
+
+/// loadOp
+
+export const loadOp = async (id) => {
+  const event = await new Promise(done => {
+    idb
+    .transaction(stores.op)
+    .objectStore(stores.op)
+    .get(id)
+    .onsuccess = done;
+  });
+
+  const encryptedOp = event.target.result;
+  if (!encryptedOp) return null;
+
+  return await decrypt(encryptedOp);
+};
+
+/// saveUndoneOps
+
+export const saveUndoneOps = async () => {
+  const event = await new Promise(done => {
+    idb
+    .transaction(stores.op)
+    .objectStore(stores.op)
+    .getAll(IDBKeyRange.bound(
+      mem.opIds.undo, mem.opIds.max,
+      false, true,
+      // undo <= id < max
+    ))
+    .onsuccess = done;
+  });
+
+  const encryptedOps = event.target.result;
+  if (!encryptedOps) return;
+
+  encryptedOps.reverse();
+
+  await new Promise(done => {
+    const txn = idb.transaction(
+      stores.op,
+      "readwrite",
+    );
+
+    const opStore = txn.objectStore(stores.op);
+    let adding;
+
+    for (const encryptedOp of encryptedOps) adding = opStore.add(encryptedOp);
+
+    finishOpAdding(adding, done);
+  });
 };
 
 /// close

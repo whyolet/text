@@ -178,8 +178,12 @@ a:active > .icon,
   grid-area: q;
   font-weight: 700;
   font-size: 1.2rem;
-  color: var(--tool);
+  color: var(--high);
   overflow-x: hidden;
+}
+
+.page > .header.pinned {
+  color: var(--tool);
 }
 
 textarea {

@@ -1,4 +1,4 @@
-import {openPage} from "./page.js";
+import {openPageByTag} from "./page.js";
 import {debounce, o, on, getRestartButton, showBanner, ui} from "./ui.js";
 
 /// getAppLock
@@ -55,7 +55,7 @@ const onSetState = (event) => debounce("onSetState", 100, () => {
 
   const screen = screens[i];
   if (screen.type === screenTypes.page) {
-    openPage(screen.props.tag);
+    openPageByTag(screen.props.tag);
   } else throw new Error(screen.type);
 });
 

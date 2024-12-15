@@ -1,4 +1,5 @@
 import * as db from "./db.js";
+import {save} from "./page.js";
 
 /// o - bullet point in a tree of elements:
 /// o("tag.class", ...kids)
@@ -60,8 +61,9 @@ export const ib = (name, shortcut, handler) => {
     name,
   );
 
-  onClick(el, () => {
+  onClick(el, async () => {
     ui.ta.focus();
+    await save();
     if (handler) handler();
   });
 
@@ -107,4 +109,36 @@ export const debounce = (timerName, millis, action) => {
   if (millis === undefined) return;
 
   timerIds[timerName] = setTimeout(action, millis);
+};
+
+/// toast
+
+let toastTimerId = 0;
+let pinnedMessage = "";
+const pinned = "pinned";
+
+export const toast = (message, props) => {
+  const isPinned = props?.isPinned;
+  if (isPinned) pinnedMessage = message;
+
+  if (toastTimerId) {
+    if (isPinned) return; // Keep showing time-limited message.
+
+    clearTimeout(toastTimerId);
+    toastTimerId = 0;
+  }
+
+  ui.header.textContent = message;
+  const cls = ui.header.classList;
+  if (isPinned) {
+    cls.add(pinned);
+    return;
+  }
+  cls.remove(pinned);
+
+  toastTimerId = setTimeout(() => {
+    toastTimerId = 0;
+    ui.header.textContent = pinnedMessage;
+    cls.add(pinned);
+  }, 1000);
 };
