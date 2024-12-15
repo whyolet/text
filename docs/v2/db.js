@@ -193,6 +193,8 @@ const loadPages = async () => {
 /// savePage
 
 export const savePage = async (page, props) => {
+  const withoutOp = props?.withoutOp;
+
   const encryptedPage = await encrypt(page);
 
   await new Promise(done => {
@@ -205,29 +207,29 @@ export const savePage = async (page, props) => {
     .objectStore(stores.page)
     .put(encryptedPage, page.id);
 
-    if (props?.withoutOp) {
+    if (withoutOp) {
       txn.oncomplete = done;
       return;
     }
 
     // op = version of page
 
-    const adding = txn
+    const addingOp = txn
     .objectStore(stores.op)
     .add(encryptedPage);
 
-    finishOpAdding(adding, done);
+    finalizeAddingOp(addingOp, done);
   });
 };
 
-/// finishOpAdding
+/// finalizeAddingOp
 
-const finishOpAdding = (adding, done) => {
-  adding.onsuccess = async (event) => {
+const finalizeAddingOp = (addingOp, done) => {
+  addingOp.onsuccess = async (event) => {
     await Promise.all([
       onOpAdded(event),
       new Promise(doneTxn => {
-        adding.transaction.oncomplete = doneTxn;
+        addingOp.transaction.oncomplete = doneTxn;
       }),
     ]);
 
@@ -314,11 +316,11 @@ export const saveUndoneOps = async () => {
     );
 
     const opStore = txn.objectStore(stores.op);
-    let adding;
+    let addingOp;
 
-    for (const encryptedOp of encryptedOps) adding = opStore.add(encryptedOp);
+    for (const encryptedOp of encryptedOps) addingOp = opStore.add(encryptedOp);
 
-    finishOpAdding(adding, done);
+    finalizeAddingOp(addingOp, done);
   });
 };
 
