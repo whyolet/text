@@ -72,7 +72,7 @@ Emacs is an old text editor. It has no "Redo" action, just an unusual "Undo":
 But...
 * Imagine the same example,
   * but instead of pressing a letter on the keyboard,
-  * you're just looking around by moving a cursor without changing the text.
+  * you're just looking around by moving the cursor without changing the text.
 * Emacs still treats this as a new version 6.
 * "Undo" will actually redo now,
   * which may be an unexpected behavior (UX bug),
