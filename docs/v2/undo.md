@@ -33,7 +33,7 @@ Most text editors disable "Redo" when you change the text:
 
 ## Emacs
 
-Emacs is an old text editor. It has no "Redo" action at all, just an unusual "Undo":
+Emacs is an old text editor. It has no "Redo" action, just an unusual "Undo":
 
 * Change the text 5 times.
 * Undo twice.
@@ -69,9 +69,14 @@ Emacs is an old text editor. It has no "Redo" action at all, just an unusual "Un
 * If you keep undoing you will see older versions too.
 * Being able to undo to any version avoids data loss, nice!
 
-* Now imagine the same example, but instead of pressing a letter on the keyboard you're just looking around by moving a cursor without changing the text.
+But...
+* Imagine the same example,
+  * but instead of pressing a letter on the keyboard,
+  * you're just looking around by moving a cursor without changing the text.
 * Emacs still treats this as a new version 6.
-* "Undo" will actually redo now, which may be an unexpected behavior (UX error) if you planned to look around and keep undoing.
+* "Undo" will actually redo now,
+  * which may be an unexpected behavior (UX bug),
+  * if you wanted to look around and keep undoing.
 
 ## Whyolet Text
 
@@ -89,6 +94,8 @@ Whyolet Text editor tries to have the best of both worlds:
 ```
 
 * Simple separate "Undo" and "Redo".
-* If you changed the text, you can undo to any version - no data loss.
+* If you've changed the text, you can undo to any version - no data loss.
 * If you're just moving around without changing the text, "Undo" keeps undoing as expected.
-* The latest 1000 versions are kept in the persistent local database, so if you (accidentally) close the app, you can re-open it and continue undoing/redoing.
+* The latest 1000 versions are kept in the persistent local database,
+  * so if you've (accidentally) closed the app,
+  * you can re-open it and continue undoing/redoing.
