@@ -1,7 +1,7 @@
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {onBack, onOpen} from "./nav.js";
-import {onStrike} from "./sel.js";
+import {onErase, onStrike} from "./sel.js";
 import {debounce, ib, o, on, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
@@ -45,7 +45,7 @@ export const initPageUI = () => {
 
     /// bottom
 
-    ib("backspace", "e"),  // Erase
+    ib("backspace", "e", onErase),
     ib("remove", "k", onStrike),  // striKe through
     ib("format_indent_decrease", "j"),
     ib("format_indent_increase", "i"),
@@ -115,12 +115,12 @@ export const save = async () => {
     needSave = true;
   }
 
+  Object.assign(page, next);
   if (!needSave) return;
 
   if (mem.opIds.undo) {
     await db.saveUndoneOps();
   }
 
-  Object.assign(page, next);
   await db.savePage(page);
 };
