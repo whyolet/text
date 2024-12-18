@@ -1,5 +1,7 @@
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
+import {onBack, onOpen} from "./nav.js";
+import {onStrike} from "./sel.js";
 import {debounce, ib, o, on, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
@@ -7,9 +9,9 @@ const mem = db.mem;
 
 const getNow = () => (new Date()).toISOString();
 
-/// setPageUI
+/// initPageUI
 
-export const setPageUI = () => {
+export const initPageUI = () => {
 
   ui.header = o(".header");
 
@@ -24,15 +26,15 @@ export const setPageUI = () => {
     
     ui.header,
     
-    ib("find_in_page", "f"),
-    ib("search", "s"),
     ib("calendar_month", "g"),  // Go to date
+    ib("search", "s"),
+    ib("find_in_page", "f"),
     ib("123", "l"),  // Line/s
 
     /// center
 
-    ib("folder_open", "o"),
-    ib("arrow_back", "b"),
+    ib("folder_open", "o", onOpen),
+    ib("arrow_back", "b", onBack),
     ib("home", "h"),
 
     ui.ta,
@@ -44,7 +46,7 @@ export const setPageUI = () => {
     /// bottom
 
     ib("backspace", "e"),  // Erase
-    ib("remove", "k"),  // striKe through
+    ib("remove", "k", onStrike),  // striKe through
     ib("format_indent_decrease", "j"),
     ib("format_indent_increase", "i"),
 
@@ -75,10 +77,11 @@ export const openPageByTag = (tag) => {
 };
 
 export const openPage = (page) => {
-  mem.tag = page.tag;
+  mem.page = page;
+  mem.pages[page.tag] = page;
+
   toast(page.tag, {isPinned: true});
 
-  mem.pages[page.tag] = page;
   ui.ta.value = page.text;
   ui.ta.setSelectionRange(page.ss, page.se);
   ui.ta.scrollTop = page.st;
@@ -91,8 +94,8 @@ const onInput = () => debounce("save", 1000, save);
 export const save = async () => {
   debounce("save");
 
-  const tag = mem.tag;
-  const page = mem.pages[tag];
+  const page = mem.page;
+  if (!page) return;
 
   const next = {
     text: ui.ta.value,

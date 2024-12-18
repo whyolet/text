@@ -24,7 +24,7 @@ export const mem = Object.seal({
   recentTags: null,
   opIds: null,
   pages: null,
-  tag: null,
+  page: null,
 });
 
 /// onDbError, updateAppVersion

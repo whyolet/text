@@ -1,5 +1,8 @@
-import {openPageByTag} from "./page.js";
-import {debounce, o, on, getRestartButton, showBanner, ui} from "./ui.js";
+import * as db from "./db.js";
+import {openPageByTag, save} from "./page.js";
+import {debounce, o, on, getRestartButton, showBanner, toast, ui} from "./ui.js";
+
+const mem = db.mem;
 
 /// getAppLock
 ///
@@ -49,9 +52,11 @@ export const openScreen = (type, props) => {
 
 /// onSetState
 
-const onSetState = (event) => debounce("onSetState", 100, () => {
+const onSetState = (event) => debounce("onSetState", 100, async () => {
   const i = event.state;
   if (!i) return;
+
+  await save();
 
   const screen = screens[i];
   if (screen.type === screenTypes.page) {
@@ -59,4 +64,41 @@ const onSetState = (event) => debounce("onSetState", 100, () => {
   } else throw new Error(screen.type);
 });
 
-on(window, "popstate", onSetState);
+/// initNav
+
+export const initNav = () => {
+  on(window, "popstate", onSetState);
+};
+
+/// onOpen
+
+export const onOpen = async () => {
+  const page = mem.page;
+  const text = page.text;
+  const cursor = page.ss;
+
+  const head = text.slice(0, cursor);
+  const tail = text.slice(cursor);
+
+  const start = head.search(/[^─\s]*$/);
+  const end = cursor + tail.match(/[^─\s]*/)[0].length;
+
+  let tag = text.slice(start, end);
+  if (!tag) return toast("Click a word first!");
+
+  if (tag.charAt(0) !== "#") {
+    ui.ta.setRangeText("#", start, start);
+    await save();
+  }
+
+  tag = tag.replace(/^#+/, "");
+  openScreen(screenTypes.page, {tag});
+};
+
+/// onBack
+
+export const onBack = async () => {
+  if (history.state > 1) {
+    history.back();
+  } else toast("Open something first!");
+};
