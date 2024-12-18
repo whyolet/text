@@ -4,6 +4,31 @@ import {ui} from "./ui.js";
 
 const mem = db.mem;
 
+/// getSel
+
+const getSel = (props) => {
+  const withNewline = props?.withNewline;
+
+  let {
+    text,
+    ss: start,
+    se: end,
+  } = mem.page;
+
+  if (start === end) {
+    start = text.slice(0, start).search(/[^\r\n]*$/);
+
+    end += text.slice(end).match(
+      withNewline ?
+      /[^\r\n]*\r?\n?/
+      : /[^\r\n]*/
+    )[0].length;
+  }
+
+  const sel = text.slice(start, end);
+  return {start, end, sel};
+};
+
 /// strike
 
 const strike = "─";
@@ -15,18 +40,9 @@ const newline_striker = strikes + "$&" + strikes;
 /// onStrike
 
 export const onStrike = async () => {
-  const page = mem.page;
-  const text = page.text;
+  const {start, end, sel} = getSel();
 
-  let start = page.ss, end = page.se;
-  if (start === end) {
-    start = text.slice(0, start).search(/[^\r\n]*$/);
-    end += text.slice(end).match(/[^\r\n]*/)[0].length;
-  }
-
-  let sel = text.slice(start, end);
-
-  sel = sel.includes(strike) ?
+  const next = sel.includes(strike) ?
     sel.replaceAll(strike, "")
     : (
       strikes +
@@ -34,6 +50,14 @@ export const onStrike = async () => {
       strikes
     );
 
-  ui.ta.setRangeText(sel, start, end, "select");
+  ui.ta.setRangeText(next, start, end, "select");
+  await save();
+};
+
+/// onErase
+
+export const onErase = async () => {
+  const {start, end} = getSel({withNewline: true});
+  ui.ta.setRangeText("", start, end, "end");
   await save();
 };
