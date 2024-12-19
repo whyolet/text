@@ -4,6 +4,9 @@ import {debounce, o, on, getRestartButton, showBanner, toast, ui} from "./ui.js"
 
 const mem = db.mem;
 
+const folder = "📂";
+const folderCodePoint = folder.codePointAt(0);
+
 /// getAppLock
 ///
 /// Usage: getAppLock();
@@ -81,15 +84,16 @@ export const onOpen = async () => {
   const start = head.search(/[^─\s]*$/);
   const end = cursor + tail.match(/[^─\s]*/)[0].length;
 
-  let tag = text.slice(start, end);
+  const hashtag = text.slice(start, end);
+  const tag = hashtag.replaceAll(folder, "");
+
   if (!tag) return toast("Click a word first!");
 
-  if (tag.charAt(0) !== "#") {
-    ui.ta.setRangeText("#", start, start);
+  if (hashtag.codePointAt(0) !== folderCodePoint) {
+    ui.ta.setRangeText(folder, start, start);
     await save();
   }
 
-  tag = tag.replace(/^#+/, "");
   openScreen(screenTypes.page, {tag});
 };
 
