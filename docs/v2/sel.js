@@ -11,8 +11,8 @@ const getSel = (props) => {
 
   let {
     text,
-    ss: start,
-    se: end,
+    selStart: start,
+    selEnd: end,
   } = mem.page;
 
   if (start === end) {
@@ -25,8 +25,8 @@ const getSel = (props) => {
     )[0].length;
   }
 
-  const sel = text.slice(start, end);
-  return {start, end, sel};
+  const part = text.slice(start, end);
+  return {start, end, part};
 };
 
 /// strike
@@ -40,17 +40,17 @@ const newline_striker = strikes + "$&" + strikes;
 /// onStrike
 
 export const onStrike = async () => {
-  const {start, end, sel} = getSel();
+  const {start, end, part} = getSel();
 
-  const next = sel.includes(strike) ?
-    sel.replaceAll(strike, "")
+  const result = part.includes(strike) ?
+    part.replaceAll(strike, "")
     : (
       strikes +
-      sel.replaceAll(/[\r\n]+/g, newline_striker) +
+      part.replaceAll(/[\r\n]+/g, newline_striker) +
       strikes
     );
 
-  ui.ta.setRangeText(next, start, end, "select");
+  ui.ta.setRangeText(result, start, end, "select");
   await save();
 };
 

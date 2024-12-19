@@ -73,9 +73,7 @@ export const initNav = () => {
 /// onOpen
 
 export const onOpen = async () => {
-  const page = mem.page;
-  const text = page.text;
-  const cursor = page.ss;
+  const {text, selStart: cursor} = mem.page;
 
   const head = text.slice(0, cursor);
   const tail = text.slice(cursor);

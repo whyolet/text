@@ -7,7 +7,7 @@ import {onRedo, onUndo} from "./undo.js";
 
 const mem = db.mem;
 
-const getNow = () => (new Date()).toISOString();
+const getNow = () => (new Date()).toISOString();  // UTC
 
 /// initPageUI
 
@@ -67,10 +67,10 @@ export const openPageByTag = (tag) => {
     id: getId(),  // local, for save
     tag,
     text: "",
-    ss: 0,  // selectionStart
-    se: 0,  // selectionEnd
-    st: 0,  // scrollTop
-    tu: getNow(),  // when the Text was Updated, ISO UTC
+    edited: getNow(),  // text was updated by user
+    selStart: 0,
+    selEnd: 0,
+    scroll: 0,
   };
 
   openPage(page);
@@ -83,8 +83,13 @@ export const openPage = (page) => {
   toast(page.tag, {isPinned: true});
 
   ui.ta.value = page.text;
-  ui.ta.setSelectionRange(page.ss, page.se);
-  ui.ta.scrollTop = page.st;
+
+  ui.ta.setSelectionRange(
+    page.selStart,
+    page.selEnd,
+  );
+
+  ui.ta.scrollTop = page.scroll;
 };
 
 /// onInput, save
@@ -99,19 +104,19 @@ export const save = async () => {
 
   const next = {
     text: ui.ta.value,
-    ss: ui.ta.selectionStart,
-    se: ui.ta.selectionEnd,
-    st: ui.ta.scrollTop,
+    selStart: ui.ta.selectionStart,
+    selEnd: ui.ta.selectionEnd,
+    scroll: ui.ta.scrollTop,
   };
 
   let needSave = mem.opIds.undo ? false : (
-    page.ss !== next.ss ||
-    page.se !== next.se ||
-    page.st !== next.st
+    page.selStart !== next.selStart ||
+    page.selEnd !== next.selEnd ||
+    page.scroll !== next.scroll
   );
 
   if (page.text !== next.text) {
-    page.tu = getNow();
+    page.edited = getNow();
     needSave = true;
   }
 
