@@ -2,7 +2,7 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {onBack, onOpen} from "./nav.js";
 import {onErase, onStrike} from "./sel.js";
-import {debounce, ib, o, on, toast, ui} from "./ui.js";
+import {debounce, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
 const mem = db.mem;
@@ -14,6 +14,7 @@ const getNow = () => (new Date()).toISOString();  // UTC
 export const initPageUI = () => {
 
   ui.header = o(".header");
+  onClick(ui.header, () => ui.page.classList.toggle("zen-mode"));
 
   ui.ta = o("textarea");
   on(ui.ta, "input", onInput);
@@ -58,6 +59,8 @@ export const initPageUI = () => {
     ib("content_paste", "v"),
     ib("select_all", "a"),
   );
+
+  onClick(ui.page, () => ui.ta.focus());
 };
 
 /// openPage/ByTag
