@@ -186,6 +186,17 @@ a:active > .icon,
   color: var(--tool);
 }
 
+.page .icon {
+  transition:
+    opacity 1s,
+    visibility 1s;
+}
+
+.page.zen-mode .icon {
+  opacity: 0;
+  visibility: hidden;
+}
+
 textarea {
   grid-area: w;
   display: block;  /* Avoid parent scrollbar and visible background */
