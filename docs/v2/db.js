@@ -25,6 +25,7 @@ export const mem = Object.seal({
   opIds: null,
   pages: null,
   page: null,
+  textLength: 0,  // for autoindent
 });
 
 /// onDbError, updateAppVersion
