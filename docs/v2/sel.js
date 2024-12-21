@@ -8,6 +8,7 @@ const mem = db.mem;
 
 export const getSel = (props) => {
   const withNewline = props?.withNewline;
+  const wholeLines = props?.wholeLines;
 
   let {
     text,
@@ -15,7 +16,7 @@ export const getSel = (props) => {
     selEnd: end,
   } = mem.page;
 
-  if (start === end) {
+  if (start === end || wholeLines) {
     start = text.slice(0, start).search(/[^\r\n]*$/);
 
     end += text.slice(end).match(
