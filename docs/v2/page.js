@@ -3,7 +3,7 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {onBack, onOpen} from "./nav.js";
-import {onErase, onStrike} from "./sel.js";
+import {onErase, onSelAll, onStrike} from "./sel.js";
 import {debounce, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
@@ -59,7 +59,7 @@ export const initPageUI = () => {
     ib("content_cut", "x", onCut),
     ib("content_copy", "c", onCopy),
     ib("content_paste", "v", onPaste),
-    ib("select_all", "a"),
+    ib("select_all", "a", onSelAll),
   );
 
   onClick(ui.page, () => ui.ta.focus());
