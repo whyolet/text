@@ -62,3 +62,12 @@ export const onErase = async () => {
   ui.ta.setRangeText("", start, end, "end");
   await save();
 };
+
+/// onSelAll
+
+export const onSelAll = () => {
+  const focused = document.activeElement;
+  if (!focused) return;
+
+  focused.setSelectionRange(0, focused.value.length);
+}
