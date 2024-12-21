@@ -6,7 +6,7 @@ const mem = db.mem;
 
 /// getSel
 
-const getSel = (props) => {
+export const getSel = (props) => {
   const withNewline = props?.withNewline;
 
   let {
@@ -32,7 +32,7 @@ const getSel = (props) => {
 /// strike
 
 const strike = "─";
-// NOTE: This char is used in few precompiled /.../ regexes directly.
+// NOTE: This char is also used in few precompiled /.../ regexes directly.
 
 const strikes = strike + strike;
 const newline_striker = strikes + "$&" + strikes;
