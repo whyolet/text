@@ -74,3 +74,26 @@ export const onIndent = async () => {
   ui.ta.setRangeText(result, start, end, "select");
   await save();
 };
+
+/// onDedent
+
+export const onDedent = async () => {
+  const {start, end, part} = getSel({wholeLines: true});
+
+  const result = part
+  .split("\n")
+  .map(line => {
+    let prefix = indent;
+    while (prefix) {
+      if (line.startsWith(prefix)) {
+        return line.slice(prefix.length);
+      }
+      prefix = prefix.slice(1);
+    }
+    return line;
+  })
+  .join("\n");
+  
+  ui.ta.setRangeText(result, start, end, "select");
+  await save();
+};
