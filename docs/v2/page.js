@@ -1,3 +1,4 @@
+import {onCut, onCopy, onPaste} from "./clipboard.js";
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
@@ -55,9 +56,9 @@ export const initPageUI = () => {
     ib("undo", "z", onUndo),  // Ctrl+Z
     ib("redo", "Z", onRedo),  // Ctrl+Shift+Z
 
-    ib("content_cut", "x"),
-    ib("content_copy", "c"),
-    ib("content_paste", "v"),
+    ib("content_cut", "x", onCut),
+    ib("content_copy", "c", onCopy),
+    ib("content_paste", "v", onPaste),
     ib("select_all", "a"),
   );
 
