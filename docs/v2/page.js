@@ -1,6 +1,6 @@
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
-import {autoindent} from "./indent.js";
+import {autoindent, onIndent} from "./indent.js";
 import {onBack, onOpen} from "./nav.js";
 import {onErase, onStrike} from "./sel.js";
 import {debounce, ib, o, on, onClick, toast, ui} from "./ui.js";
@@ -50,7 +50,7 @@ export const initPageUI = () => {
     ib("backspace", "e", onErase),
     ib("remove", "k", onStrike),  // striKe through
     ib("format_indent_decrease", "j"),
-    ib("format_indent_increase", "i"),
+    ib("format_indent_increase", "i", onIndent),
 
     ib("undo", "z", onUndo),  // Ctrl+Z
     ib("redo", "Z", onRedo),  // Ctrl+Shift+Z
