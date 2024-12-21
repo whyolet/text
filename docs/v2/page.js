@@ -1,5 +1,6 @@
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
+import {autoindent} from "./indent.js";
 import {onBack, onOpen} from "./nav.js";
 import {onErase, onStrike} from "./sel.js";
 import {debounce, ib, o, on, onClick, toast, ui} from "./ui.js";
@@ -82,6 +83,7 @@ export const openPageByTag = (tag) => {
 export const openPage = (page) => {
   mem.page = page;
   mem.pages[page.tag] = page;
+  mem.textLength = page.text.length;
 
   toast(page.tag, {isPinned: true});
 
@@ -95,9 +97,14 @@ export const openPage = (page) => {
   ui.ta.scrollTop = page.scroll;
 };
 
-/// onInput, save
+/// onInput
 
-const onInput = () => debounce("save", 1000, save);
+const onInput = () => {
+  autoindent();
+  debounce("save", 1000, save);
+};
+
+/// save
 
 export const save = async () => {
   debounce("save");
@@ -124,6 +131,7 @@ export const save = async () => {
   }
 
   Object.assign(page, next);
+  mem.textLength = page.text.length;
   if (!needSave) return;
 
   if (mem.opIds.undo) {
