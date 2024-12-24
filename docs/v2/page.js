@@ -2,9 +2,10 @@ import {onCut, onCopy, onPaste} from "./clipboard.js";
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
+import {hideLineForm, onLineForm, updateLineFormOnSelChange} from "./line.js";
 import {onBack, onOpen} from "./nav.js";
 import {onErase, onSelAll, onStrike} from "./sel.js";
-import {debounce, ib, o, on, onClick, toast, ui} from "./ui.js";
+import {collapse, debounce, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
 const mem = db.mem;
@@ -16,7 +17,7 @@ const getNow = () => (new Date()).toISOString();  // UTC
 export const initPageUI = () => {
 
   ui.header = o(".header");
-  onClick(ui.header, () => ui.page.classList.toggle("zen-mode"));
+  onClick(ui.header, onHeader);
 
   ui.ta = o("textarea");
   on(ui.ta, "input", onInput);
@@ -32,7 +33,7 @@ export const initPageUI = () => {
     ib("calendar_month", "g"),  // Go to date
     ib("search", "s"),
     ib("find_in_page", "f"),
-    ib("123", "l"),  // Line/s
+    ib("123", "l", onLineForm),
 
     /// center
 
@@ -96,7 +97,17 @@ export const openPage = (page) => {
   );
 
   ui.ta.scrollTop = page.scroll;
+
+  updateLineFormOnSelChange();
 };
+
+/// onHeader
+
+const onHeader = () => {
+  hideLineForm();
+  collapse(ui.attic);
+  ui.page.classList.toggle("zen-mode");
+}
 
 /// onInput
 

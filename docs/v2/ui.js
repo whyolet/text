@@ -43,11 +43,31 @@ export const ui = {isActive: true};
 
 /// on, onClick
 
-export const on = (el, eventName, handler) => {
-  el.addEventListener(eventName, handler);
+export const on = (el, eventName, handler, props) => {
+  el.addEventListener(eventName, handler, props);
 };
 
 export const onClick = (el, handler) => on(el, "click", handler);
+
+/// isHidden, hide, show
+
+const hidden = "hidden";
+
+export const isHidden = (el) => el.classList.contains(hidden);
+
+export const hide = (el) => el.classList.add(hidden);
+
+export const show = (el) => el.classList.remove(hidden);
+
+/// isCollapsed, collapse, expand
+
+const collapsed = "collapsed";
+
+export const isCollapsed = (el) => el.classList.contains(collapsed);
+
+export const collapse = (el) => el.classList.add(collapsed);
+
+export const expand = (el) => el.classList.remove(collapsed);
 
 /// Icon Button.
 
@@ -141,4 +161,27 @@ export const toast = (message, props) => {
     ui.header.textContent = pinnedMessage;
     cls.add(pinned);
   }, 1000);
+};
+
+/// getInt
+
+export const getInt = (props) => {
+  const {oldValue, newValue, min, max} = props;
+  if (newValue === null) return null;
+
+  const result = parseInt(newValue, 10);
+  if (
+    result === oldValue ||
+    Number.isNaN(result)
+  ) return null;
+
+  if (
+    result < min ||
+    result > max
+  ) {
+    toast(`From ${min} to ${max}`);
+    return null;
+  }
+
+  return result;
 };

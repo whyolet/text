@@ -7,6 +7,9 @@
   --back: #332255;
 
   --icon: 2rem;
+  --thin: 0.5px solid var(--hint);
+
+  --anim: 0.5s;
 }
 
 @font-face {
@@ -78,6 +81,11 @@ textarea {
   height: 100%;
 }
 
+body {
+  display: flex;
+  flex-direction: column;
+}
+
 input::placeholder {
   color: var(--hint);
 }
@@ -135,12 +143,32 @@ a:active > .icon,
   padding: 0.5rem;
 }
 
-.banner .header {
+.banner > .header {
   font-size: 1.2rem;
   font-weight: 700;
 }
 
+.attic {
+  flex: 0 0 auto;
+  height: var(--icon);
+  border-bottom: var(--thin);
+
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.line-form > input {
+  border: var(--thin);
+  min-width: 0.2rem;
+  max-width: 10rem;
+  padding: 0.2rem 0.5rem;
+  text-align: center;
+}
+
 .page {
+  flex: 1 1 auto;
   display: grid;
 
   grid-template-columns:
@@ -186,13 +214,13 @@ a:active > .icon,
   color: var(--tool);
 }
 
-.page .icon {
+.page > .icon {
   transition:
-    opacity 1s,
-    visibility 1s;
+    opacity var(--anim),
+    visibility var(--anim);
 }
 
-.page.zen-mode .icon {
+.page.zen-mode > .icon {
   opacity: 0;
   visibility: hidden;
 }
@@ -203,4 +231,17 @@ textarea {
   scrollbar-color: var(--hint) var(--back);
   touch-action: pan-y;  /* Custom x-swipes */
   resize: none;
+}
+
+.collapsible {
+  transition: height var(--anim);
+  overflow-y: hidden;
+}
+
+.collapsed {
+  height: 0;
+}
+
+.hidden {
+  display: none;
 }
