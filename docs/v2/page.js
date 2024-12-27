@@ -3,14 +3,12 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {hideLineForm, onLineForm, updateLineFormOnSelChange} from "./line.js";
-import {onBack, onOpenDate, onOpenTag} from "./nav.js";
+import {getNow, onBack, onOpenDate, onOpenTag} from "./nav.js";
 import {onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
 import {collapse, debounce, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
 const mem = db.mem;
-
-const getNow = () => (new Date()).toISOString();  // UTC
 
 /// initPageUI
 
