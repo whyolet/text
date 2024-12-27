@@ -1,6 +1,7 @@
 // Please read "./undo.md"
 
 import * as db from "./db.js";
+import {getNow} from "./nav.js";
 import {openPage} from "./page.js";
 import {toast} from "./ui.js";
 
@@ -38,6 +39,10 @@ export const onRedo = async () => {
 
 const applyOp = async (opId) => {
   const page = await db.loadOp(opId);
+
+  if (mem.pages[page.tag]?.text !== page.text) {
+    page.edited = getNow();
+  };
 
   await Promise.all([
     db.savePage(page, {withoutOp: true}),
