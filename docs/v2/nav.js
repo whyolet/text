@@ -7,6 +7,10 @@ const mem = db.mem;
 const folder = "📂";
 const folderCodePoint = folder.codePointAt(0);
 
+/// getNow
+
+export const getNow = () => (new Date()).toISOString();  // UTC
+
 /// getAppLock
 ///
 /// Usage: getAppLock();
