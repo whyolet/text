@@ -3,7 +3,7 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {hideLineForm, onLineForm, updateLineFormOnSelChange} from "./line.js";
-import {onBack, onOpen} from "./nav.js";
+import {onBack, onOpenDate, onOpenTag} from "./nav.js";
 import {onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
 import {collapse, debounce, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
@@ -30,14 +30,14 @@ export const initPageUI = () => {
     
     ui.header,
     
-    ib("calendar_month", "g"),  // Go to date
+    ib("calendar_month", "g", onOpenDate),  // Go to date
     ib("search", "s"),
     ib("find_in_page", "f"),
     ib("123", "l", onLineForm),
 
     /// center
 
-    ib("folder_open", "o", onOpen),
+    ib("folder_open", "o", onOpenTag),
     ib("arrow_back", "b", onBack),
     ib("home", "h"),
 

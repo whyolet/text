@@ -67,15 +67,42 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
   } else throw new Error(screen.type);
 });
 
-/// initNav
+/// initNavUI
 
-export const initNav = () => {
+export const initNavUI = () => {
   on(window, "popstate", onSetState);
+
+  ui.openDateInput = o({
+    o: "input.hidden",
+    "type": "date",
+  });
+  on(ui.openDateInput, "change", onOpenDateInput);
 };
 
-/// onOpen
+/// onOpenDate, onOpenDateInput
 
-export const onOpen = async () => {
+export const onOpenDate = () => {
+  const input = ui.openDateInput;
+  input.value = "";
+  if ("showPicker" in input) {
+    try {
+      input.showPicker();
+      return;
+    } catch {}
+  }
+  input.click();
+};
+
+const onOpenDateInput = () => {
+  const tag = ui.openDateInput.value;
+  if (!tag) return;
+
+  openScreen(screenTypes.page, {tag});
+};
+
+/// onOpenTag
+
+export const onOpenTag = async () => {
   const {text, selStart: cursor} = mem.page;
 
   const head = text.slice(0, cursor);
