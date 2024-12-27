@@ -4,7 +4,7 @@ import * as db from "./db.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {hideLineForm, onLineForm, updateLineFormOnSelChange} from "./line.js";
 import {onBack, onOpen} from "./nav.js";
-import {onErase, onSelAll, onStrike} from "./sel.js";
+import {onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
 import {collapse, debounce, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
@@ -43,9 +43,9 @@ export const initPageUI = () => {
 
     ui.ta,
 
-    ib("north", "u"),  // Up
+    ib("north", "u", onMoveUp),
     ib("send", "n"),  // Next day/s
-    ib("south", "d"),  // Down
+    ib("south", "d", onMoveDown),
 
     /// bottom
 

@@ -1,6 +1,6 @@
 import * as db from "./db.js";
 import {save} from "./page.js";
-import {ui} from "./ui.js";
+import {toast, ui} from "./ui.js";
 
 const mem = db.mem;
 
@@ -17,7 +17,9 @@ export const getSel = (props) => {
   } = mem.page;
 
   if (start === end || wholeLines) {
-    start = text.slice(0, start).search(/[^\r\n]*$/);
+    start = text
+    .slice(0, start)
+    .search(/[^\r\n]*$/);
 
     end += text.slice(end).match(
       withNewline ?
@@ -61,6 +63,64 @@ export const onErase = async () => {
   const {start, end} = getSel({withNewline: true});
   ui.ta.setRangeText("", start, end, "end");
   await save();
+};
+
+/// onMoveUp, onMoveDown
+
+export const onMoveUp = () => {
+  const {start, end, part} = getSel({wholeLines: true});
+  if (!start) {
+    ui.ta.setSelectionRange(0, end);
+    return toast("Start of text reached!");
+  }
+
+  const prev = mem.page.text
+  .slice(0, start)
+  .match(/([^\r\n]*)(\r?\n?)$/);
+
+  const prevStart = prev.index;
+  const [, prevPart, newline] = prev;
+
+  const result = [
+    part,
+    newline,
+    prevPart,
+  ].join("");
+
+  ui.ta.setRangeText(result, prevStart, end);
+
+  ui.ta.setSelectionRange(
+    prevStart,
+    prevStart + (end - start),
+  );
+};
+
+export const onMoveDown = () => {
+  const text = mem.page.text;
+  const {start, end, part} = getSel({wholeLines: true});
+
+  if (end === text.length) {
+    ui.ta.setSelectionRange(start, end);
+    return toast("End of text reached!");
+  }
+
+  const [
+    ,
+    newline,
+    nextPart,
+  ] = text
+  .slice(end)
+  .match(/(\r?\n?)([^\r\n]*)/);
+
+  const result = [
+    nextPart,
+    newline,
+    part,
+  ].join("");
+
+  const added = nextPart.length + newline.length;
+  ui.ta.setRangeText(result, start, end + added);
+  ui.ta.setSelectionRange(start + added, end + added);
 };
 
 /// onSelAll
