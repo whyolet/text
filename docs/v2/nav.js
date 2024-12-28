@@ -193,12 +193,8 @@ export const onMoveOverdue = async () => {
 
   for (const tag of overdueTags) {
     const page = mem.pages[tag];
-
-    parts.push(
-      `${tag}:`,
-      page.text,
-      "",
-    );
+    const text = page.text.trim();
+    if (text) parts.push(text);
 
     Object.assign(page, {
       text: "",
@@ -211,10 +207,8 @@ export const onMoveOverdue = async () => {
     pagesToSave.push(page);
   }
 
-  parts.push(
-    `${today}:`,
-    mem.page.text,
-  );
+  const text = mem.page.text.trim();
+  if (text) parts.push(text);
 
   Object.assign(mem.page, {
     text: parts.join("\n"),
