@@ -187,7 +187,7 @@ a:active > .icon,
 
   grid-template-areas:
     /* Areas/shortcuts */
-    "m q q q q q q q g s"
+    "m p q q q q q q g s"
     ". w w w w w w w w f"
     ". w w w w w w w w l"
     ". w w w w w w w w ."

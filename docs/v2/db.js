@@ -194,7 +194,7 @@ const loadPages = async () => {
 /// savePage
 
 export const savePage = async (page, props) => {
-  const withoutOp = props?.withoutOp;
+  const {withoutOp, withoutFinalize} = props ?? {};
 
   const encryptedPage = await encrypt(page);
 
@@ -218,6 +218,11 @@ export const savePage = async (page, props) => {
     const addingOp = txn
     .objectStore(stores.op)
     .add(encryptedPage);
+
+    if (withoutFinalize) {
+      txn.oncomplete = done;
+      return;
+    };
 
     finalizeAddingOp(addingOp, done);
   });

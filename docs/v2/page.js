@@ -3,9 +3,9 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {hideLineForm, onLineForm, updateLineFormOnSelChange} from "./line.js";
-import {getNow, onBack, onOpenDate, onOpenTag} from "./nav.js";
+import {getNow, onBack, onMoveOverdue, onOpenDate, onOpenTag, showOrHideOverdue} from "./nav.js";
 import {onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
-import {collapse, debounce, ib, o, on, onClick, toast, ui} from "./ui.js";
+import {collapse, debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
 const mem = db.mem;
@@ -13,6 +13,8 @@ const mem = db.mem;
 /// initPageUI
 
 export const initPageUI = () => {
+  ui.moveOverdue = ib("history", "p", onMoveOverdue);  // Past
+  hide(ui.moveOverdue);
 
   ui.header = o(".header");
   onClick(ui.header, onHeader);
@@ -25,6 +27,7 @@ export const initPageUI = () => {
     /// top
 
     ib("menu", "m"),
+    ui.moveOverdue,
     
     ui.header,
     
@@ -97,6 +100,7 @@ export const openPage = (page) => {
   ui.ta.scrollTop = page.scroll;
 
   updateLineFormOnSelChange();
+  showOrHideOverdue();
 };
 
 /// onHeader

@@ -7,8 +7,7 @@ const mem = db.mem;
 /// getSel
 
 export const getSel = (props) => {
-  const withNewline = props?.withNewline;
-  const wholeLines = props?.wholeLines;
+  const {withNewline, wholeLines} = props ?? {};
 
   let {
     text,

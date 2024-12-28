@@ -1,15 +1,22 @@
 import * as db from "./db.js";
-import {openPageByTag, save} from "./page.js";
-import {debounce, o, on, getRestartButton, showBanner, toast, ui} from "./ui.js";
+import {openPage, openPageByTag, save} from "./page.js";
+import {debounce, hide, o, on, getRestartButton, show, showBanner, toast, ui} from "./ui.js";
 
 const mem = db.mem;
 
 const folder = "📂";
 const folderCodePoint = folder.codePointAt(0);
 
-/// getNow
+/// getNow, getTodayPlus, isDateTag
 
 export const getNow = () => (new Date()).toISOString();  // UTC
+
+export const getTodayPlus = (days) => {
+  const date = new Date(Date.now() + days * 1000*60*60*24);
+  return date.toISOString().split("T")[0];
+};
+
+export const isDateTag = (tag) => /^\d+-\d{2}-\d{2}$/.test(tag);
 
 /// getAppLock
 ///
@@ -134,4 +141,98 @@ export const onBack = async () => {
   if (history.state > 1) {
     history.back();
   } else toast("Open something first!");
+};
+
+/// showOrHideOverdue, onMoveOverdue
+
+export const showOrHideOverdue = () => {
+  const today = getTodayPlus(0);
+  if (mem.page.tag !== today) {
+    hide(ui.moveOverdue);
+    return;
+  }
+
+  for (const tag in mem.pages) {
+    if (!isOverdueTag(tag, today)) continue;
+
+    show(ui.moveOverdue);
+    return;
+  }
+
+  hide(ui.moveOverdue);
+};
+
+const isOverdueTag = (tag, today) => (
+  tag < today &&
+  isDateTag(tag) &&
+  mem.pages[tag].text
+);
+
+export const onMoveOverdue = async () => {
+  const today = getTodayPlus(0);
+  if (mem.page.tag !== today) {
+    // Midnight happened.
+    openScreen(screenTypes.page, {tag: today});
+    // It's debounced, so:
+    alert("Welcome to a new day!");
+    setTimeout(onMoveOverdue, 500);
+    return;
+  }
+
+  if (!confirm("Move overdue to today?")) return;
+
+  const overdueTags = [];
+  for (const tag in mem.pages) {
+    if (isOverdueTag(tag, today)) overdueTags.push(tag);
+  }
+  overdueTags.sort();
+
+  const now = getNow();
+  const parts = [];
+  const pagesToSave = [];
+
+  for (const tag of overdueTags) {
+    const page = mem.pages[tag];
+
+    parts.push(
+      `${tag}:`,
+      page.text,
+      "",
+    );
+
+    Object.assign(page, {
+      text: "",
+      edited: now,
+      selStart: 0,
+      selEnd: 0,
+      scroll: 0,
+    });
+
+    pagesToSave.push(page);
+  }
+
+  parts.push(
+    `${today}:`,
+    mem.page.text,
+  );
+
+  Object.assign(mem.page, {
+    text: parts.join("\n"),
+    edited: now,
+    selStart: 0,
+    selEnd: 0,
+    scroll: 0,
+  });
+
+  pagesToSave.push(mem.page);
+
+  // No `Promise.all` here:
+  // for reliable chronological undo.
+  for (const page of pagesToSave) {
+    await db.savePage(page, {
+      withoutFinalize: page !== mem.page,
+    });
+  }
+
+  openPage(mem.page);
 };

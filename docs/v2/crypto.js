@@ -99,7 +99,7 @@ export const getDbName = async () => {
 // (data, {isExport: true}) -> [salt, iv, compressed+encrypted]
 
 export const encrypt = async (data, props) => {
-  const isExport = props?.isExport;
+  const {isExport} = props ?? {};
   const salt = isExport ? getSalt() : null;
   const key = isExport ? await getKey(salt) : dbKey;
   const iv = getIV();
@@ -149,7 +149,7 @@ const tryCompress = async (bytes) => {
 /// decrypt: Bytes -> JSON -> object
 
 export const decrypt = async (bytes, props) => {
-  const isImport = props?.isImport;
+  const {isImport} = props ?? {};
   const buffer = bytes.buffer;
   let i = bytes.byteOffset;
 

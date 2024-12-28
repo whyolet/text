@@ -93,9 +93,10 @@ export const ib = (name, shortcut, handler) => {
 /// showBanner
 
 export const showBanner = (props, ...kids) => {
+  const {isActive} = props ?? {};
   if (!ui.isActive) return;
 
-  ui.isActive = props.isActive ?? false;
+  ui.isActive = isActive;
   db.close();
 
   document.body.textContent = "";
@@ -138,7 +139,7 @@ let pinnedMessage = "";
 const pinned = "pinned";
 
 export const toast = (message, props) => {
-  const isPinned = props?.isPinned;
+  const {isPinned} = props ?? {};
   if (isPinned) pinnedMessage = message;
 
   if (toastTimerId) {
