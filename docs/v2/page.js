@@ -3,7 +3,7 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {hideLineForm, onLineForm, updateLineFormOnSelChange} from "./line.js";
-import {getNow, onBack, onMoveOverdue, onOpenDate, onOpenTag, showOrHideOverdue} from "./nav.js";
+import {getNow, getTodayPlus, onBack, onMoveOverdue, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
 import {onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
 import {collapse, debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
@@ -40,7 +40,7 @@ export const initPageUI = () => {
 
     ib("folder_open", "o", onOpenTag),
     ib("arrow_back", "b", onBack),
-    ib("home", "h"),
+    ib("home", "h", onOpenHome),
 
     ui.ta,
 
@@ -88,7 +88,12 @@ export const openPage = (page) => {
   mem.pages[page.tag] = page;
   mem.textLength = page.text.length;
 
-  toast(page.tag, {isPinned: true});
+  const today = getTodayPlus(0);
+  const header = (page.tag === today ?
+    `Today ${today}`
+    : page.tag
+  );
+  toast(header, {isPinned: true});
 
   ui.ta.value = page.text;
 

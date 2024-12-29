@@ -14,7 +14,7 @@ export const onUndo = async () => {
 
   let opId = ids.undo || ids.max;
   if (!opId || opId === ids.min) {
-    return toast("This is the oldest!");
+    return toast("It's the oldest!");
   }
 
   opId--;
@@ -27,7 +27,7 @@ export const onUndo = async () => {
 export const onRedo = async () => {
   let opId = mem.opIds.undo;
   if (!opId) {
-    return toast("This is the newest!");
+    return toast("It's the newest!");
   }
 
   opId++;

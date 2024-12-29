@@ -143,6 +143,18 @@ export const onBack = async () => {
   } else toast("Open something first!");
 };
 
+/// onOpenHome
+
+export const onOpenHome = () => {
+  const today = getTodayPlus(0);
+  if (mem.page.tag === today) {
+    toast("It's today already!");
+    return;
+  }
+
+  openScreen(screenTypes.page, {tag: today});
+};
+
 /// showOrHideOverdue, onMoveOverdue
 
 export const showOrHideOverdue = () => {
