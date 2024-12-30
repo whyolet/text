@@ -106,7 +106,10 @@ export const onOpenDate = () => {
 
 const onOpenDateInput = () => {
   const tag = ui.openDateInput.value;
-  if (!tag) return;
+  if (
+    !tag ||
+    tag === mem.page.tag
+  ) return;
 
   openScreen(screenTypes.page, {tag});
 };
@@ -130,6 +133,11 @@ export const onOpenTag = async () => {
   if (hashtag.codePointAt(0) !== folderCodePoint) {
     ui.ta.setRangeText(folder, start, start);
     await save();
+  }
+
+  if (tag === mem.page.tag) {
+    toast("It's opened already!");
+    return;
   }
 
   openScreen(screenTypes.page, {tag});
