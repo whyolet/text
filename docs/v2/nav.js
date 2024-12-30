@@ -1,6 +1,7 @@
 import * as db from "./db.js";
-import {openPage, openPageByTag, save} from "./page.js";
-import {debounce, hide, o, on, getRestartButton, show, showBanner, toast, ui} from "./ui.js";
+import {getNewPage, openPage, openPageByTag, save} from "./page.js";
+import {getSel} from "./sel.js";
+import {getDateInput, debounce, hide, o, on, getRestartButton, show, showBanner, showDateInput, toast, ui} from "./ui.js";
 
 const mem = db.mem;
 
@@ -83,35 +84,18 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
 export const initNavUI = () => {
   on(window, "popstate", onSetState);
 
-  ui.openDateInput = o({
-    o: "input.hidden",
-    "type": "date",
-  });
-  on(ui.openDateInput, "change", onOpenDateInput);
+  ui.openDateInput = getDateInput(onOpenDateInput);
+  ui.moveToDateInput = getDateInput(onMoveToDateInput);
 };
 
 /// onOpenDate, onOpenDateInput
 
 export const onOpenDate = () => {
-  const input = ui.openDateInput;
-  input.value = "";
-  if ("showPicker" in input) {
-    try {
-      input.showPicker();
-      return;
-    } catch {}
-  }
-  input.click();
+  showDateInput(ui.openDateInput);
 };
 
-const onOpenDateInput = () => {
-  const tag = ui.openDateInput.value;
-  if (
-    !tag ||
-    tag === mem.page.tag
-  ) return;
-
-  openScreen(screenTypes.page, {tag});
+const onOpenDateInput = (date) => {
+  openScreen(screenTypes.page, {tag: date});
 };
 
 /// onOpenTag
@@ -209,12 +193,15 @@ export const onMoveOverdue = async () => {
 
   const now = getNow();
   const parts = [];
-  const pagesToSave = [];
 
   for (const tag of overdueTags) {
     const page = mem.pages[tag];
     const text = page.text.trim();
     if (text) parts.push(text);
+
+    await db.savePage(page, {
+      withoutFinalize: true,
+    });  // For undo.
 
     Object.assign(page, {
       text: "",
@@ -224,11 +211,17 @@ export const onMoveOverdue = async () => {
       scroll: 0,
     });
 
-    pagesToSave.push(page);
+    await db.savePage(page, {
+      withoutFinalize: true,
+    });
   }
 
   const text = mem.page.text.trim();
   if (text) parts.push(text);
+
+  await db.savePage(mem.page, {
+    withoutFinalize: true,
+  });  // For undo.
 
   Object.assign(mem.page, {
     text: parts.join("\n"),
@@ -238,15 +231,50 @@ export const onMoveOverdue = async () => {
     scroll: 0,
   });
 
-  pagesToSave.push(mem.page);
-
-  // No `Promise.all` here:
-  // for reliable chronological undo.
-  for (const page of pagesToSave) {
-    await db.savePage(page, {
-      withoutFinalize: page !== mem.page,
-    });
-  }
-
+  await db.savePage(mem.page);
   openPage(mem.page);
+};
+
+/// onMoveToDate, onMoveToDateInput
+
+export const onMoveToDate = () => {
+  const {start, end} = getSel({wholeLines: true});
+  ui.ta.setSelectionRange(start, end);
+  showDateInput(ui.moveToDateInput);
+};
+
+const onMoveToDateInput = async (date) => {
+  const {start, end, part} = getSel({
+    wholeLines: true,
+    withNewline: true,
+  });
+
+  const page = mem.pages[date] || getNewPage(date);
+  mem.pages[date] = page;
+
+  await db.savePage(page, {
+    withoutFinalize: true,
+  });  // For undo.
+
+  const parts = [
+    page.text.trim(),
+    part.trim(),
+  ];
+
+  Object.assign(page, {
+    text: parts.join("\n"),
+    edited: getNow(),
+    selStart: 0,
+    selEnd: 0,
+    scroll: 0,
+  });
+
+  await db.savePage(page, {
+    withoutFinalize: true,
+  });
+
+  ui.ta.setRangeText("", start, end, "end");
+  await save();
+
+  toast(`Moved to ${date}`);
 };

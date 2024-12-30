@@ -24,8 +24,11 @@ openScreen(screenTypes.page, {tag: getTodayPlus(0)});
 
 const body = document.body;
 body.textContent = "";
-body.appendChild(ui.attic);
-body.appendChild(ui.openDateInput);
-body.appendChild(ui.page);
+for (const el of [
+  ui.attic,
+  ui.openDateInput,
+  ui.moveToDateInput,
+  ui.page,
+]) body.appendChild(el);
 
 ui.ta.focus();

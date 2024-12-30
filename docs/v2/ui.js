@@ -1,6 +1,8 @@
 import * as db from "./db.js";
 import {save} from "./page.js";
 
+const mem = db.mem;
+
 /// o - bullet point in a tree of elements:
 /// o("tag.class", ...kids)
 /// o({o: "tag.class", attr: value}, ...kids)
@@ -118,6 +120,37 @@ export const getRestartButton = () => {
   });
 
   return el;
+};
+
+/// getDateInput, showDateInput
+
+export const getDateInput = (onSet) => {
+  const el = o({
+    o: "input.hidden",
+    "type": "date",
+  });
+
+  on(el, "change", () => {
+    const date = el.value;
+    if (!date || date === mem.page.tag) return;
+
+    onSet(date);
+  });
+
+  return el;
+};
+
+export const showDateInput = (el) => {
+  el.value = "";  // To get `change`.
+
+  if ("showPicker" in el) {
+    try {
+      el.showPicker();
+      return;
+    } catch {}
+  }
+
+  el.click();
 };
 
 /// debounce

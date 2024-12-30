@@ -3,7 +3,7 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {hideLineForm, onLineForm, updateLineFormOnSelChange} from "./line.js";
-import {getNow, getTodayPlus, onBack, onMoveOverdue, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
+import {getNow, getTodayPlus, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
 import {onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
 import {collapse, debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
@@ -45,7 +45,7 @@ export const initPageUI = () => {
     ui.ta,
 
     ib("north", "u", onMoveUp),
-    ib("send", "n"),  // Next day/s
+    ib("send", "n", onMoveToDate),  // Next
     ib("south", "d", onMoveDown),
 
     /// bottom
@@ -67,19 +67,22 @@ export const initPageUI = () => {
   onClick(ui.page, () => ui.ta.focus());
 };
 
+/// getNewPage
+
+export const getNewPage = (tag) => ({
+  id: getId(),  // local, for save
+  tag,
+  text: "",
+  edited: getNow(),  // text was updated by user
+  selStart: 0,
+  selEnd: 0,
+  scroll: 0,
+});
+
 /// openPage/ByTag
 
 export const openPageByTag = (tag) => {
-  const page = mem.pages[tag] || {
-    id: getId(),  // local, for save
-    tag,
-    text: "",
-    edited: getNow(),  // text was updated by user
-    selStart: 0,
-    selEnd: 0,
-    scroll: 0,
-  };
-
+  const page = mem.pages[tag] || getNewPage(tag);
   openPage(page);
 };
 
