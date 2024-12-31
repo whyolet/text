@@ -1,4 +1,6 @@
 import * as db from "./db.js";
+import {hideFindForm} from "./find.js";
+import {hideLineForm} from "./line.js";
 import {getNewPage, openPage, openPageByTag, save} from "./page.js";
 import {getSel} from "./sel.js";
 import {getDateInput, debounce, hide, o, on, getRestartButton, show, showBanner, showDateInput, toast, ui} from "./ui.js";
@@ -84,8 +86,16 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
 export const initNavUI = () => {
   on(window, "popstate", onSetState);
 
+  ui.attic = o(".attic collapsible collapsed");
   ui.openDateInput = getDateInput(onOpenDateInput);
   ui.moveToDateInput = getDateInput(onMoveToDateInput);
+};
+
+/// hideAtticForms
+
+export const hideAtticForms = () => {
+  hideFindForm();
+  hideLineForm();
 };
 
 /// onOpenDate, onOpenDateInput
@@ -249,8 +259,7 @@ const onMoveToDateInput = async (date) => {
     withNewline: true,
   });
 
-  const page = mem.pages[date] || getNewPage(date);
-  mem.pages[date] = page;
+  const page = mem.pages[date] ??= getNewPage(date);
 
   await db.savePage(page, {
     withoutFinalize: true,

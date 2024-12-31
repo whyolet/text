@@ -86,16 +86,12 @@ body {
   flex-direction: column;
 }
 
+input {
+  width: 100%;
+}
+
 input::placeholder {
   color: var(--hint);
-}
-
-input[type=date]::-webkit-datetime-edit {
-  visibility: hidden;
-}
-
-input[type=date]::-webkit-calendar-picker-indicator {
-  color: var(--tool);
 }
 
 ul {
@@ -159,7 +155,34 @@ a:active > .icon,
   align-items: center;
 }
 
-.line-form > input {
+.find-form {
+  flex: 1 1 auto;
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, var(--icon))
+    1fr
+    repeat(2, var(--icon))
+    1fr
+    var(--icon);
+
+  grid-template-rows: var(--icon);
+  grid-template-areas:
+    "p n f o a r w";
+
+  place-items: center;
+}
+
+.line-form {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: 1fr var(--icon);
+  grid-template-rows: var(--icon);
+  grid-template-areas: "q w";
+  place-items: center;
+}
+
+.line-form > .main > input {
   border: var(--thin);
   min-width: 0.2rem;
   max-width: 10rem;

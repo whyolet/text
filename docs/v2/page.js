@@ -1,11 +1,12 @@
 import {onCut, onCopy, onPaste} from "./clipboard.js";
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
+import {onFindForm} from "./find.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
-import {hideLineForm, onLineForm, updateLineFormOnSelChange} from "./line.js";
-import {getNow, getTodayPlus, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
+import {onLineForm, updateLineFormOnSelChange} from "./line.js";
+import {getNow, getTodayPlus, hideAtticForms, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
 import {onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
-import {collapse, debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
+import {debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
 const mem = db.mem;
@@ -33,7 +34,7 @@ export const initPageUI = () => {
     
     ib("calendar_month", "g", onOpenDate),  // Go to date
     ib("search", "s"),
-    ib("find_in_page", "f"),
+    ib("find_in_page", "f", onFindForm),
     ib("123", "l", onLineForm),
 
     /// center
@@ -114,8 +115,7 @@ export const openPage = (page) => {
 /// onHeader
 
 const onHeader = () => {
-  hideLineForm();
-  collapse(ui.attic);
+  hideAtticForms();
   ui.page.classList.toggle("zen-mode");
 }
 

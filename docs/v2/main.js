@@ -1,6 +1,7 @@
 import "./error.js";
 import {setPassphrase} from "./crypto.js";
 import * as db from "./db.js";
+import {initFindUI} from "./find.js";
 import {initLineUI} from "./line.js";
 import {getAppLock, getTodayPlus, initNavUI, openScreen, screenTypes} from "./nav.js";
 import {initPageUI} from "./page.js";
@@ -15,9 +16,9 @@ getAppLock();
 setPassphrase("");
 await db.load();
 
-ui.attic = o(".attic collapsible collapsed");
-initLineUI();
 initNavUI();
+initFindUI();
+initLineUI();
 
 initPageUI();
 openScreen(screenTypes.page, {tag: getTodayPlus(0)});

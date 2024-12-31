@@ -1,4 +1,5 @@
-import {getInt, isHidden, hide, show, isCollapsed, collapse, expand, o, on, ui} from "./ui.js";
+import {hideAtticForms} from "./nav.js";
+import {getInt, ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, ui} from "./ui.js";
 
 let lineNumber = null;
 
@@ -16,10 +17,13 @@ export const initLineUI = () => {
   ui.maxLineNumber = o("span");
 
   ui.lineForm = o(".line-form hidden",
-    "Line ",
-    ui.lineNumber,
-    " / ",
-    ui.maxLineNumber,
+    o(".main",
+      "Line ",
+      ui.lineNumber,
+      " / ",
+      ui.maxLineNumber,
+    ),
+    ib("close", "w", hideLineForm),
   );
 
   ui.attic.appendChild(ui.lineForm);
@@ -56,6 +60,7 @@ export const updateLineFormOnSelChange = () => {
 /// showLineForm
 
 export const showLineForm = () => {
+  hideAtticForms();
   expand(ui.attic);
   show(ui.lineForm);
 
