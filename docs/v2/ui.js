@@ -3,37 +3,48 @@ import {save} from "./page.js";
 
 const mem = db.mem;
 
-/// o - bullet point in a tree of elements:
-/// o("tag.class", ...kids)
-/// o({o: "tag.class", attr: value}, ...kids)
-/// Default tag is "div", no class, no kids.
+/// o
 
-export const o = (data, ...kids) => {
-  let tag_cls, attrs;
-  if (typeof data === "string") {
-    tag_cls = data;
-  } else {
-    tag_cls = data.o || "";
-    delete data.o;
-    attrs = data;
-  }
+/** o - bullet point in a tree of HTML elements.
+ *
+ * o("tag.class",
+ *   o("tag", {attr: value}, "text"),
+ *   o(".class"),
+ *   o("", {attr: cond ? val : null},
+ *     cond ? o("br") : null,
+ *   ),
+ * )
+ *
+ * `null` attrs and kids are skipped.
+ * Non-`Node` objects become attrs.
+ * Primitives like `string` become text nodes.
+ * Default `o()` has `div` tag, no class, no attrs, no kids.
+ */
 
-  const [tag, cls] = tag_cls.split(".");
-
+export const o = (tag_cls, ...kids) => {
+  const [tag, cls] = (tag_cls || "").split(".");
   const el = document.createElement(tag || "div");
   if (cls) el.className = cls;
 
-  if (attrs) for (const key in attrs) {
-    const val = attrs[key];
-    if (val !== null) el.setAttribute(key, val);
-  }
-
   for (const kid of kids) {
-    if (kid !== null) el.appendChild(
-      typeof kid === "string"
-      ? document.createTextNode(kid)
-      : kid
-    );
+    if (kid === null) continue;
+
+    if (kid instanceof Node) {
+      el.appendChild(kid);
+      continue;
+    }
+
+    if (typeof kid === "object") {
+      const attrs = kid;
+      for (const key in attrs) {
+        const val = attrs[key];
+        if (val === null) continue;
+        el.setAttribute(key, val);
+      }
+      continue;
+    }
+
+    el.appendChild(document.createTextNode(kid));
   }
 
   return el;
@@ -74,11 +85,11 @@ export const expand = (el) => el.classList.remove(collapsed);
 /// Icon Button.
 
 export const ib = (name, shortcut, handler) => {
-  const el = o(
+  const el = o(".icon button",
     {
-      "o": ".icon button",
-      "style": shortcut ? `grid-area: ${shortcut}`
-      : null,
+      "style": shortcut ?
+        `grid-area: ${shortcut}`
+        : null,
     },
     name,
   );
@@ -125,8 +136,7 @@ export const getRestartButton = () => {
 /// getDateInput, showDateInput
 
 export const getDateInput = (onSet) => {
-  const el = o({
-    o: "input.hidden",
+  const el = o("input.hidden", {
     "type": "date",
   });
 

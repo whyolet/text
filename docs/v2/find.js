@@ -4,14 +4,12 @@ import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, ui} from
 /// initFindUI
 
 export const initFindUI = () => {
-  ui.findInput = o({
-    o: "input",
+  ui.findInput = o("input", {
     style: "grid-area: f",
     placeholder: "Find…",
   });
 
-  ui.replaceInput = o({
-    o: "input",
+  ui.replaceInput = o("input", {
     style: "grid-area: r",
     placeholder: "Replace…",
   });

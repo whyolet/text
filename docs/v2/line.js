@@ -6,8 +6,7 @@ let lineNumber = null;
 /// initLineUI
 
 export const initLineUI = () => {
-  ui.lineNumber = o({
-    o: "input",
+  ui.lineNumber = o("input", {
     "type": "number",
     min: 1,
     step: 1,
