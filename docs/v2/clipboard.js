@@ -8,25 +8,38 @@ const mem = db.mem;
 /// onCut
 
 export const onCut = async () => {
-  const {start, end, part} = getSel({withNewline: true});
+  const {start, end, part, input, isTa} = getSel({
+    withNewline: true,
+    focused: true,
+  });
+
   await navigator.clipboard.writeText(part);
-  ui.ta.setRangeText("", start, end, "end");
-  await save();
+  input.setRangeText("", start, end, "end");
+  if (isTa) await save();
 };
 
 /// onCopy
 
 export const onCopy = async () => {
-  const {start, end, part} = getSel({withNewline: true});
+  const {start, end, part, input} = getSel({
+    withNewline: true,
+    focused: true,
+  });
+
   await navigator.clipboard.writeText(part);
-  ui.ta.setSelectionRange(start, end);
+  input.setSelectionRange(start, end);
 };
 
 /// onPaste
 
 export const onPaste = async () => {
   const part = await navigator.clipboard.readText();
-  const {selStart, selEnd} = mem.page;
-  ui.ta.setRangeText(part, selStart, selEnd, "end");
-  await save();
+
+  const {start, end, input, isTa} = getSel({
+    withoutExpand: true,
+    focused: true,
+  });
+
+  input.setRangeText(part, start, end, "end");
+  if (isTa) await save();
 };

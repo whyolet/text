@@ -85,6 +85,7 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
 
 export const initNavUI = () => {
   on(window, "popstate", onSetState);
+  on(document, "focusin", onFocus);
 
   ui.attic = o(".attic collapsible collapsed");
   ui.openDateInput = getDateInput(onOpenDateInput);
@@ -286,4 +287,16 @@ const onMoveToDateInput = async (date) => {
   await save();
 
   toast(`Moved to ${date}`);
+};
+
+/// onFocus
+
+const onFocus = (event) => {
+  const el = event.target;
+  if ([
+    ui.ta,
+    ui.findInput,
+    ui.replaceInput,
+  ].includes(el)) ui.focusedInput = el;
+  // `document.activeElement` may be `body` on button click!
 };

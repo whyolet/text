@@ -48,7 +48,7 @@ export const onLineForm = () => {
 
 export const updateLineFormOnSelChange = () => {
   if (
-    document.activeElement !== ui.ta ||
+    ui.focusedInput !== ui.ta ||
     isHidden(ui.lineForm)
   ) return;
 

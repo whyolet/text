@@ -51,21 +51,19 @@ export const initPageUI = () => {
 
     /// bottom
 
-    ib("backspace", "e", onErase),
-    ib("remove", "k", onStrike),  // striKe through
+    ib("backspace", "e", onErase, {focused: true}),
+    ib("remove", "k", onStrike, {focused: true}),  // striKe through
     ib("format_indent_decrease", "j", onDedent),
     ib("format_indent_increase", "i", onIndent),
 
     ib("undo", "z", onUndo),  // Ctrl+Z
     ib("redo", "Z", onRedo),  // Ctrl+Shift+Z
 
-    ib("content_cut", "x", onCut),
-    ib("content_copy", "c", onCopy),
-    ib("content_paste", "v", onPaste),
-    ib("select_all", "a", onSelAll),
+    ib("content_cut", "x", onCut, {focused: true}),
+    ib("content_copy", "c", onCopy, {focused: true}),
+    ib("content_paste", "v", onPaste, {focused: true}),
+    ib("select_all", "a", onSelAll, {focused: true}),
   );
-
-  onClick(ui.page, () => ui.ta.focus());
 };
 
 /// getNewPage

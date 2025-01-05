@@ -7,15 +7,15 @@ const mem = db.mem;
 /// getSel
 
 export const getSel = (props) => {
-  const {withNewline, wholeLines} = props ?? {};
+  const {withNewline, withoutExpand, wholeLines, focused} = props ?? {};
 
-  let {
-    text,
-    selStart: start,
-    selEnd: end,
-  } = mem.page;
+  const input = focused && ui.focusedInput || ui.ta;
+  const isTa = (input === ui.ta);
+  const text = input.value;
+  let start = input.selectionStart;
+  let end = input.selectionEnd;
 
-  if (start === end || wholeLines) {
+  if ((start === end || wholeLines) && !withoutExpand) {
     start = text
     .slice(0, start)
     .search(/[^\r\n]*$/);
@@ -28,7 +28,7 @@ export const getSel = (props) => {
   }
 
   const part = text.slice(start, end);
-  return {start, end, part};
+  return {start, end, part, input, isTa};
 };
 
 /// strike
@@ -42,7 +42,7 @@ const newline_striker = strikes + "$&" + strikes;
 /// onStrike
 
 export const onStrike = async () => {
-  const {start, end, part} = getSel();
+  const {start, end, part, input, isTa} = getSel({focused: true});
 
   const result = part.includes(strike) ?
     part.replaceAll(strike, "")
@@ -52,16 +52,20 @@ export const onStrike = async () => {
       strikes
     );
 
-  ui.ta.setRangeText(result, start, end, "select");
-  await save();
+  input.setRangeText(result, start, end, "select");
+  if (isTa) await save();
 };
 
 /// onErase
 
 export const onErase = async () => {
-  const {start, end} = getSel({withNewline: true});
-  ui.ta.setRangeText("", start, end, "end");
-  await save();
+  const {start, end, input, isTa} = getSel({
+    withNewline: true,
+    focused: true,
+  });
+
+  input.setRangeText("", start, end, "end");
+  if (isTa) await save();
 };
 
 /// onMoveUp, onMoveDown
@@ -125,8 +129,6 @@ export const onMoveDown = () => {
 /// onSelAll
 
 export const onSelAll = () => {
-  const focused = document.activeElement;
-  if (!focused) return;
-
-  focused.setSelectionRange(0, focused.value.length);
+  const input = ui.focusedInput || ui.ta;
+  input.setSelectionRange(0, input.value.length);
 }

@@ -1,4 +1,5 @@
 import {hideAtticForms} from "./nav.js";
+import {getSel} from "./sel.js";
 import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, ui} from "./ui.js";
 
 /// initFindUI
@@ -41,6 +42,9 @@ export const showFindForm = () => {
   hideAtticForms();
   expand(ui.attic);
   show(ui.findForm);
+
+  const {part} = getSel();
+  ui.findInput.value = part;
 };
 
 /// hideFindForm

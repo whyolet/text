@@ -84,7 +84,9 @@ export const expand = (el) => el.classList.remove(collapsed);
 
 /// Icon Button.
 
-export const ib = (name, shortcut, handler) => {
+export const ib = (name, shortcut, handler, props) => {
+  const {focused} = props ?? {};
+
   const el = o(".icon button",
     {
       "style": shortcut ?
@@ -95,9 +97,11 @@ export const ib = (name, shortcut, handler) => {
   );
 
   onClick(el, async () => {
-    ui.ta.focus();
-    await save();
+    const input = focused && ui.focusedInput || ui.ta;
+    input.focus();
+    if (input === ui.ta) await save();
     if (handler) handler();
+    input.focus();
   });
 
   return el;
