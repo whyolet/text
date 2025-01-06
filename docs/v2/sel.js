@@ -31,6 +31,19 @@ export const getSel = (props) => {
   return {start, end, part, input, isTa};
 };
 
+/// getFindSelected
+
+export const getFindSelected = () => {
+  const {start, end, part} = getSel({
+    withoutExpand: true,
+  });
+
+  return (
+    start === end ||
+    part.includes("\n")
+  ) ? "" : part;
+};
+
 /// strike
 
 const strike = "─";
