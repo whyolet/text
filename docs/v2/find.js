@@ -1,7 +1,7 @@
 import * as db from "./db.js";
 import {hideAtticForms} from "./nav.js";
 import {getLineEnd, getLineNumbers} from "./line.js";
-import {getSel} from "./sel.js";
+import {getFindSelected, getSel} from "./sel.js";
 import {save} from "./page.js";
 import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, toast, ui} from "./ui.js";
 
@@ -48,8 +48,7 @@ export const showFindForm = () => {
   expand(ui.attic);
   show(ui.findForm);
 
-  const {part} = getSel();
-  ui.findInput.value = part;
+  ui.findInput.value = getFindSelected();
 };
 
 /// hideFindForm
