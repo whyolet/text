@@ -1,7 +1,7 @@
 import {hideAtticForms} from "./nav.js";
 import {getInt, ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, ui} from "./ui.js";
 
-let lineNumber = null;
+let recentLineNumber = null;
 
 /// initLineUI
 
@@ -63,22 +63,31 @@ export const showLineForm = () => {
   expand(ui.attic);
   show(ui.lineForm);
 
+  const {lineNumber, maxLineNumber} = getLineNumbers();
+
+  ui.maxLineNumber.textContent = maxLineNumber;
+  ui.lineNumber.max = maxLineNumber;
+
+  recentLineNumber = lineNumber;
+  ui.lineNumber.value = lineNumber;
+  resizeLineNumber();
+};
+
+/// getLineNumbers
+
+export const getLineNumbers = () => {
   // Ignore `mem.page` to react on `selectionchange` instantly.
   const text = ui.ta.value;
   const selStart = ui.ta.selectionStart;
   let maxLineNumber = 1, i = -1;
-  lineNumber = 1;  // Outer state.
+  let lineNumber = 1;
 
   while ((i = text.indexOf("\n", i + 1)) !== -1) {
     maxLineNumber++;
     if (i < selStart) lineNumber++;
   }
 
-  ui.maxLineNumber.textContent = maxLineNumber;
-  ui.lineNumber.max = maxLineNumber;
-
-  ui.lineNumber.value = lineNumber;
-  resizeLineNumber();
+  return {lineNumber, maxLineNumber};
 };
 
 /// hideLineForm
@@ -89,8 +98,8 @@ export const hideLineForm = () => {
   hide(ui.lineForm);
   collapse(ui.attic);
 
-  lineNumber = getInt({
-    oldValue: lineNumber,
+  const lineNumber = getInt({
+    oldValue: recentLineNumber,
     newValue: ui.lineNumber.value,
     min: 1,
     max: ui.lineNumber.max,
@@ -103,7 +112,7 @@ export const hideLineForm = () => {
 
 /// getLineEnd
 
-const getLineEnd = (lineNumber) => {
+export const getLineEnd = (lineNumber) => {
   const text = ui.ta.value;
   let i = -1;
   while (
