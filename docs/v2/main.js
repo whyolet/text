@@ -5,6 +5,7 @@ import {initFindUI} from "./find.js";
 import {initLineUI} from "./line.js";
 import {getAppLock, getTodayPlus, initNavUI, openScreen, screenTypes} from "./nav.js";
 import {initPageUI} from "./page.js";
+import {initSearchUI} from "./search.js";
 import {o, showBanner, ui} from "./ui.js";
 
 showBanner({isActive: true},
@@ -19,17 +20,13 @@ await db.load();
 initNavUI();
 initFindUI();
 initLineUI();
-
 initPageUI();
-openScreen(screenTypes.page, {tag: getTodayPlus(0)});
+initSearchUI();
 
 const body = document.body;
 body.textContent = "";
-for (const el of [
-  ui.attic,
-  ui.openDateInput,
-  ui.moveToDateInput,
-  ui.page,
-]) body.appendChild(el);
+for (const screenType in screenTypes)  {
+  body.appendChild(ui[screenType]);
+}
 
-ui.ta.focus();
+openScreen(screenTypes.page, {tag: getTodayPlus(0)});

@@ -2,6 +2,7 @@ import * as db from "./db.js";
 import {hideFindForm} from "./find.js";
 import {hideLineForm} from "./line.js";
 import {getNewPage, openPage, openPageByTag, save} from "./page.js";
+import {openSearch} from "./search.js";
 import {getSel} from "./sel.js";
 import {getDateInput, debounce, hide, o, on, getRestartButton, show, showBanner, showDateInput, toast, ui} from "./ui.js";
 
@@ -51,6 +52,7 @@ export const getAppLock = async () => {
 
 export const screenTypes = Object.seal({
   page: "page",
+  search: "search",
 });
 
 const screens = [null];
@@ -74,10 +76,19 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
   if (!i) return;
 
   await save();
-
   const screen = screens[i];
+
+  for (const screenType in screenTypes) {
+    const el = ui[screenType];
+    if (screenType === screen.type) {
+      show(el);
+    } else hide(el);
+  }
+
   if (screen.type === screenTypes.page) {
-    openPageByTag(screen.props.tag);
+    await openPageByTag(screen.props.tag);
+  } else if (screen.type === screenTypes.search) {
+    openSearch(screen.props.what);
   } else throw new Error(screen.type);
 });
 
@@ -140,7 +151,7 @@ export const onOpenTag = async () => {
 
 /// onBack
 
-export const onBack = async () => {
+export const onBack = () => {
   if (history.state > 1) {
     history.back();
   } else toast("Open something first!");
@@ -243,7 +254,7 @@ export const onMoveOverdue = async () => {
   });
 
   await db.savePage(mem.page);
-  openPage(mem.page);
+  await openPage(mem.page);
 };
 
 /// onMoveToDate, onMoveToDateInput
@@ -292,6 +303,8 @@ const onMoveToDateInput = async (date) => {
 /// onFocus
 
 const onFocus = (event) => {
+  // Set `ui.focusedInput` only if it should be supported by `focused: true` actions.
+
   const el = event.target;
   if ([
     ui.ta,

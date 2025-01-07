@@ -27,7 +27,7 @@ export const initFindUI = () => {
     ib("arrow_forward", "o", onReplaceOne),
     ib("arrow_split", "a", onReplaceAll),
     ui.replaceInput,
-    ib("close", "w", hideFindForm),
+    ib("close", "x", onClearOrHide),
   );
 
   ui.attic.appendChild(ui.findForm);
@@ -49,6 +49,18 @@ export const showFindForm = () => {
   show(ui.findForm);
 
   ui.findInput.value = getFindSelected();
+};
+
+/// onClearOrHide
+
+const onClearOrHide = () => {
+  if (
+    ui.findInput.value ||
+    ui.replaceInput.value
+  ) {
+    ui.findInput.value = "";
+    ui.replaceInput.value = "";
+  } else hideFindForm();
 };
 
 /// hideFindForm

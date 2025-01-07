@@ -22,7 +22,7 @@ export const initLineUI = () => {
       " / ",
       ui.maxLineNumber,
     ),
-    ib("close", "w", hideLineForm),
+    ib("close", "x", hideLineForm),
   );
 
   ui.attic.appendChild(ui.lineForm);
@@ -47,8 +47,9 @@ export const onLineForm = () => {
 /// updateLineFormOnSelChange
 
 export const updateLineFormOnSelChange = () => {
+  // Don't check `ui.focusedInput` here as input to `ui.lineNumber` leads here too.
   if (
-    ui.focusedInput !== ui.ta ||
+    document.activeElement !== ui.ta ||
     isHidden(ui.lineForm)
   ) return;
 

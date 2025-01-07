@@ -49,5 +49,5 @@ const applyOp = async (opId) => {
     db.saveConf(db.conf.opIds),
   ]);
 
-  openPage(page);
+  await openPage(page);
 };

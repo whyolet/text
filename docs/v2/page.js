@@ -5,6 +5,7 @@ import {onFindForm} from "./find.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {onLineForm, updateLineFormOnSelChange} from "./line.js";
 import {getNow, getTodayPlus, hideAtticForms, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
+import {addToRecentTags, onSearch} from "./search.js";
 import {onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
 import {debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
@@ -23,7 +24,7 @@ export const initPageUI = () => {
   ui.ta = o("textarea");
   on(ui.ta, "input", onInput);
 
-  ui.page = o(".page",
+  ui.frame = o(".frame",
 
     /// top
 
@@ -33,7 +34,7 @@ export const initPageUI = () => {
     ui.header,
     
     ib("calendar_month", "g", onOpenDate),  // Go to date
-    ib("search", "s"),
+    ib("search", "s", onSearch),
     ib("find_in_page", "f", onFindForm),
     ib("123", "l", onLineForm),
 
@@ -64,6 +65,13 @@ export const initPageUI = () => {
     ib("content_paste", "v", onPaste, {focused: true}),
     ib("select_all", "a", onSelAll, {focused: true}),
   );
+
+  ui.page = o(".page",
+    ui.attic,
+    ui.openDateInput,
+    ui.moveToDateInput,
+    ui.frame,
+  );
 };
 
 /// getNewPage
@@ -80,12 +88,12 @@ export const getNewPage = (tag) => ({
 
 /// openPage/ByTag
 
-export const openPageByTag = (tag) => {
+export const openPageByTag = async (tag) => {
   const page = mem.pages[tag] || getNewPage(tag);
-  openPage(page);
+  await openPage(page);
 };
 
-export const openPage = (page) => {
+export const openPage = async (page) => {
   mem.page = page;
   mem.pages[page.tag] = page;
   mem.textLength = page.text.length;
@@ -98,6 +106,7 @@ export const openPage = (page) => {
   toast(header, {isPinned: true});
 
   ui.ta.value = page.text;
+  ui.ta.focus();
 
   ui.ta.setSelectionRange(
     page.selStart,
@@ -108,13 +117,14 @@ export const openPage = (page) => {
 
   updateLineFormOnSelChange();
   showOrHideOverdue();
+  await addToRecentTags(page.tag);
 };
 
 /// onHeader
 
 const onHeader = () => {
   hideAtticForms();
-  ui.page.classList.toggle("zen-mode");
+  ui.frame.classList.toggle("zen-mode");
 }
 
 /// onInput
