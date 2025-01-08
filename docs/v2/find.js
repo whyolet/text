@@ -78,7 +78,7 @@ export const hideFindForm = () => {
 
 const onFindPrev = async () => await onFindForward(false);
 
-const onFindNext = async () => await onFindForward(true);
+export const onFindNext = async () => await onFindForward(true);
 
 const onFindForward = async (forward) => {
   const what = ui.findInput.value.toLowerCase();

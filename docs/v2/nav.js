@@ -1,5 +1,5 @@
 import * as db from "./db.js";
-import {hideFindForm} from "./find.js";
+import {hideFindForm, onFindNext, showFindForm} from "./find.js";
 import {hideLineForm} from "./line.js";
 import {getNewPage, openPage, openPageByTag, save} from "./page.js";
 import {openSearch} from "./search.js";
@@ -86,9 +86,21 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
   }
 
   if (screen.type === screenTypes.page) {
-    await openPageByTag(screen.props.tag);
+    const {tag, findValue} = screen.props;
+    await openPageByTag(tag);
+
+    if (findValue) {
+      // Find only once: when page is opened from Search, not when it is opened later on Back.
+      screen.props.findValue = "";
+      showFindForm();
+      ui.findInput.value = findValue;
+      mem.page.selStart = mem.page.selEnd = mem.page.scroll = 0;
+      onFindNext();
+    }
+
   } else if (screen.type === screenTypes.search) {
     openSearch(screen.props.what);
+
   } else throw new Error(screen.type);
 });
 
@@ -178,8 +190,8 @@ export const showOrHideOverdue = () => {
     return;
   }
 
-  for (const tag in mem.pages) {
-    if (!isOverdueTag(tag, today)) continue;
+  for (const page of Object.values(mem.pages)) {
+    if (!isOverdue(page, today)) continue;
 
     show(ui.moveOverdue);
     return;
@@ -188,10 +200,10 @@ export const showOrHideOverdue = () => {
   hide(ui.moveOverdue);
 };
 
-const isOverdueTag = (tag, today) => (
-  tag < today &&
-  isDateTag(tag) &&
-  mem.pages[tag].text
+const isOverdue = (page, today) => (
+  page.tag < today &&
+  isDateTag(page.tag) &&
+  page.text
 );
 
 export const onMoveOverdue = async () => {
@@ -208,8 +220,8 @@ export const onMoveOverdue = async () => {
   if (!confirm("Move overdue to today?")) return;
 
   const overdueTags = [];
-  for (const tag in mem.pages) {
-    if (isOverdueTag(tag, today)) overdueTags.push(tag);
+  for (const page of Object.values(mem.pages)) {
+    if (isOverdue(page, today)) overdueTags.push(page.tag);
   }
   overdueTags.sort();
 
@@ -246,7 +258,9 @@ export const onMoveOverdue = async () => {
   });  // For undo.
 
   Object.assign(mem.page, {
-    text: parts.join("\n"),
+    text: parts
+      .filter(value => value)
+      .join("\n"),
     edited: now,
     selStart: 0,
     selEnd: 0,
@@ -280,7 +294,7 @@ const onMoveToDateInput = async (date) => {
   const parts = [
     page.text.trim(),
     part.trim(),
-  ];
+  ].filter(value => value);
 
   Object.assign(page, {
     text: parts.join("\n"),
