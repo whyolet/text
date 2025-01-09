@@ -1,5 +1,5 @@
 import * as db from "./db.js";
-import {onBack, openScreen, screenTypes} from "./nav.js";
+import {isDateTag, onBack, openScreen, screenTypes} from "./nav.js";
 import {getFindSelected} from "./sel.js";
 import {ib, o, on, onClick, ui} from "./ui.js";
 
@@ -67,16 +67,9 @@ const onSearchInput = () => {
       ) tags.push(page.tag);
     }
 
-    items.push(o(".item header",
-      o(".icon", tags.length ?
-        "find_in_page"
-        : "search_off"
-      ),
-      o("span", tags.length ?
-        "Found"
-        : "Not found!"
-      ),
-    ));
+    if (tags.length) {
+      addHeader(items, "find_in_page", "Found");
+    } else addHeader(items, "search_off", "Not found!");
 
     tags.sort();
     for (const tag of tags) add(items, tag, findValue);
@@ -89,24 +82,41 @@ const onSearchInput = () => {
 
     for (const tag of mem.recentTags) add(items, tag, findValue);
 
-    items.push(o(".item header",
-      o(".icon", "sort_by_alpha"),
-      o("span", "All"),
-    ));
-
-    const tags = [];
+    const tags = [], dates = [];
     for (const page of Object.values(mem.pages)) {
-      if (page.text) tags.push(page.tag);
+      if (!page.text) continue;
+
+      if (isDateTag(page.tag)) {
+        dates.push(page.tag);
+      } else tags.push(page.tag);
     }
 
-    tags.sort();
-    for (const tag of tags) add(items, tag, findValue);
+    if (tags.length) {
+      addHeader(items, "sort_by_alpha", "Tags");
+      tags.sort();
+      for (const tag of tags) add(items, tag, findValue);
+    }
+
+    if (dates.length) {
+      addHeader(items, "calendar_month", "Dates");
+      dates.sort();
+      for (const tag of dates) add(items, tag, findValue);
+    }
   }
 
   ui.found.textContent = "";
   for (const item of items) {
     ui.found.appendChild(item);
   }
+};
+
+/// addHeader
+
+const addHeader = (items, icon, text) => {
+  items.push(o(".item header",
+    o(".icon", icon),
+    o("span", text),
+  ));
 };
 
 /// add

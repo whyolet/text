@@ -3,7 +3,8 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {onFindForm} from "./find.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
-import {onLineForm, updateLineFormOnSelChange} from "./line.js";
+import {updateLineFormOnSelChange} from "./line.js";
+import {onMenuForm} from "./menu.js";
 import {getNow, getTodayPlus, hideAtticForms, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
@@ -28,7 +29,7 @@ export const initPageUI = () => {
 
     /// top
 
-    ib("menu", "m"),
+    ib("menu", "m", onMenuForm),
     ui.moveOverdue,
     
     ui.header,
@@ -36,7 +37,6 @@ export const initPageUI = () => {
     ib("calendar_month", "g", onOpenDate),  // Go to date
     ib("search", "s", onSearch),
     ib("find_in_page", "f", onFindForm),
-    ib("123", "l", onLineForm),
 
     /// center
 
@@ -130,6 +130,8 @@ const onHeader = () => {
 /// onInput
 
 const onInput = () => {
+  if (!ui.isActive) return;
+
   autoindent();
   debounce("save", 1000, save);
 };

@@ -180,12 +180,24 @@ b {
   place-items: center;
 }
 
+.menu-form,
 .line-form {
   flex: 1 1 auto;
   display: grid;
   grid-template-columns: 1fr var(--icon);
   grid-template-rows: var(--icon);
   grid-template-areas: "m x";
+  place-items: center;
+}
+
+.menu-form > .main {
+  width: 100%;
+  overflow-x: auto;
+
+  display: grid;
+  grid-auto-columns: var(--icon);
+  grid-template-rows: var(--icon);
+  grid-auto-flow: column;
   place-items: center;
 }
 
@@ -209,22 +221,20 @@ b {
     repeat(3, var(--icon));
 
   grid-template-rows:
-    repeat(3, var(--icon))
+    repeat(2, var(--icon))
     1fr
     repeat(3, var(--icon))
     1fr
-    repeat(3, var(--icon));
+    repeat(2, var(--icon));
 
   grid-template-areas:
     /* Areas/shortcuts */
     "m p q q q q q q g s"
     ". w w w w w w w w f"
-    ". w w w w w w w w l"
     ". w w w w w w w w ."
     "o w w w w w w w w u"
     "b w w w w w w w w n"
     "h w w w w w w w w d"
-    ". w w w w w w w w ."
     ". w w w w w w w w ."
     "e w w w w w w w w v"
     "k j i . z Z . x c a";

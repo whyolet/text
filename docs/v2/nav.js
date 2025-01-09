@@ -1,6 +1,7 @@
 import * as db from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
 import {hideLineForm} from "./line.js";
+import {hideMenuForm} from "./menu.js";
 import {getNewPage, openPage, openPageByTag, save} from "./page.js";
 import {openSearch} from "./search.js";
 import {getSel} from "./sel.js";
@@ -73,7 +74,7 @@ export const openScreen = (type, props) => {
 
 const onSetState = (event) => debounce("onSetState", 100, async () => {
   const i = event.state;
-  if (!i) return;
+  if (!i || !ui.isActive) return;
 
   await save();
   const screen = screens[i];
@@ -118,6 +119,7 @@ export const initNavUI = () => {
 /// hideAtticForms
 
 export const hideAtticForms = () => {
+  hideMenuForm();
   hideFindForm();
   hideLineForm();
 };

@@ -3,6 +3,7 @@ import {setPassphrase} from "./crypto.js";
 import * as db from "./db.js";
 import {initFindUI} from "./find.js";
 import {initLineUI} from "./line.js";
+import {initMenuUI} from "./menu.js";
 import {getAppLock, getTodayPlus, initNavUI, openScreen, screenTypes} from "./nav.js";
 import {initPageUI} from "./page.js";
 import {initSearchUI} from "./search.js";
@@ -18,10 +19,11 @@ setPassphrase("");
 await db.load();
 
 initNavUI();
+initMenuUI();
 initFindUI();
+initSearchUI();
 initLineUI();
 initPageUI();
-initSearchUI();
 
 const body = document.body;
 body.textContent = "";

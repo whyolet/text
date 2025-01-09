@@ -97,6 +97,8 @@ export const ib = (name, shortcut, handler, props) => {
   );
 
   onClick(el, async () => {
+    if (!ui.isActive) return;
+
     const input = focused && ui.focusedInput || ui.ta;
     input.focus();
     if (input === ui.ta) await save();
