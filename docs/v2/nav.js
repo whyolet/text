@@ -213,9 +213,11 @@ export const onMoveOverdue = async () => {
   if (mem.page.tag !== today) {
     // Midnight happened.
     openScreen(screenTypes.page, {tag: today});
-    // It's debounced, so:
-    alert("Welcome to a new day!");
-    setTimeout(onMoveOverdue, 500);
+    // Opening is debounced, so:
+    setTimeout(() => {
+      alert("Welcome to a new day!");
+      onMoveOverdue();
+    }, 500);
     return;
   }
 

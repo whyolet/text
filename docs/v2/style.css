@@ -214,30 +214,34 @@ b {
   display: grid;
 
   grid-template-columns:
-    repeat(3, var(--icon))
+    repeat(2, var(--icon))
     1fr
     repeat(2, var(--icon))
     1fr
-    repeat(3, var(--icon));
-
-  grid-template-rows:
     repeat(2, var(--icon))
-    1fr
-    repeat(3, var(--icon))
     1fr
     repeat(2, var(--icon));
 
+  grid-template-rows:
+    repeat(3, var(--icon))
+    1fr
+    repeat(3, var(--icon))
+    1fr
+    repeat(3, var(--icon));
+
   grid-template-areas:
     /* Areas/shortcuts */
-    "m p q q q q q q g s"
-    ". w w w w w w w w f"
-    ". w w w w w w w w ."
-    "o w w w w w w w w u"
-    "b w w w w w w w w n"
-    "h w w w w w w w w d"
-    ". w w w w w w w w ."
-    "e w w w w w w w w v"
-    "k j i . z Z . x c a";
+    "m p q q q q q q q g s"
+    ". t t t t t t t t t f"
+    ". t t t t t t t t t ."
+    ". t t t t t t t t t ."
+    "o t t t t t t t t t u"
+    "b t t t t t t t t t n"
+    "h t t t t t t t t t d"
+    ". t t t t t t t t t ."
+    ". t t t t t t t t t a"
+    "e t t t t t t t t t v"
+    "k w . j i . z Z . x c";
 
   place-items: center;
 }
@@ -266,7 +270,7 @@ b {
 }
 
 textarea {
-  grid-area: w;
+  grid-area: t;
   display: block;  /* Avoid parent scrollbar and visible background */
   scrollbar-color: var(--hint) var(--back);
   resize: none;

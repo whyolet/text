@@ -81,6 +81,18 @@ export const onErase = async () => {
   if (isTa) await save();
 };
 
+/// onDuplicate
+
+export const onDuplicate = async () => {
+  const {start, end, part} = getSel({wholeLines: true});
+  ui.ta.setRangeText("\n" + part, end, end);
+  ui.ta.setSelectionRange(
+    end + 1,
+    end + 1 + part.length,
+  );
+  await save();
+};
+
 /// onMoveUp, onMoveDown
 
 export const onMoveUp = () => {
