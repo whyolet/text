@@ -4,9 +4,9 @@ import {o, toast} from "./ui.js";
 
 const mem = db.mem;
 
-/// onExportPage
+/// onPageExport
 
-export const onExportPage = () => {
+export const onPageExport = () => {
   const {tag, text} = mem.page;
 
   const fileName = (
