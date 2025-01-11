@@ -76,17 +76,21 @@ export const initPageUI = () => {
   );
 };
 
-/// getNewPage
+/// getNewPage, zeroCursor
 
 export const getNewPage = (tag) => ({
   id: getId(),  // local, for save
   tag,
   text: "",
   edited: getNow(),  // text was updated by user
+  ...zeroCursor
+});
+
+export const zeroCursor = {
   selStart: 0,
   selEnd: 0,
   scroll: 0,
-});
+};
 
 /// openPage/ByTag
 

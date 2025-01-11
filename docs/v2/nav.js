@@ -2,7 +2,7 @@ import * as db from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
 import {hideLineForm} from "./line.js";
 import {hideMenuForm} from "./menu.js";
-import {getNewPage, openPage, openPageByTag, save} from "./page.js";
+import {getNewPage, openPage, openPageByTag, save, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
 import {getSel} from "./sel.js";
 import {getDateInput, debounce, hide, o, on, getRestartButton, show, showBanner, showDateInput, toast, ui} from "./ui.js";
@@ -95,7 +95,7 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
       screen.props.findValue = "";
       showFindForm();
       ui.findInput.value = findValue;
-      mem.page.selStart = mem.page.selEnd = mem.page.scroll = 0;
+      Object.assign(mem.page, zeroCursor);
       onFindNext();
     }
 
@@ -244,10 +244,7 @@ export const onMoveOverdue = async () => {
     Object.assign(page, {
       text: "",
       edited: now,
-      selStart: 0,
-      selEnd: 0,
-      scroll: 0,
-    });
+    }, zeroCursor);
 
     await db.savePage(page, {
       withoutFinalize: true,
@@ -266,10 +263,7 @@ export const onMoveOverdue = async () => {
       .filter(value => value)
       .join("\n"),
     edited: now,
-    selStart: 0,
-    selEnd: 0,
-    scroll: 0,
-  });
+  }, zeroCursor);
 
   await db.savePage(mem.page);
   await openPage(mem.page);
@@ -303,10 +297,7 @@ const onMoveToDateInput = async (date) => {
   Object.assign(page, {
     text: parts.join("\n"),
     edited: getNow(),
-    selStart: 0,
-    selEnd: 0,
-    scroll: 0,
-  });
+  }, zeroCursor);
 
   await db.savePage(page, {
     withoutFinalize: true,

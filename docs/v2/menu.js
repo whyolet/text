@@ -1,5 +1,5 @@
 
-import {onPageExport} from "./file.js";
+import {onPageExport, onPageImport} from "./file.js";
 import {onLineForm} from "./line.js";
 import {hideAtticForms} from "./nav.js";
 import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, ui} from "./ui.js";
@@ -13,7 +13,7 @@ export const initMenuUI = () => {
       ib("123", "", onLineForm),
       ib("pending"),
       ib("file_save", "", onPageExport),
-      ib("file_open"),
+      ib("file_open", "", onPageImport),
       ib("key"),
       ib("archive"),
       ib("unarchive"),

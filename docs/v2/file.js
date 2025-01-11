@@ -1,5 +1,5 @@
 import * as db from "./db.js";
-import {save} from "./page.js";
+import {save, zeroCursor} from "./page.js";
 import {o, toast} from "./ui.js";
 
 const mem = db.mem;
@@ -33,4 +33,9 @@ const downloadURL = (url, fileName) => {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
+};
+
+/// onPageImport
+
+export const onPageImport = () => {
 };
