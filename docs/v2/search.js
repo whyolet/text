@@ -1,7 +1,7 @@
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {isDateTag, onBack, openScreen, screenTypes} from "./nav.js";
-import {getFindSelected} from "./sel.js";
+import {getQueryFromSel} from "./sel.js";
 import {ib, o, on, onClick, ui} from "./ui.js";
 
 /// addToRecentTags
@@ -35,14 +35,14 @@ export const initSearchUI = () => {
 /// onSearch
 
 export const onSearch = () => {
-  const what = ui.findInput.value || getFindSelected();
-  openScreen(screenTypes.search, {what});
+  const query = ui.findInput.value || getQueryFromSel();
+  openScreen(screenTypes.search, {query});
 };
 
 /// openSearch
 
-export const openSearch = (what) => {
-  ui.searchInput.value = what;
+export const openSearch = (query) => {
+  ui.searchInput.value = query;
   ui.searchInput.focus();
   onSearchInput();
 };
@@ -50,11 +50,11 @@ export const openSearch = (what) => {
 /// onSearchInput
 
 const onSearchInput = () => {
-  const findValue = ui.searchInput.value;
+  const query = ui.searchInput.value;
   const items = [];
 
-  if (findValue) {
-    const findWhat = findValue.toLowerCase();
+  if (query) {
+    const lowerQuery = query.toLowerCase();
 
     const tags = [];
     for (const page of Object.values(mem.pages)) {
@@ -62,7 +62,7 @@ const onSearchInput = () => {
         page
         .text
         .toLowerCase()
-        .includes(findWhat)
+        .includes(lowerQuery)
       ) tags.push(page.tag);
     }
 
@@ -71,7 +71,7 @@ const onSearchInput = () => {
     } else addHeader(items, "search_off", "Not found!");
 
     tags.sort();
-    for (const tag of tags) add(items, tag, findValue);
+    for (const tag of tags) add(items, tag, query);
 
   } else {
     items.push(o(".item header",
@@ -79,7 +79,7 @@ const onSearchInput = () => {
       o("span", "Recent"),
     ));
 
-    for (const tag of mem.recentTags) add(items, tag, findValue);
+    for (const tag of mem.recentTags) add(items, tag, query);
 
     const tags = [], dates = [];
     for (const page of Object.values(mem.pages)) {
@@ -93,13 +93,13 @@ const onSearchInput = () => {
     if (tags.length) {
       addHeader(items, "sort_by_alpha", "Tags");
       tags.sort();
-      for (const tag of tags) add(items, tag, findValue);
+      for (const tag of tags) add(items, tag, query);
     }
 
     if (dates.length) {
       addHeader(items, "calendar_month", "Dates");
       dates.sort();
-      for (const tag of dates) add(items, tag, findValue);
+      for (const tag of dates) add(items, tag, query);
     }
   }
 
@@ -120,10 +120,10 @@ const addHeader = (items, icon, text) => {
 
 /// add
 
-const add = (items, tag, findValue) => {
+const add = (items, tag, query) => {
   const el = o(".item button", tag);
   onClick(el, () => {
-    openScreen(screenTypes.page, {tag, findValue});
+    openScreen(screenTypes.page, {tag, query});
   });
   items.push(el);
 };

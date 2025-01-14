@@ -3,7 +3,7 @@ import {mem} from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
 import {hideLineForm} from "./line.js";
 import {hideMenuForm} from "./menu.js";
-import {getNewPage, openPage, openPageByTag, save, zeroCursor} from "./page.js";
+import {getPage, openPage, openPageByTag, save, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
 import {getSel} from "./sel.js";
 import {getDateInput, debounce, hide, o, on, getRestartButton, show, showBanner, showDateInput, toast, ui} from "./ui.js";
@@ -86,20 +86,21 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
   }
 
   if (screen.type === screenTypes.page) {
-    const {tag, findValue} = screen.props;
+    const {tag, query} = screen.props;
     await openPageByTag(tag);
 
-    if (findValue) {
+    if (query) {
       // Find only once: when page is opened from Search, not when it is opened later on Back.
-      screen.props.findValue = "";
+      screen.props.query = "";
+
       showFindForm();
-      ui.findInput.value = findValue;
+      ui.findInput.value = query;
       Object.assign(mem.page, zeroCursor);
       onFindNext();
     }
 
   } else if (screen.type === screenTypes.search) {
-    openSearch(screen.props.what);
+    openSearch(screen.props.query);
 
   } else throw new Error(screen.type);
 });
@@ -277,7 +278,7 @@ const onMoveToDateInput = async (date) => {
   ui.ta.setRangeText("", start, end, "end");
   await save();
 
-  const page = mem.pages[date] ??= getNewPage(date);
+  const page = getPage(date);
 
   const parts = [
     page.text.trim(),

@@ -30,9 +30,9 @@ export const getSel = (props) => {
   return {start, end, part, input, isTa};
 };
 
-/// getFindSelected
+/// getQueryFromSel
 
-export const getFindSelected = () => {
+export const getQueryFromSel = () => {
   const {start, end, part} = getSel({
     withoutExpand: true,
   });

@@ -75,10 +75,13 @@ export const initPageUI = () => {
   );
 };
 
-/// getNewPage, zeroCursor
+/// getPage, zeroCursor
 
-export const getNewPage = (tag) => {
-  const page = {
+export const getPage = (tag) => {
+  let page = mem.pages[tag];
+  if (page) return page;
+
+  page = {
     id: getId(),  // local, for save
     tag,
     text: "",
@@ -100,7 +103,7 @@ export const zeroCursor = {
 /// openPage/ByTag
 
 export const openPageByTag = async (tag) => {
-  const page = mem.pages[tag] ??= getNewPage(tag);
+  const page = getPage(tag);
   await openPage(page);
 };
 

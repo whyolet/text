@@ -2,7 +2,7 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {hideAtticForms} from "./nav.js";
 import {getLineEnd, getLineNumbers} from "./line.js";
-import {getFindSelected, getSel} from "./sel.js";
+import {getQueryFromSel, getSel} from "./sel.js";
 import {save} from "./page.js";
 import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, toast, ui} from "./ui.js";
 
@@ -47,7 +47,7 @@ export const showFindForm = () => {
   expand(ui.attic);
   show(ui.findForm);
 
-  ui.findInput.value = getFindSelected();
+  ui.findInput.value = getQueryFromSel();
 };
 
 /// onClearOrHide
@@ -80,14 +80,14 @@ const onFindPrev = async () => await onFindForward(false);
 export const onFindNext = async () => await onFindForward(true);
 
 const onFindForward = async (forward) => {
-  const what = ui.findInput.value.toLowerCase();
-  if (!what) {
+  const lowerQuery = ui.findInput.value.toLowerCase();
+  if (!lowerQuery) {
     ui.findInput.focus();
     toast("Find what?");
     return;
   }
 
-  const where = mem.page.text.toLowerCase();
+  const lowerText = mem.page.text.toLowerCase();
 
   const start = mem.page.selStart + (
     forward ? 1 : -1
@@ -95,14 +95,14 @@ const onFindForward = async (forward) => {
 
   const found = (
     start < 0 ||
-    start >= where.length
+    start >= lowerText.length
   ) ? -1 : (forward ?
-    where.indexOf(what, start)
-    : where.lastIndexOf(what, start)
+    lowerText.indexOf(lowerQuery, start)
+    : lowerText.lastIndexOf(lowerQuery, start)
   );
   if (found === -1) return toast("Not found!");
 
-  ui.ta.setSelectionRange(found, found + what.length);
+  ui.ta.setSelectionRange(found, found + lowerQuery.length);
   await save();
 };
 
