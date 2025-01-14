@@ -1,11 +1,10 @@
 import * as db from "./db.js";
+import {mem} from "./db.js";
 import {hideAtticForms} from "./nav.js";
 import {getLineEnd, getLineNumbers} from "./line.js";
 import {getFindSelected, getSel} from "./sel.js";
 import {save} from "./page.js";
 import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, toast, ui} from "./ui.js";
-
-const mem = db.mem;
 
 /// initFindUI
 

@@ -1,5 +1,6 @@
 import {decrypt, encrypt, getDbName, getKey, getSalt, setKey} from "./crypto.js";
 import {o, showBanner} from "./ui.js";
+import {createOp, getRevertedOp} from "./undo.js";
 
 /// idb, stores, conf, mem
 
@@ -25,7 +26,8 @@ export const mem = Object.seal({
   opIds: null,
   pages: null,
   page: null,
-  textLength: 0,  // for autoindent
+  textLength: 0,  // for `autoindent`
+  oldPages: null, // for `createOp`
 });
 
 /// onDbError, updateAppVersion
@@ -186,8 +188,10 @@ const loadPages = async () => {
   );
 
   mem.pages = {};
+  mem.oldPages = {};
   for (const page of pages) {
     mem.pages[page.tag] = page;
+    mem.oldPages[page.tag] = Object.assign({}, page);
   }
 };
 
@@ -197,6 +201,7 @@ export const savePage = async (page, props) => {
   const {withoutOp, withoutFinalize} = props ?? {};
 
   const encryptedPage = await encrypt(page);
+  const encryptedOp = withoutOp ? null : await encrypt(createOp(page));
 
   await new Promise(done => {
     const txn = idb.transaction(
@@ -213,11 +218,11 @@ export const savePage = async (page, props) => {
       return;
     }
 
-    // op = version of page
+    /// op
 
     const addingOp = txn
     .objectStore(stores.op)
-    .add(encryptedPage);
+    .add(encryptedOp);
 
     if (withoutFinalize) {
       txn.oncomplete = done;
@@ -304,8 +309,7 @@ export const saveUndoneOps = async () => {
     .objectStore(stores.op)
     .getAll(IDBKeyRange.bound(
       mem.opIds.undo, mem.opIds.max,
-      false, true,
-      // undo <= id < max
+      // undo <= id <= max
     ))
     .onsuccess = done;
   });
@@ -314,6 +318,16 @@ export const saveUndoneOps = async () => {
   if (!encryptedOps) return;
 
   encryptedOps.reverse();
+
+  const ops = await Promise.all(
+    encryptedOps.map(encryptedOp => decrypt(encryptedOp))
+  );
+
+  const revertedOps = ops.map(op => getRevertedOp(op));
+
+  const encRevOps = await Promise.all(
+    revertedOps.map(revertedOp => encrypt(revertedOp))
+  );
 
   await new Promise(done => {
     const txn = idb.transaction(
@@ -324,10 +338,18 @@ export const saveUndoneOps = async () => {
     const opStore = txn.objectStore(stores.op);
     let addingOp;
 
-    for (const encryptedOp of encryptedOps) addingOp = opStore.add(encryptedOp);
+    for (const encRevOp of encRevOps) {
+      addingOp = opStore.add(encRevOp);
+    }
 
     finalizeAddingOp(addingOp, done);
   });
+};
+
+/// debug
+
+export const debug = (data) => {
+  alert(JSON.stringify(data));
 };
 
 /// close

@@ -1,4 +1,5 @@
 import * as db from "./db.js";
+import {mem} from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
 import {hideLineForm} from "./line.js";
 import {hideMenuForm} from "./menu.js";
@@ -6,8 +7,6 @@ import {getNewPage, openPage, openPageByTag, save, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
 import {getSel} from "./sel.js";
 import {getDateInput, debounce, hide, o, on, getRestartButton, show, showBanner, showDateInput, toast, ui} from "./ui.js";
-
-const mem = db.mem;
 
 const folder = "📂";
 const folderCodePoint = folder.codePointAt(0);
@@ -237,10 +236,6 @@ export const onMoveOverdue = async () => {
     const text = page.text.trim();
     if (text) parts.push(text);
 
-    await db.savePage(page, {
-      withoutFinalize: true,
-    });  // For undo.
-
     Object.assign(page, {
       text: "",
       edited: now,
@@ -253,10 +248,6 @@ export const onMoveOverdue = async () => {
 
   const text = mem.page.text.trim();
   if (text) parts.push(text);
-
-  await db.savePage(mem.page, {
-    withoutFinalize: true,
-  });  // For undo.
 
   Object.assign(mem.page, {
     text: parts
@@ -283,11 +274,10 @@ const onMoveToDateInput = async (date) => {
     withNewline: true,
   });
 
-  const page = mem.pages[date] ??= getNewPage(date);
+  ui.ta.setRangeText("", start, end, "end");
+  await save();
 
-  await db.savePage(page, {
-    withoutFinalize: true,
-  });  // For undo.
+  const page = mem.pages[date] ??= getNewPage(date);
 
   const parts = [
     page.text.trim(),
@@ -299,13 +289,7 @@ const onMoveToDateInput = async (date) => {
     edited: getNow(),
   }, zeroCursor);
 
-  await db.savePage(page, {
-    withoutFinalize: true,
-  });
-
-  ui.ta.setRangeText("", start, end, "end");
-  await save();
-
+  await db.savePage(page);
   toast(`Moved to ${date}`);
 };
 

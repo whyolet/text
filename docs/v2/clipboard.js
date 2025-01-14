@@ -1,9 +1,8 @@
 import * as db from "./db.js";
+import {mem} from "./db.js";
 import {getSel} from "./sel.js";
 import {save} from "./page.js";
 import {ui} from "./ui.js";
-
-const mem = db.mem;
 
 /// onCut
 

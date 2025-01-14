@@ -1,8 +1,7 @@
 import * as db from "./db.js";
+import {mem} from "./db.js";
 import {save, zeroCursor} from "./page.js";
 import {o, toast} from "./ui.js";
-
-const mem = db.mem;
 
 /// onPageExport
 

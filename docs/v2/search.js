@@ -1,9 +1,8 @@
 import * as db from "./db.js";
+import {mem} from "./db.js";
 import {isDateTag, onBack, openScreen, screenTypes} from "./nav.js";
 import {getFindSelected} from "./sel.js";
 import {ib, o, on, onClick, ui} from "./ui.js";
-
-const mem = db.mem;
 
 /// addToRecentTags
 

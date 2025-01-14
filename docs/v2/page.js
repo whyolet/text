@@ -1,6 +1,7 @@
 import {onCut, onCopy, onPaste} from "./clipboard.js";
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
+import {mem} from "./db.js";
 import {onFindForm} from "./find.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
@@ -10,8 +11,6 @@ import {addToRecentTags, onSearch} from "./search.js";
 import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
 import {debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
-
-const mem = db.mem;
 
 /// initPageUI
 
@@ -78,13 +77,19 @@ export const initPageUI = () => {
 
 /// getNewPage, zeroCursor
 
-export const getNewPage = (tag) => ({
-  id: getId(),  // local, for save
-  tag,
-  text: "",
-  edited: getNow(),  // text was updated by user
-  ...zeroCursor
-});
+export const getNewPage = (tag) => {
+  const page = {
+    id: getId(),  // local, for save
+    tag,
+    text: "",
+    edited: getNow(),  // text was updated by user
+    ...zeroCursor
+  };
+
+  mem.pages[tag] = page;
+  mem.oldPages[tag] = Object.assign({}, page);
+  return page;
+};
 
 export const zeroCursor = {
   selStart: 0,
@@ -95,7 +100,7 @@ export const zeroCursor = {
 /// openPage/ByTag
 
 export const openPageByTag = async (tag) => {
-  const page = mem.pages[tag] || getNewPage(tag);
+  const page = mem.pages[tag] ??= getNewPage(tag);
   await openPage(page);
 };
 
