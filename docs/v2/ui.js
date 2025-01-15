@@ -51,7 +51,10 @@ export const o = (tag_cls, ...kids) => {
 
 /// UI elements and data.
 
-export const ui = {isActive: true};
+export const ui = {
+  body: document.body,
+  isActive: true,
+};
 
 /// on, onClick
 
@@ -116,8 +119,8 @@ export const showBanner = (props, ...kids) => {
   ui.isActive = isActive;
   db.close();
 
-  document.body.textContent = "";
-  document.body.appendChild(
+  ui.body.textContent = "";
+  ui.body.appendChild(
     o(".banner", ...kids)
   );
 };

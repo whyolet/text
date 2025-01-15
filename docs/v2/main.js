@@ -25,10 +25,9 @@ initSearchUI();
 initLineUI();
 initPageUI();
 
-const body = document.body;
-body.textContent = "";
+ui.body.textContent = "";
 for (const screenType in screenTypes)  {
-  body.appendChild(ui[screenType]);
+  ui.body.appendChild(ui[screenType]);
 }
 
 openScreen(screenTypes.page, {tag: getTodayPlus(0)});
