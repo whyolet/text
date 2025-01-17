@@ -291,6 +291,7 @@ const onMoveToDateInput = async (date) => {
   }, zeroCursor);
 
   await db.savePage(page);
+  showOrHideOverdue();
   toast(`Moved to ${date}`);
 };
 
