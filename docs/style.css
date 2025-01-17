@@ -12,6 +12,8 @@
   --thin: 0.5px solid var(--hint);
 
   --anim: 0.5s;
+  --quick: 0.25s;
+
   --bold: 700;
 }
 
@@ -319,8 +321,11 @@ textarea {
 }
 
 .collapsible {
-  transition: all var(--anim);
   overflow-y: hidden;
+
+  transition:
+    height var(--anim),
+    border-bottom-width var(--quick);
 }
 
 .collapsed {
