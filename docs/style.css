@@ -319,12 +319,13 @@ textarea {
 }
 
 .collapsible {
-  transition: height var(--anim);
+  transition: all var(--anim);
   overflow-y: hidden;
 }
 
 .collapsed {
   height: 0;
+  border-bottom-width: 0;
 }
 
 .hidden {
