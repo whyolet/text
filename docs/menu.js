@@ -1,16 +1,19 @@
 import {onPageExport, onPageImport} from "./file.js";
 import {onLineForm} from "./line.js";
+import {getPersisted} from "./local.js";
 import {hideAtticForms} from "./nav.js";
 import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, ui} from "./ui.js";
 
 /// initMenuUI
 
 export const initMenuUI = () => {
+  ui.localDataButton = ib("pending");
+
   ui.menuForm = o(".menu-form hidden",
     o(".main",
       ib("format_size"),
       ib("123", "", onLineForm),
-      ib("pending"),
+      ui.localDataButton,
       ib("file_save", "", onPageExport),
       ib("file_open", "", onPageImport),
       ib("key"),
@@ -35,10 +38,13 @@ export const onMenuForm = () => {
 
 /// showMenuForm
 
-export const showMenuForm = () => {
+export const showMenuForm = async () => {
   hideAtticForms();
   expand(ui.attic);
   show(ui.menuForm);
+
+  const persisted = await getPersisted();
+  ui.localDataButton.textContent = persisted ? "health_and_safety" : "warning";
 };
 
 /// hideMenuForm
