@@ -62,16 +62,24 @@ export const autoindent = () => {
 
 export const onIndent = async () => {
   const {start, end, part} = getSel({wholeLines: true});
+  const multiline = part.includes("\n");
 
-  const result = part
-  .split("\n")
-  .map(line => /\S/.test(line) ?
-    indent + line
-    : line
-  )
-  .join("\n");
+  const result = multiline ?
+    part
+    .split("\n")
+    .map(line =>
+      /\S/.test(line) ?
+      indent + line
+      : line
+    )
+    .join("\n")
+    : indent + part;
   
-  ui.ta.setRangeText(result, start, end, "select");
+  ui.ta.setRangeText(
+    result, start, end,
+    multiline ? "select" : "end",
+  );
+
   await save();
 };
 
@@ -79,6 +87,7 @@ export const onIndent = async () => {
 
 export const onDedent = async () => {
   const {start, end, part} = getSel({wholeLines: true});
+  const multiline = part.includes("\n");
 
   const result = part
   .split("\n")
@@ -94,6 +103,10 @@ export const onDedent = async () => {
   })
   .join("\n");
   
-  ui.ta.setRangeText(result, start, end, "select");
+  ui.ta.setRangeText(
+    result, start, end,
+    multiline ? "select" : "end",
+  );
+
   await save();
 };
