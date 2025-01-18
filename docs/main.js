@@ -3,6 +3,7 @@ import {setPassphrase} from "./crypto.js";
 import * as db from "./db.js";
 import {initFindUI} from "./find.js";
 import {initLineUI} from "./line.js";
+import {getPersisted, tryPersist} from "./local.js";
 import {initMenuUI} from "./menu.js";
 import {getAppLock, getTodayPlus, initNavUI, openScreen, screenTypes} from "./nav.js";
 import {initPageUI} from "./page.js";
@@ -31,3 +32,6 @@ for (const screenType in screenTypes)  {
 }
 
 openScreen(screenTypes.page, {tag: getTodayPlus(0)});
+
+const persisted = await getPersisted();
+if (!persisted) await tryPersist();
