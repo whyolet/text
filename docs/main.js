@@ -28,6 +28,9 @@ initSearchUI();
 initLineUI();
 initPageUI();
 
+// TODO: Move to db.load()
+// ui.body.classList.add("mono");
+
 ui.body.textContent = "";
 for (const screenType in screenTypes)  {
   ui.body.appendChild(ui[screenType]);

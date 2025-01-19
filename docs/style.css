@@ -16,22 +16,13 @@
 
   --thin: 0.5px solid var(--hint);
 
-  --bold: 700;
-  --normal: 400;
-
   --anim: 0.5s;
   --quick: 0.25s;
+
+  /* `@font-face.font-weight` did not support var() */
 }
 
 /** fonts **/
-
-@font-face {
-  font-family: "SourceCodePro";
-  font-display: swap;
-  src:
-    local("Source Code Pro"),
-    url("fonts/SourceCodePro-VariableFont_wght.ttf") format("truetype");
-}
 
 @font-face {
   font-family: "Material Symbols Outlined";
@@ -42,6 +33,38 @@
     local("MaterialSymbols-Outlined"),
     url("fonts/MaterialSymbolsOutlined.woff2") format("woff2"),
     url("fonts/MaterialSymbolsOutlined.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "SourceCodePro";
+  font-display: swap;
+  src:
+    local("Source Code Pro"),
+    url("fonts/SourceCodePro-VariableFont_wght.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Ubuntu";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src:
+    local("Ubuntu Light"),
+    local("Ubuntu-Light"),
+    url("fonts/Ubuntu-Light.woff2") format("woff2"),
+    url("fonts/Ubuntu-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Ubuntu";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src:
+    local("Ubuntu Bold"),
+    local("Ubuntu-Bold"),
+    url("fonts/Ubuntu-Bold.woff2") format("woff2"),
+    url("fonts/Ubuntu-Bold.ttf") format("truetype");
 }
 
 /** defaults for all elements **/
@@ -58,9 +81,15 @@
   background-color: var(--back);
   -webkit-tap-highlight-color: transparent;
 
-  font-family: "SourceCodePro", monospace;
+  font-family: "Ubuntu", sans-serif;
+  font-weight: 300;
   font-size: var(--char);
-  font-weight: var(--normal);
+}
+
+.mono,
+.mono * {
+  font-family: "SourceCodePro", monospace;
+  font-weight: 400;
 }
 
 /** icon **/
@@ -122,7 +151,7 @@ li::marker {
 
 a {
   text-decoration: none;
-  font-weight: var(--bold);
+  font-weight: 700;
 }
 
 a,
@@ -156,7 +185,7 @@ a:active > .icon,
 /** bold **/
 
 b {
-  font-weight: var(--bold);
+  font-weight: 700;
 }
 
 /** header **/
@@ -164,7 +193,7 @@ b {
 .header,
 .header > span {
   font-size: var(--header);
-  font-weight: var(--bold);
+  font-weight: 700;
   color: var(--tool);
   text-align: center;
 }
