@@ -2,6 +2,7 @@ import "./error.js";
 import {setPassphrase} from "./crypto.js";
 import * as db from "./db.js";
 import {initFindUI} from "./find.js";
+import {initInfoUI} from "./info.js";
 import {initLineUI} from "./line.js";
 import {getPersisted, tryPersist} from "./local.js";
 import {initMenuUI} from "./menu.js";
@@ -11,7 +12,7 @@ import {initSearchUI} from "./search.js";
 import {o, showBanner, ui} from "./ui.js";
 
 showBanner({isActive: true},
-  o(".header", "Loading..."),
+  "Loading...",
 );
 
 getAppLock();
@@ -21,6 +22,7 @@ await db.load();
 
 initNavUI();
 initMenuUI();
+initInfoUI();
 initFindUI();
 initSearchUI();
 initLineUI();

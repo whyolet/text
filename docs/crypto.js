@@ -179,8 +179,8 @@ export const decrypt = async (bytes, props) => {
       error.name === "InvalidAccessError"
     ) {
       showBanner({},
-        o(".header", "Decryption failed!"),
-        o("", "Try another passphrase."),
+        "Decryption failed!",
+        "Try another passphrase.",
         getRestartButton(),
       );
       return null;
@@ -209,8 +209,8 @@ const tryDecompress = async (buffer) => {
 
   if (!("DecompressionStream" in window)) {
     showBanner({},
-      o(".header", "Cannot decompress!"),
-      o("", "Try another browser."),
+      "Cannot decompress!",
+      "Try another browser.",
       getRestartButton(),
     );
     return null;

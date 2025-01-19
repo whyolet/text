@@ -112,23 +112,30 @@ export const ib = (name, shortcut, handler, props) => {
 
 /// showBanner
 
-export const showBanner = (props, ...kids) => {
+export const showBanner = (props, ...items) => {
   const {isActive} = props ?? {};
   if (!ui.isActive) return;
 
   ui.isActive = isActive;
-  db.close();
+  if (!isActive) db.close();
+
+  items = items.map(item =>
+    item instanceof Node ?
+    item : o("", item)
+  );
+
+  items[0]?.classList.add("header");
 
   ui.body.textContent = "";
   ui.body.appendChild(
-    o(".banner", ...kids)
+    o(".full centered", ...items),
   );
 };
 
 /// getRestartButton
 
 export const getRestartButton = () => {
-  const el = o(".button",
+  const el = o(".rounded button",
     o(".icon", "refresh"),
     " Restart",
   );

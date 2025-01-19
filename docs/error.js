@@ -18,7 +18,7 @@ event.reason && event.reason.stack ||
 
   /// copyButton
 
-  const copyButton = o(".button",
+  const copyButton = o(".rounded button",
     o(".icon", "content_copy"),
     " Copy details to clipboard",
   );
@@ -29,7 +29,7 @@ event.reason && event.reason.stack ||
 
   /// sendButton
 
-  const sendButton = o(".button",
+  const sendButton = o(".rounded button",
     o(".icon", "send"),
     " Send details by email",
   );
@@ -46,7 +46,7 @@ event.reason && event.reason.stack ||
   /// banner
 
   showBanner({},
-    o(".header", "Error!"),
+    "Error!",
     o("",
       "Please help to fix it", o("br"),
       "by sending details to", o("br"),

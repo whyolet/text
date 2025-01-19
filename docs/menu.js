@@ -1,13 +1,13 @@
 import {onPageExport, onPageImport} from "./file.js";
 import {onLineForm} from "./line.js";
-import {getPersisted} from "./local.js";
+import {getPersisted, onLocalData} from "./local.js";
 import {hideAtticForms} from "./nav.js";
 import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, ui} from "./ui.js";
 
 /// initMenuUI
 
 export const initMenuUI = () => {
-  ui.localDataButton = ib("pending");
+  ui.localDataButton = ib("pending", "", onLocalData);
 
   ui.menuForm = o(".menu-form hidden",
     o(".main",

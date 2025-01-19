@@ -37,9 +37,7 @@ const onDbError = (event) => {
 };
 
 const updateAppVersion = () => {
-  showBanner({},
-    o(".header", "Updating..."),
-  );
+  showBanner({}, "Updating...");
   setTimeout(() => {
     location.reload();
   }, 1000);

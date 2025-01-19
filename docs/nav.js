@@ -1,6 +1,7 @@
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
+import {openInfo} from "./info.js";
 import {hideLineForm} from "./line.js";
 import {hideMenuForm} from "./menu.js";
 import {getPage, openPage, openPageByTag, save, zeroCursor} from "./page.js";
@@ -37,7 +38,7 @@ export const getAppLock = async () => {
   } catch {}
 
   showBanner({},
-    o(".header", "Paused!"),
+    "Paused!",
     o("",
       "You've opened Whyolet Text", o("br"),
       "in another tab.", o("br"),
@@ -51,6 +52,7 @@ export const getAppLock = async () => {
 /// openScreen, screenTypes
 
 export const screenTypes = Object.seal({
+  info: "info",
   page: "page",
   search: "search",
 });
@@ -101,6 +103,10 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
 
   } else if (screen.type === screenTypes.search) {
     openSearch(screen.props.query);
+
+  } else if (screen.type === screenTypes.info) {
+    const {header, items} = screen.props;
+    openInfo(header, items);
 
   } else throw new Error(screen.type);
 });

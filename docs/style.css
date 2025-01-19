@@ -1,3 +1,5 @@
+/** variables **/
+
 :root {
   --high: #DDCCFF;
   --text: #BBAADD;
@@ -6,16 +8,22 @@
   --hint: #554477;
   --back: #332255;
 
-  --gap: 0.5rem;
-  --header: 1.2rem;
   --icon: 2rem;
+  --header: 1.2rem;
+  --char: 1rem;
+  --gap: 0.5rem;
+  --small-gap: 0.2rem;
+
   --thin: 0.5px solid var(--hint);
+
+  --bold: 700;
+  --normal: 400;
 
   --anim: 0.5s;
   --quick: 0.25s;
-
-  --bold: 700;
 }
+
+/** fonts **/
 
 @font-face {
   font-family: "SourceCodePro";
@@ -36,6 +44,8 @@
     url("fonts/MaterialSymbolsOutlined.ttf") format("truetype");
 }
 
+/** defaults for all elements **/
+
 * {
   box-sizing: border-box;
 
@@ -49,9 +59,11 @@
   -webkit-tap-highlight-color: transparent;
 
   font-family: "SourceCodePro", monospace;
-  font-weight: 400;
-  font-size: 1rem;
+  font-size: var(--char);
+  font-weight: var(--normal);
 }
+
+/** icon **/
 
 .icon {
   font-family: "Material Symbols Outlined";
@@ -72,14 +84,10 @@
   text-rendering: optimizeLegibility;
 }
 
+/** html, body **/
+
 html,
-body,
-.banner,
-.page,
-.frame,
-.search,
-.found,
-textarea {
+body {
   width: 100%;
   height: 100%;
 }
@@ -89,6 +97,8 @@ body {
   overscroll-behavior-y: contain;
 }
 
+/** input **/
+
 input {
   width: 100%;
 }
@@ -96,6 +106,8 @@ input {
 input::placeholder {
   color: var(--hint);
 }
+
+/** list **/
 
 ul {
   list-style-type: square;
@@ -106,6 +118,8 @@ li::marker {
   color: var(--hint);
 }
 
+/** clickable **/
+
 a {
   text-decoration: none;
   font-weight: var(--bold);
@@ -114,12 +128,20 @@ a {
 a,
 .icon {
   color: var(--tool);
-  border-radius: var(--icon);
 }
 
 .button {
   cursor: pointer;
   user-select: none;
+}
+
+.button.icon,
+.button.rounded {
+  border-radius: var(--icon);
+}
+
+.button.rounded {
+  padding: var(--gap);
 }
 
 a:active,
@@ -131,93 +153,72 @@ a:active > .icon,
   background-color: var(--hint);
 }
 
+/** bold **/
+
 b {
   font-weight: var(--bold);
 }
 
-.banner {
+/** header **/
+
+.header,
+.header > span {
+  font-size: var(--header);
+  font-weight: var(--bold);
+  color: var(--tool);
+  text-align: center;
+}
+
+.header > span {
+  padding-left: var(--gap);
+}
+
+/** centered **/
+
+.centered {
+  width: 100%;
+
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
 }
 
-.banner > *,
-.banner .button {
-  padding: 0.5rem;
-  border-radius: var(--icon);
+.centered.full {
+  height: 100%;
+  justify-content: center;
 }
 
-.banner > .header {
-  font-size: var(--header);
-  font-weight: var(--bold);
+.centered > * {
+  margin: var(--char);
 }
+
+/** page screen = attics + frame **/
 
 .page {
+  width: 100%;
+  height: 100%;
+
   display: flex;
   flex-direction: column;
 }
 
 .attic {
-  flex: 0 0 auto;
+  flex: none;
+  width: 100%;
   height: var(--icon);
   border-bottom: var(--thin);
-
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
 }
 
-.find-form {
-  flex: 1 1 auto;
-  display: grid;
-
-  grid-template-columns:
-    repeat(2, var(--icon))
-    1fr
-    repeat(2, var(--icon))
-    1fr
-    var(--icon);
-
-  grid-template-rows: var(--icon);
-  grid-template-areas:
-    "p n f o a r x";
-
-  place-items: center;
-}
-
-.menu-form,
-.line-form {
-  flex: 1 1 auto;
-  display: grid;
-  grid-template-columns: 1fr var(--icon);
-  grid-template-rows: var(--icon);
-  grid-template-areas: "m x";
-  place-items: center;
-}
-
-.menu-form > .main {
+.attic > * {
   width: 100%;
-  overflow-x: auto;
-
-  display: grid;
-  grid-auto-columns: var(--icon);
-  grid-template-rows: var(--icon);
-  grid-auto-flow: column;
-  place-items: center;
-}
-
-.line-form > .main > input {
-  border: var(--thin);
-  min-width: 0.2rem;
-  max-width: 10rem;
-  padding: 0.2rem 0.5rem;
-  text-align: center;
+  height: 100%;
 }
 
 .frame {
-  flex: 1 1 auto;
+  flex: auto;
+  width: 100%;
+  height: 100%;
+
   display: grid;
 
   grid-template-columns:
@@ -255,10 +256,9 @@ b {
 
 .frame > .header {
   grid-area: q;
-  font-size: var(--header);
-  font-weight: var(--bold);
+  width: 100%;
+  overflow-x: auto;
   color: var(--high);
-  overflow-x: hidden;
 }
 
 .frame > .header.pinned {
@@ -278,18 +278,76 @@ b {
 
 textarea {
   grid-area: t;
+  width: 100%;
+  height: 100%;
   display: block;  /* Avoid parent scrollbar and visible background */
   scrollbar-color: var(--hint) var(--back);
   resize: none;
 }
 
+/** attic forms: menu, line **/
+
+.menu-form,
+.line-form {
+  display: grid;
+  grid-template-columns: 1fr var(--icon);
+  grid-template-rows: var(--icon);
+  grid-template-areas: "m x";
+  place-items: center;
+}
+
+.menu-form > .main {
+  width: 100%;
+  overflow-x: auto;
+
+  display: grid;
+  grid-auto-columns: var(--icon);
+  grid-template-rows: var(--icon);
+  grid-auto-flow: column;
+  place-items: center;
+}
+
+.line-form > .main > input {
+  border: var(--thin);
+  min-width: var(--small-gap);
+  max-width: 10rem;
+  padding: var(--small-gap) var(--gap);
+  text-align: center;
+}
+
+/** attic forms: find/replace **/
+
+.find-form {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, var(--icon))
+    1fr
+    repeat(2, var(--icon))
+    1fr
+    var(--icon);
+
+  grid-template-rows: var(--icon);
+  grid-template-areas:
+    "p n f o a r x";
+
+  place-items: center;
+}
+
+/** screens: info, search **/
+
+.info,
 .search {
+  width: 100%;
+  height: 100%;
+
   display: grid;
   grid-template-columns: 1fr var(--icon);
   grid-template-rows: var(--icon) 1fr;
+
   grid-template-areas:
-    "w x"
-    "f f";
+    "h x"
+    "i i";
 
   place-items: center;
 }
@@ -298,27 +356,28 @@ textarea {
   padding-left: var(--gap);
 }
 
-.found {
-  grid-area: f;
-  border-top: var(--thin);
+.info > .items,
+.search > .items {
+  grid-area: i;
+  width: 100%;
+  height: 100%;
   overflow-y: auto;
 }
 
-.found > .header {
-  text-align: center;
+.search > .items {
+  border-top: var(--thin);
 }
 
-.found > .header > span {
-  padding-left: var(--gap);
-  font-size: var(--header);
-  font-weight: var(--bold);
-  color: var(--tool);
-}
-
-.found > .item {
-  border-bottom: var(--thin);
+.info > .items > *,
+.search > .items > * {
   padding: var(--gap);
 }
+
+.search > .items > * {
+  border-bottom: var(--thin);
+}
+
+/** collapsed/hidden **/
 
 .collapsible {
   overflow-y: hidden;

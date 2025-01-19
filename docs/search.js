@@ -23,7 +23,7 @@ export const initSearchUI = () => {
   });
   on(ui.searchInput, "input", onSearchInput);
 
-  ui.found = o(".found");
+  ui.found = o(".items");
 
   ui.search = o(".search",
     ui.searchInput,
