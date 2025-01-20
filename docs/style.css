@@ -399,7 +399,8 @@ textarea {
 
 .info > .items > *,
 .search > .items > * {
-  padding: var(--gap);
+  padding: var(--gap) var(--char);
+  overflow: hidden;
 }
 
 .search > .items > * {
