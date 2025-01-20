@@ -2,6 +2,7 @@ import "./error.js";
 import {setPassphrase} from "./crypto.js";
 import * as db from "./db.js";
 import {initFindUI} from "./find.js";
+import {initFontUI} from "./font.js";
 import {initInfoUI} from "./info.js";
 import {initLineUI} from "./line.js";
 import {getPersisted, tryPersist} from "./local.js";
@@ -22,14 +23,12 @@ await db.load();
 
 initNavUI();
 initMenuUI();
+initFontUI();
+initLineUI();
 initInfoUI();
 initFindUI();
 initSearchUI();
-initLineUI();
 initPageUI();
-
-// TODO: Move to db.load()
-// ui.body.classList.add("mono");
 
 ui.body.textContent = "";
 for (const screenType in screenTypes)  {

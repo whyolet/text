@@ -31,7 +31,6 @@
   src:
     local("Material Symbols Outlined"),
     local("MaterialSymbols-Outlined"),
-    url("fonts/MaterialSymbolsOutlined.woff2") format("woff2"),
     url("fonts/MaterialSymbolsOutlined.ttf") format("truetype");
 }
 
@@ -51,7 +50,6 @@
   src:
     local("Ubuntu Light"),
     local("Ubuntu-Light"),
-    url("fonts/Ubuntu-Light.woff2") format("woff2"),
     url("fonts/Ubuntu-Light.ttf") format("truetype");
 }
 
@@ -63,7 +61,6 @@
   src:
     local("Ubuntu Bold"),
     local("Ubuntu-Bold"),
-    url("fonts/Ubuntu-Bold.woff2") format("woff2"),
     url("fonts/Ubuntu-Bold.ttf") format("truetype");
 }
 
@@ -84,12 +81,6 @@
   font-family: "Ubuntu", sans-serif;
   font-weight: 300;
   font-size: var(--char);
-}
-
-.mono,
-.mono * {
-  font-family: "SourceCodePro", monospace;
-  font-weight: 400;
 }
 
 /** icon **/
@@ -314,15 +305,33 @@ textarea {
   resize: none;
 }
 
-/** attic forms: menu, line **/
+textarea.mono {
+  font-family: "SourceCodePro", monospace;
+  font-weight: 400;
+}
+
+/** attic forms: menu, font, line **/
+
+.menu-form,
+.font-form,
+.line-form {
+  display: grid;
+  grid-template-rows: var(--icon);
+  place-items: center;
+}
 
 .menu-form,
 .line-form {
-  display: grid;
   grid-template-columns: 1fr var(--icon);
-  grid-template-rows: var(--icon);
   grid-template-areas: "m x";
-  place-items: center;
+}
+
+.font-form {
+  grid-template-areas: "a m x";
+  grid-template-columns:
+    var(--icon)
+    1fr
+    var(--icon);
 }
 
 .menu-form > .main {
@@ -336,10 +345,10 @@ textarea {
   place-items: center;
 }
 
+.font-form > .main > input,
 .line-form > .main > input {
   border: var(--thin);
-  min-width: var(--small-gap);
-  max-width: 10rem;
+  width: 4rem;
   padding: var(--small-gap) var(--gap);
   text-align: center;
 }

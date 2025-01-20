@@ -28,15 +28,12 @@
     "/icons/Icon-maskable-192.png",
     "/icons/Icon-maskable-512.png",
     "/fonts/MaterialSymbolsOutlined.ttf",
-    "/fonts/MaterialSymbolsOutlined.woff2",
     "/fonts/SourceCodePro-VariableFont_wght.ttf",
     "/fonts/Ubuntu-Bold.ttf",
-    "/fonts/Ubuntu-Bold.woff2",
     "/fonts/Ubuntu-Light.ttf",
-    "/fonts/Ubuntu-Light.woff2",
   ];
 
-  const moreStatic = ["png", "ttf", "woff2"];
+  const moreStatic = ["png", "ttf"];
 
   const precache = async () => {
     const cache = await caches.open(cacheName);

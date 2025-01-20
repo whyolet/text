@@ -224,21 +224,23 @@ export const toast = (message, props) => {
 /// getInt
 
 export const getInt = (props) => {
-  const {oldValue, newValue, min, max} = props;
+  const {oldValue, newValue, add, min, max, fix} = props;
   if (newValue === null) return null;
 
-  const result = parseInt(newValue, 10);
-  if (
-    result === oldValue ||
-    Number.isNaN(result)
-  ) return null;
+  let result = parseInt(newValue, 10);
+  if (Number.isNaN(result)) return null;
+
+  if (add) result += add;
+  if (result === oldValue) return null;
 
   if (
     result < min ||
     result > max
   ) {
     toast(`From ${min} to ${max}`);
-    return null;
+    return fix ?
+      ((result < min) ? min : max)
+      : null;
   }
 
   return result;

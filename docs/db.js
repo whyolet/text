@@ -14,6 +14,7 @@ const stores = Object.seal({
 
 export const conf = Object.seal({
   salt: "salt",
+  mono: "mono",
   zoom: "zoom",
   recentTags: "recentTags",
   opIds: "opIds",
@@ -21,10 +22,14 @@ export const conf = Object.seal({
 
 export const mem = Object.seal({
   salt: null,
+  mono: null,
   zoom: null,
   recentTags: null,
   opIds: null,
   pages: null,
+
+  /// Not saved
+
   page: null,
   textLength: 0,  // for `autoindent`
   oldPages: null, // for `createOp`
@@ -86,6 +91,7 @@ export const load = async () => await new Promise(async (doneLoading) => {
     setKey(await getKey(mem.salt));
 
     await Promise.all([
+      loadConf(conf.mono, () => false),
       loadConf(conf.zoom, () => 100),
       loadConf(conf.recentTags, () => []),
 

@@ -1,6 +1,7 @@
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
+import {hideFontForm} from "./font.js";
 import {openInfo} from "./info.js";
 import {hideLineForm} from "./line.js";
 import {hideMenuForm} from "./menu.js";
@@ -77,8 +78,10 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
   const i = event.state;
   if (!i || !ui.isActive) return;
 
-  await save();
   const screen = screens[i];
+  if (!screen) return;
+
+  await save();
 
   for (const screenType in screenTypes) {
     const el = ui[screenType];
@@ -126,8 +129,9 @@ export const initNavUI = () => {
 
 export const hideAtticForms = () => {
   hideMenuForm();
-  hideFindForm();
+  hideFontForm();
   hideLineForm();
+  hideFindForm();
 };
 
 /// onOpenDate, onOpenDateInput

@@ -1,4 +1,5 @@
 import {onPageExport, onPageImport} from "./file.js";
+import {onFontForm} from "./font.js";
 import {onLineForm} from "./line.js";
 import {getPersisted, onLocalData} from "./local.js";
 import {hideAtticForms} from "./nav.js";
@@ -11,7 +12,7 @@ export const initMenuUI = () => {
 
   ui.menuForm = o(".menu-form hidden",
     o(".main",
-      ib("format_size"),
+      ib("format_size", "", onFontForm),
       ib("123", "", onLineForm),
       ui.localDataButton,
       ib("file_save", "", onPageExport),

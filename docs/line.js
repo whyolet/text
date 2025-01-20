@@ -11,7 +11,6 @@ export const initLineUI = () => {
     min: 1,
     step: 1,
   });
-  on(ui.lineNumber, "input", resizeLineNumber);
 
   ui.maxLineNumber = o("span");
 
@@ -27,13 +26,6 @@ export const initLineUI = () => {
 
   ui.attic.appendChild(ui.lineForm);
   on(document, "selectionchange", updateLineFormOnSelChange);
-};
-
-/// resizeLineNumber
-
-const resizeLineNumber = () => {
-  ui.lineNumber.style.width = "auto";
-  ui.lineNumber.style.width = `${ui.lineNumber.scrollWidth}px`;
 };
 
 /// onLineForm
@@ -71,7 +63,6 @@ export const showLineForm = () => {
 
   recentLineNumber = lineNumber;
   ui.lineNumber.value = lineNumber;
-  resizeLineNumber();
 };
 
 /// getLineNumbers

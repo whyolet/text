@@ -3,6 +3,7 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {onFindForm} from "./find.js";
+import {applyFont} from "./font.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
@@ -23,6 +24,7 @@ export const initPageUI = () => {
 
   ui.ta = o("textarea");
   on(ui.ta, "input", onInput);
+  applyFont();
 
   ui.frame = o(".frame",
 
