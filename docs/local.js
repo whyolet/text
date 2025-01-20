@@ -1,4 +1,5 @@
 import {openInfoScreen} from "./info.js";
+import {showMenuForm} from "./menu.js";
 import {o, onClick} from "./ui.js";
 
 /// isPersistSupported
@@ -104,6 +105,7 @@ const onRequestPerm = async () => {
 /// onSuccess
 
 const onSuccess = () => {
+  showMenuForm();  // Update icon.
   alert("Success!");
   history.back();
   setTimeout(onLocalData, 200);
