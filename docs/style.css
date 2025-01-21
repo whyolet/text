@@ -303,6 +303,7 @@ textarea {
   display: block;  /* Avoid parent scrollbar and visible background */
   scrollbar-color: var(--hint) var(--back);
   resize: none;
+  touch-action: pan-y;
 }
 
 textarea.mono {

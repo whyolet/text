@@ -4,10 +4,11 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {onFindForm} from "./find.js";
 import {applyFont} from "./font.js";
+import {detectGestures} from "./gesture.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
-import {getNow, getTodayPlus, hideAtticForms, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
+import {getNow, getTodayPlus, hideAtticForms, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
 import {debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
@@ -25,6 +26,11 @@ export const initPageUI = () => {
   ui.ta = o("textarea");
   on(ui.ta, "input", onInput);
   applyFont();
+
+  detectGestures(ui.ta, {
+    onSwipeLeft: () => openNextDate({forward: false}),
+    onSwipeRight: () => openNextDate({forward: true}),
+  });
 
   ui.frame = o(".frame",
 
@@ -100,6 +106,30 @@ export const zeroCursor = {
   selStart: 0,
   selEnd: 0,
   scroll: 0,
+};
+
+/// openNextDate
+
+const openNextDate = async (props) => {
+  const {forward = true} = props ?? {};
+  const {tag} = mem.page;
+
+  if (!isDateTag(tag)) {
+    onOpenHome();
+    return;
+  }
+
+  const date = new Date(
+    Date.parse(tag) +
+    (forward ? 1 : -1) *
+    1000*60*60*24
+  );
+
+  await openPageByTag(
+    date
+    .toISOString()
+    .split("T")[0]
+  );
 };
 
 /// openPage/ByTag
