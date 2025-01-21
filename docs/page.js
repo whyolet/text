@@ -28,8 +28,8 @@ export const initPageUI = () => {
   applyFont();
 
   detectGestures(ui.ta, {
-    onSwipeLeft: () => openNextDate({forward: false}),
-    onSwipeRight: () => openNextDate({forward: true}),
+    onSwipeLeft: () => openNextDate({forward: true}),
+    onSwipeRight: () => openNextDate({forward: false}),
   });
 
   ui.frame = o(".frame",
