@@ -1,3 +1,4 @@
+import {anchor} from "./anchor.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
@@ -215,7 +216,9 @@ export const showOrHideOverdue = () => {
 const isOverdue = (page, today) => (
   page.tag < today &&
   isDateTag(page.tag) &&
-  page.text
+  page.text &&
+  page.text.indexOf(anchor)
+    // Not found or not the start.
 );
 
 export const onMoveOverdue = async () => {
@@ -231,7 +234,10 @@ export const onMoveOverdue = async () => {
     return;
   }
 
-  if (!confirm("Move overdue to today?")) return;
+  if (!confirm(
+`Move overdue to today?
+Text after ${anchor} is not moved.`
+  )) return;
 
   const overdueTags = [];
   for (const page of Object.values(mem.pages)) {
@@ -244,11 +250,21 @@ export const onMoveOverdue = async () => {
 
   for (const tag of overdueTags) {
     const page = mem.pages[tag];
-    const text = page.text.trim();
-    if (text) parts.push(text);
+    const {text} = page;
+    const i = text.indexOf(anchor);
+
+    const moving = (i === -1 ?
+      text : text.slice(0, i)
+    ).trim();
+
+    const anchored = (i === -1 ?
+      "" : text.slice(i)
+    ).trim();
+
+    if (moving) parts.push(moving);
 
     Object.assign(page, {
-      text: "",
+      text: anchored,
       edited: now,
     }, zeroCursor);
 

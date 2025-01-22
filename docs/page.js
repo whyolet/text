@@ -1,3 +1,4 @@
+import {onAnchor} from "./anchor.js";
 import {onCut, onCopy, onPaste} from "./clipboard.js";
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
@@ -44,6 +45,7 @@ export const initPageUI = () => {
     ib("calendar_month", "g", onOpenDate),  // Go to date
     ib("search", "s", onSearch),
     ib("find_in_page", "f", onFindForm),
+    ib("anchor", "y", onAnchor),
 
     /// center
 

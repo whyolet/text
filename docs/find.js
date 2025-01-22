@@ -1,4 +1,3 @@
-import * as db from "./db.js";
 import {mem} from "./db.js";
 import {hideAtticForms} from "./nav.js";
 import {getLineEnd, getLineNumbers} from "./line.js";

@@ -1,4 +1,3 @@
-import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getSel} from "./sel.js";
 import {save} from "./page.js";

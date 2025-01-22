@@ -1,4 +1,3 @@
-import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getNow} from "./nav.js";
 import {save} from "./page.js";

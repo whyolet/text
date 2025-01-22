@@ -94,7 +94,7 @@ export const onDuplicate = async () => {
 
 /// onMoveUp, onMoveDown
 
-export const onMoveUp = () => {
+export const onMoveUp = async () => {
   const {start, end, part} = getSel({wholeLines: true});
   if (!start) {
     ui.ta.setSelectionRange(0, end);
@@ -120,9 +120,11 @@ export const onMoveUp = () => {
     prevStart,
     prevStart + (end - start),
   );
+
+  await save();
 };
 
-export const onMoveDown = () => {
+export const onMoveDown = async () => {
   const text = mem.page.text;
   const {start, end, part} = getSel({wholeLines: true});
 
@@ -148,6 +150,7 @@ export const onMoveDown = () => {
   const added = nextPart.length + newline.length;
   ui.ta.setRangeText(result, start, end + added);
   ui.ta.setSelectionRange(start + added, end + added);
+  await save();
 };
 
 /// onSelAll
