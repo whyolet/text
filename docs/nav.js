@@ -6,9 +6,9 @@ import {hideFontForm} from "./font.js";
 import {openInfo} from "./info.js";
 import {hideLineForm} from "./line.js";
 import {hideMenuForm} from "./menu.js";
-import {getPage, openPage, openPageByTag, save, zeroCursor} from "./page.js";
+import {getDone, getPage, openPage, openPageByTag, save, splitDoneText, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
-import {getSel} from "./sel.js";
+import {getSel, strikes} from "./sel.js";
 import {getDateInput, debounce, hide, o, on, getRestartButton, show, showBanner, showDateInput, toast, ui} from "./ui.js";
 
 const folder = "📂";
@@ -216,9 +216,7 @@ export const showOrHideOverdue = () => {
 const isOverdue = (page, today) => (
   page.tag < today &&
   isDateTag(page.tag) &&
-  page.text &&
-  page.text.indexOf(anchor)
-    // Not found or not the start.
+  !page.done
 );
 
 export const onMoveOverdue = async () => {
@@ -236,7 +234,10 @@ export const onMoveOverdue = async () => {
 
   if (!confirm(
 `Move overdue to today?
-Text after ${anchor} is not moved.`
+
+${strikes}Done lines${strikes}
+and text after ${anchor}
+will not be moved.`
   )) return;
 
   const overdueTags = [];
@@ -250,21 +251,13 @@ Text after ${anchor} is not moved.`
 
   for (const tag of overdueTags) {
     const page = mem.pages[tag];
-    const {text} = page;
-    const i = text.indexOf(anchor);
+    const {notDoneText, doneText} = splitDoneText(page);
 
-    const moving = (i === -1 ?
-      text : text.slice(0, i)
-    ).trim();
-
-    const anchored = (i === -1 ?
-      "" : text.slice(i)
-    ).trim();
-
-    if (moving) parts.push(moving);
+    if (notDoneText) parts.push(notDoneText);
 
     Object.assign(page, {
-      text: anchored,
+      text: doneText,
+      done: true,
       edited: now,
     }, zeroCursor);
 
@@ -283,6 +276,7 @@ Text after ${anchor} is not moved.`
     edited: now,
   }, zeroCursor);
 
+  mem.page.done = getDone(mem.page);
   await db.savePage(mem.page);
   await openPage(mem.page);
 };
@@ -316,6 +310,7 @@ const onMoveToDateInput = async (date) => {
     edited: getNow(),
   }, zeroCursor);
 
+  page.done = getDone(page);
   await db.savePage(page);
   showOrHideOverdue();
   toast(`Moved to ${date}`);

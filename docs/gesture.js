@@ -55,8 +55,8 @@ const onPointerUp = (event) => {
   const absDY = Math.abs(dY);
 
   if (
-    absDX > 2 * absDY &&
-    absDX > ui.ta.clientWidth / 3
+    absDX > 50 &&
+    absDX > 2 * absDY
   ) {
     if (dX > 0) {
       handlers.onSwipeRight?.();

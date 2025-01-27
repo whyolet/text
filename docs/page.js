@@ -1,4 +1,4 @@
-import {onAnchor} from "./anchor.js";
+import {anchor, onAnchor} from "./anchor.js";
 import {onCut, onCopy, onPaste} from "./clipboard.js";
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
@@ -11,7 +11,7 @@ import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
 import {getNow, getTodayPlus, hideAtticForms, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
-import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onStrike} from "./sel.js";
+import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onStrike, strikes} from "./sel.js";
 import {debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
@@ -45,7 +45,7 @@ export const initPageUI = () => {
     ib("calendar_month", "g", onOpenDate),  // Go to date
     ib("search", "s", onSearch),
     ib("find_in_page", "f", onFindForm),
-    ib("anchor", "y", onAnchor),
+    ib("anchor", "j", onAnchor),
 
     /// center
 
@@ -65,8 +65,8 @@ export const initPageUI = () => {
     ib("remove", "k", onStrike, {focused: true}),  // striKe through
     ib("add", "w", onDuplicate),
 
-    ib("format_indent_decrease", "j", onDedent),
-    ib("format_indent_increase", "i", onIndent),
+    ib("format_indent_decrease", "I", onDedent),  // Ctrl+Shift+I
+    ib("format_indent_increase", "i", onIndent),  // Ctrl+I
 
     ib("undo", "z", onUndo),  // Ctrl+Z
     ib("redo", "Z", onRedo),  // Ctrl+Shift+Z
@@ -95,6 +95,7 @@ export const getPage = (tag) => {
     id: getId(),  // local, for save
     tag,
     text: "",
+    done: true,
     edited: getNow(),  // text was updated by user
     ...zeroCursor
   };
@@ -108,6 +109,48 @@ export const zeroCursor = {
   selStart: 0,
   selEnd: 0,
   scroll: 0,
+};
+
+/// getDone, splitDoneText
+
+export const getDone = (page) => {
+  // For quicker saves.
+  if (!isDateTag(page.tag)) {
+    return false;
+  }
+
+  const {notDoneText, doneText} = splitDoneText(page);
+  return !notDoneText;
+};
+
+export const splitDoneText = (page) => {
+  const {text} = page;
+  const i = text.indexOf(anchor);
+
+  const moving = (i === -1 ?
+    text : text.slice(0, i)
+  ).trim();
+
+  const anchored = (i === -1 ?
+    "" : text.slice(i)
+  ).trim();
+
+  const lines = moving.split("\n");
+  const notDoneLines = [];
+  const doneLines = [];
+
+  for (const line of lines) {
+    if (line.includes(strikes)) {
+      doneLines.push(line);
+    } else notDoneLines.push(line);
+  }
+
+  if (anchored) doneLines.push(anchored);
+
+  return {
+    notDoneText: notDoneLines.join("\n"),
+    doneText: doneLines.join("\n"),
+  };
 };
 
 /// openNextDate
@@ -193,16 +236,20 @@ export const save = async () => {
   if (!page) return;
 
   const next = {
+    tag: page.tag,  // for `getDone`
     text: ui.ta.value,
     selStart: ui.ta.selectionStart,
     selEnd: ui.ta.selectionEnd,
     scroll: ui.ta.scrollTop,
   };
 
+  next.done = getDone(next);
+
   let needSave = mem.opIds.undo ? false : (
     page.selStart !== next.selStart ||
     page.selEnd !== next.selEnd ||
-    page.scroll !== next.scroll
+    page.scroll !== next.scroll ||
+    page.done !== next.done
   );
 
   if (page.text !== next.text) {

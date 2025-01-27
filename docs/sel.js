@@ -48,7 +48,7 @@ export const getQueryFromSel = () => {
 const strike = "─";
 // NOTE: This char is also used in few precompiled /.../ regexes directly.
 
-const strikes = strike + strike;
+export const strikes = strike + strike;
 const newline_striker = strikes + "$&" + strikes;
 
 /// onStrike

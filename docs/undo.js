@@ -45,10 +45,12 @@ export const createOp = (newPage) => {
     oss: oldPage.selStart,
     ose: oldPage.selEnd,
     osc: oldPage.scroll,
+    odn: oldPage.done,
 
     nss: newPage.selStart,
     nse: newPage.selEnd,
     nsc: newPage.scroll,
+    ndn: newPage.done,
   };
 
   Object.assign(oldPage, newPage);
@@ -67,10 +69,12 @@ export const getRevertedOp = (op) => ({
   oss: op.nss,  // oldSelStart
   ose: op.nse,  // oldSelEnd
   osc: op.nsc,  // oldScroll
+  odn: op.ndn,  // oldDone
 
   nss: op.oss,  // newSelStart
   nse: op.ose,  // newSelEnd
   nsc: op.osc,  // newScroll
+  ndn: op.odn,  // newDone
 });
 
 /// onUndo
@@ -124,6 +128,7 @@ const applyOp = async (opId, props) => {
     selStart: forward ? op.nss : op.oss,
     selEnd: forward ? op.nse : op.ose,
     scroll: forward ? op.nsc : op.osc,
+    done: forward ? op.ndn : op.odn,
   });
 
   Object.assign(oldPage, page);
