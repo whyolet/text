@@ -1,7 +1,7 @@
 import {mem} from "./db.js";
 import {hideAtticForms} from "./nav.js";
 import {getLineEnd, getLineNumbers} from "./line.js";
-import {getQueryFromSel, getSel} from "./sel.js";
+import {getQueryFromSel} from "./sel.js";
 import {save} from "./page.js";
 import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, toast, ui} from "./ui.js";
 

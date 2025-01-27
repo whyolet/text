@@ -6,7 +6,13 @@ import {toast, ui} from "./ui.js";
 /// getSel
 
 export const getSel = (props) => {
-  const {withNewline, withoutExpand, wholeLines, focused} = props ?? {};
+  const {
+    focused,
+    withNewline,
+    withoutExpand,
+    withoutIndent,
+    wholeLines,
+  } = props ?? {};
 
   const input = focused && ui.focusedInput || ui.ta;
   const isTa = (input === ui.ta);
@@ -24,6 +30,12 @@ export const getSel = (props) => {
       /[^\r\n]*\r?\n?/
       : /[^\r\n]*/
     )[0].length;
+
+    if (withoutIndent) {
+      start += text
+      .slice(start, end)
+      .match(/\s*/)[0].length;
+    }
   }
 
   const part = text.slice(start, end);
@@ -54,7 +66,10 @@ const newline_striker = strikes + "$&" + strikes;
 /// onStrike
 
 export const onStrike = async () => {
-  const {start, end, part, input, isTa} = getSel({focused: true});
+  const {start, end, part, input, isTa} = getSel({
+    focused: true,
+    withoutIndent: true,
+  });
 
   const result = part.includes(strike) ?
     part.replaceAll(strike, "")

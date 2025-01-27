@@ -7,8 +7,9 @@ import {ui} from "./ui.js";
 
 export const onCut = async () => {
   const {start, end, part, input, isTa} = getSel({
-    withNewline: true,
     focused: true,
+    withNewline: true,
+    withoutIndent: true,
   });
 
   await navigator.clipboard.writeText(part);
@@ -20,8 +21,9 @@ export const onCut = async () => {
 
 export const onCopy = async () => {
   const {start, end, part, input} = getSel({
-    withNewline: true,
     focused: true,
+    withNewline: true,
+    withoutIndent: true,
   });
 
   await navigator.clipboard.writeText(part);
@@ -34,8 +36,8 @@ export const onPaste = async () => {
   const part = await navigator.clipboard.readText();
 
   const {start, end, input, isTa} = getSel({
-    withoutExpand: true,
     focused: true,
+    withoutExpand: true,
   });
 
   input.setRangeText(part, start, end, "end");
