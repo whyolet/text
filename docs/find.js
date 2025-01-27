@@ -46,7 +46,9 @@ export const showFindForm = () => {
   expand(ui.attic);
   show(ui.findForm);
 
-  ui.findInput.value = getQueryFromSel();
+  const query = getQueryFromSel();
+  ui.findInput.value = query;
+  if (!query) ui.findInput.focus();
 };
 
 /// onClearOrHide
