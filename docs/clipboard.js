@@ -9,7 +9,7 @@ export const onCut = async () => {
   const {start, end, part, input, isTa} = getSel({
     focused: true,
     withNewline: true,
-    withoutIndent: true,
+    // Not `withoutIndent`: to delete the line.
   });
 
   await navigator.clipboard.writeText(part);
