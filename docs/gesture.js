@@ -55,7 +55,7 @@ const onPointerUp = (event) => {
   const absDY = Math.abs(dY);
 
   if (
-    absDX > 50 &&
+    absDX > 100 &&
     absDX > 2 * absDY
   ) {
     if (dX > 0) {
