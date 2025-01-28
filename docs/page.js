@@ -185,6 +185,8 @@ export const openPageByTag = async (tag) => {
 };
 
 export const openPage = async (page) => {
+  const tagChanged = (mem.page?.tag !== page.tag);
+
   mem.page = page;
   mem.pages[page.tag] = page;
   mem.textLength = page.text.length;
@@ -195,6 +197,11 @@ export const openPage = async (page) => {
     : page.tag
   );
   toast(header, {isPinned: true});
+
+  if (tagChanged) {
+    // Flash changed tag.
+    toast(header);
+  }
 
   ui.ta.value = page.text;
   ui.ta.focus();
