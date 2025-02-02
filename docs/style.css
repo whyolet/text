@@ -356,21 +356,26 @@ textarea.mono {
 
 /** attic forms: find/replace **/
 
-.find-form {
+.find-form,
+.replace-form {
   display: grid;
 
   grid-template-columns:
-    repeat(2, var(--icon))
+    var(--icon)
     1fr
-    repeat(2, var(--icon))
-    1fr
-    var(--icon);
+    repeat(4, var(--icon));
 
   grid-template-rows: var(--icon);
-  grid-template-areas:
-    "p n f o a r x";
 
   place-items: center;
+}
+
+.find-form {
+  grid-template-areas: "r i q p n x";
+}
+
+.replace-form {
+  grid-template-areas: "a i q q o w";
 }
 
 /** screens: info, search **/

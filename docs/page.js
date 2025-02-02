@@ -79,6 +79,7 @@ export const initPageUI = () => {
 
   ui.page = o(".page",
     ui.attic,
+    ui.attic2,
     ui.openDateInput,
     ui.moveToDateInput,
     ui.frame,

@@ -122,6 +122,7 @@ export const initNavUI = () => {
   on(document, "focusin", onFocus);
 
   ui.attic = o(".attic collapsible collapsed");
+  ui.attic2 = o(".attic collapsible collapsed");
   ui.openDateInput = getDateInput(onOpenDateInput);
   ui.moveToDateInput = getDateInput(onMoveToDateInput);
 };

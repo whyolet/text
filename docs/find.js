@@ -9,26 +9,31 @@ import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, toast, u
 
 export const initFindUI = () => {
   ui.findInput = o("input", {
-    style: "grid-area: f",
+    style: "grid-area: i",
     placeholder: "Find…",
   });
 
   ui.replaceInput = o("input", {
-    style: "grid-area: r",
+    style: "grid-area: i",
     placeholder: "Replace…",
   });
 
   ui.findForm = o(".find-form hidden",
+    ib("move_down", "r", onReplaceForm),
+    ui.findInput,
     ib("keyboard_arrow_up", "p", onFindPrev),
     ib("keyboard_arrow_down", "n", onFindNext),
-    ui.findInput,
-    ib("arrow_forward", "o", onReplaceOne),
-    ib("arrow_split", "a", onReplaceAll),
-    ui.replaceInput,
     ib("close", "x", onClearOrHide),
   );
 
+  ui.replaceForm = o(".replace-form hidden",
+    ib("fast_forward", "a", onReplaceAll),
+    ui.replaceInput,
+    ib("play_arrow", "o", onReplaceOne),
+  );
+
   ui.attic.appendChild(ui.findForm);
+  ui.attic2.appendChild(ui.replaceForm);
 };
 
 /// onFindForm
@@ -37,6 +42,14 @@ export const onFindForm = () => {
   if (isHidden(ui.findForm)) {
     showFindForm();
   } else hideFindForm();
+};
+
+/// onReplaceForm
+
+const onReplaceForm = () => {
+  if (isHidden(ui.replaceForm)) {
+    showReplaceForm();
+  } else hideReplaceForm();
 };
 
 /// showFindForm
@@ -49,6 +62,14 @@ export const showFindForm = () => {
   const query = getQueryFromSel();
   ui.findInput.value = query;
   if (!query) ui.findInput.focus();
+};
+
+/// showReplaceForm
+
+const showReplaceForm = () => {
+  expand(ui.attic2);
+  show(ui.replaceForm);
+  ui.replaceInput.value = ui.findInput.value;
 };
 
 /// onClearOrHide
@@ -69,9 +90,20 @@ export const hideFindForm = () => {
   if (isHidden(ui.findForm)) return;
 
   ui.findInput.value = "";
-  ui.replaceInput.value = "";
   hide(ui.findForm);
   collapse(ui.attic);
+
+  hideReplaceForm();
+};
+
+/// hideReplaceForm
+
+const hideReplaceForm = () => {
+  if (isHidden(ui.replaceForm)) return;
+
+  ui.replaceInput.value = "";
+  hide(ui.replaceForm);
+  collapse(ui.attic2);
 };
 
 /// onFindPrev, onFindNext
