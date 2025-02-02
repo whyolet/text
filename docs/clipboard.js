@@ -22,7 +22,6 @@ export const onCut = async () => {
 export const onCopy = async () => {
   const {start, end, part, input} = getSel({
     focused: true,
-    withNewline: true,
     withoutIndent: true,
   });
 
