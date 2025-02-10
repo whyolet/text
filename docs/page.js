@@ -11,7 +11,7 @@ import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
 import {getNow, getTodayPlus, hideAtticForms, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
-import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onStrike, strikes} from "./sel.js";
+import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onSelLine, onStrike, strikes} from "./sel.js";
 import {debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
@@ -62,6 +62,7 @@ export const initPageUI = () => {
     /// bottom
 
     ib("backspace", "e", onErase, {focused: true}),
+    ib("variables", "l", onSelLine, {focused: true}),
     ib("remove", "k", onStrike, {focused: true}),  // striKe through
     ib("add", "w", onDuplicate),
 
