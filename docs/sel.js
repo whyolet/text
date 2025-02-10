@@ -174,3 +174,16 @@ export const onSelAll = () => {
   const input = ui.focusedInput || ui.ta;
   input.setSelectionRange(0, input.value.length);
 }
+
+/// onSelLine
+
+export const onSelLine = async () => {
+  const {start, end, input, isTa} = getSel({
+    wholeLines: true,
+    withNewline: true,
+    focused: true,
+  });
+
+  input.setSelectionRange(start, end);
+  if (isTa) await save();
+};
