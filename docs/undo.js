@@ -2,7 +2,7 @@
 
 import * as db from "./db.js";
 import {mem} from "./db.js";
-import {getNow} from "./nav.js";
+import {getNow, openScreen, screenTypes} from "./nav.js";
 import {openPage} from "./page.js";
 import {toast} from "./ui.js";
 
@@ -138,5 +138,10 @@ const applyOp = async (opId, props) => {
     db.saveConf(db.conf.opIds),
   ]);
 
-  await openPage(page);
+  if (page.tag === mem.page.tag) {
+    await openPage(page);
+    return;
+  }
+
+  openScreen(screenTypes.page, {tag: page.tag});
 };
