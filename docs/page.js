@@ -9,7 +9,7 @@ import {detectGestures} from "./gesture.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
-import {getNow, getTodayPlus, hideAtticForms, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, showOrHideOverdue} from "./nav.js";
+import {getNow, getTodayPlus, hideAtticForms, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onSelLine, onStrike, strikes} from "./sel.js";
 import {debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
@@ -157,7 +157,7 @@ export const splitDoneText = (page) => {
 
 /// openNextDate
 
-const openNextDate = async (props) => {
+const openNextDate = (props) => {
   const {forward = true} = props ?? {};
   const {tag} = mem.page;
 
@@ -166,17 +166,13 @@ const openNextDate = async (props) => {
     return;
   }
 
-  const date = new Date(
+  const nextTag = (new Date(
     Date.parse(tag) +
     (forward ? 1 : -1) *
     1000*60*60*24
-  );
+  )).toISOString().split("T")[0];
 
-  await openPageByTag(
-    date
-    .toISOString()
-    .split("T")[0]
-  );
+  openScreen(screenTypes.page, {tag: nextTag});
 };
 
 /// openPage/ByTag
