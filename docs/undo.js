@@ -87,8 +87,8 @@ export const onUndo = async () => {
     return toast("It's the oldest!");
   }
 
-  await applyOp(opId, {forward: false});
   ids.undo = opId;
+  await applyOp(opId, {forward: false});
 };
 
 /// onRedo
@@ -98,8 +98,8 @@ export const onRedo = async () => {
   const opId = ids.undo;
   if (!opId) return toast("It's the newest!");
 
-  await applyOp(opId, {forward: true});
   ids.undo = opId < ids.max ? opId + 1 : null;
+  await applyOp(opId, {forward: true});
 };
 
 /// applyOp
