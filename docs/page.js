@@ -234,7 +234,7 @@ const onInput = () => {
 
 /// save
 
-export const save = async () => {
+export const save = async (props) => {
   debounce("save");
 
   const page = mem.page;
@@ -270,5 +270,5 @@ export const save = async () => {
     await db.saveUndoneOps();
   }
 
-  await db.savePage(page);
+  await db.savePage(page, props);
 };

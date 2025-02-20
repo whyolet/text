@@ -82,7 +82,8 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
   const screen = screens[i];
   if (!screen) return;
 
-  await save();
+  const {withoutSave} = screen.props ?? {};
+  if (!withoutSave) await save();
 
   for (const screenType in screenTypes) {
     const el = ui[screenType];
@@ -249,6 +250,7 @@ will not be moved.`
 
   const now = getNow();
   const parts = [];
+  let hasPrev = false;
 
   for (const tag of overdueTags) {
     const page = mem.pages[tag];
@@ -263,8 +265,11 @@ will not be moved.`
     }, zeroCursor);
 
     await db.savePage(page, {
-      withoutFinalize: true,
+      hasPrev,
+      hasNext: true,
     });
+
+    hasPrev = true;
   }
 
   const text = mem.page.text.trim();
@@ -278,7 +283,7 @@ will not be moved.`
   }, zeroCursor);
 
   mem.page.done = getDone(mem.page);
-  await db.savePage(mem.page);
+  await db.savePage(mem.page, {hasPrev});
   await openPage(mem.page);
 };
 
@@ -297,7 +302,7 @@ const onMoveToDateInput = async (date) => {
   });
 
   ui.ta.setRangeText("", start, end, "end");
-  await save();
+  await save({hasNext: true});
 
   const page = getPage(date);
 
@@ -312,7 +317,7 @@ const onMoveToDateInput = async (date) => {
   }, zeroCursor);
 
   page.done = getDone(page);
-  await db.savePage(page);
+  await db.savePage(page, {hasPrev: true});
   showOrHideOverdue();
   toast(`Moved to ${date}`);
 };

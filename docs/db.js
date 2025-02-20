@@ -202,10 +202,16 @@ const loadPages = async () => {
 /// savePage
 
 export const savePage = async (page, props) => {
-  const {withoutOp, withoutFinalize} = props ?? {};
+  const {
+    hasPrev,
+    hasNext,
+    withoutOp,
+  } = props ?? {};
 
   const encryptedPage = await encrypt(page);
-  const encryptedOp = withoutOp ? null : await encrypt(createOp(page));
+
+  const encryptedOp = withoutOp ? null
+    : await encrypt(createOp(page, {hasPrev, hasNext}));
 
   await new Promise(done => {
     const txn = idb.transaction(
@@ -228,7 +234,7 @@ export const savePage = async (page, props) => {
     .objectStore(stores.op)
     .add(encryptedOp);
 
-    if (withoutFinalize) {
+    if (hasNext) {
       txn.oncomplete = done;
       return;
     };

@@ -8,7 +8,12 @@ import {toast} from "./ui.js";
 
 /// createOp
 
-export const createOp = (newPage) => {
+export const createOp = (newPage, props) => {
+  const {
+    hasPrev = false,
+    hasNext = false,
+  } = props ?? {};
+
   const {tag, text: newText} = newPage;
   const oldPage = mem.oldPages[tag];
   const oldText = oldPage.text;
@@ -42,6 +47,9 @@ export const createOp = (newPage) => {
   const op = {
     tag, at, del, ins,
 
+    hp: hasPrev,
+    hn: hasNext,
+
     oss: oldPage.selStart,
     ose: oldPage.selEnd,
     osc: oldPage.scroll,
@@ -66,6 +74,9 @@ export const getRevertedOp = (op) => ({
   del: op.ins,
   ins: op.del,
 
+  hp: op.hn,  // hasPrev
+  hn: op.hp,  // hasNext
+
   oss: op.nss,  // oldSelStart
   ose: op.nse,  // oldSelEnd
   osc: op.nsc,  // oldScroll
@@ -81,25 +92,31 @@ export const getRevertedOp = (op) => ({
 
 export const onUndo = async () => {
   const ids = mem.opIds;
-  const opId = ids.undo ? ids.undo - 1 : ids.max;
+  let hasMore = true;
+  while (hasMore) {
+    const opId = ids.undo ? ids.undo - 1 : ids.max;
 
-  if (!opId || opId < ids.min) {
-    return toast("It's the oldest!");
+    if (!opId || opId < ids.min) {
+      return toast("It's the oldest!");
+    }
+
+    ids.undo = opId;
+    hasMore = await applyOp(opId, {forward: false});
   }
-
-  ids.undo = opId;
-  await applyOp(opId, {forward: false});
 };
 
 /// onRedo
 
 export const onRedo = async () => {
   const ids = mem.opIds;
-  const opId = ids.undo;
-  if (!opId) return toast("It's the newest!");
+  let hasMore = true;
+  while (hasMore) {
+    const opId = ids.undo;
+    if (!opId) return toast("It's the newest!");
 
-  ids.undo = opId < ids.max ? opId + 1 : null;
-  await applyOp(opId, {forward: true});
+    ids.undo = opId < ids.max ? opId + 1 : null;
+    hasMore = await applyOp(opId, {forward: true});
+  }
 };
 
 /// applyOp
@@ -138,10 +155,15 @@ const applyOp = async (opId, props) => {
     db.saveConf(db.conf.opIds),
   ]);
 
+  const hasMore = forward ? op.hn : op.hp;
+  if (hasMore) return true;
+
   if (page.tag === mem.page.tag) {
     await openPage(page);
-    return;
-  }
+  } else openScreen(screenTypes.page, {
+      tag: page.tag,
+      withoutSave: true,
+  });
 
-  openScreen(screenTypes.page, {tag: page.tag});
+  return false;
 };
