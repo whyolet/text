@@ -181,12 +181,32 @@ export const onSelAll = () => {
 /// onSelLine
 
 export const onSelLine = async () => {
-  const {start, end, input, isTa} = getSel({
-    wholeLines: true,
-    withNewline: true,
+  const {start, end} = getSel({
     focused: true,
+    withoutExpand: true,
   });
 
-  input.setSelectionRange(start, end);
-  if (isTa) await save();
+  if (start !== end) {
+    /// Grow to the next line.
+
+    const {start, end, input} = getSel({
+      focused: true,
+      wholeLines: true,
+      withNewline: true,
+    });
+
+    input.setSelectionRange(start, end);
+  }
+
+  {
+    /// Select whole current lines.
+
+    const {start, end, input, isTa} = getSel({
+      focused: true,
+      wholeLines: true,
+    });
+
+    input.setSelectionRange(start, end);
+    if (isTa) await save();
+  }
 };
