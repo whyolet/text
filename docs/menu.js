@@ -3,7 +3,7 @@ import {onFontForm} from "./font.js";
 import {onLineForm} from "./line.js";
 import {getPersisted, onLocalData} from "./local.js";
 import {hideAtticForms} from "./nav.js";
-import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, ui} from "./ui.js";
+import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, toast, ui} from "./ui.js";
 
 /// initMenuUI
 
@@ -17,17 +17,21 @@ export const initMenuUI = () => {
       ui.localDataButton,
       ib("file_save", "", onPageExport),
       ib("file_open", "", onPageImport),
-      ib("key"),
-      ib("archive"),
-      ib("unarchive"),
-      ib("drive_export"),
-      ib("layers"),
+      ib("key", "", onTodo),
+      ib("archive", "", onTodo),
+      ib("unarchive", "", onTodo),
+      ib("drive_export", "", onTodo),
+      ib("layers", "", onTodo),
     ),
     ib("close", "x", hideMenuForm),
   );
 
   ui.attic.appendChild(ui.menuForm);
 };
+
+/// onTodo
+
+const onTodo = () => toast("Under construction");
 
 /// onMenuForm
 
