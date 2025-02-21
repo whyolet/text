@@ -45,14 +45,17 @@ export const getSel = (props) => {
 /// getQueryFromSel
 
 export const getQueryFromSel = () => {
-  const {start, end, part} = getSel({
+  const {start, end, part, input, isTa} = getSel({
+    focused: true,
     withoutExpand: true,
   });
 
-  return (
-    start === end ||
-    part.includes("\n")
-  ) ? "" : part;
+  return isTa ? (
+    (
+      start === end ||
+      part.includes("\n")
+    ) ? "" : part
+  ) : input.value;
 };
 
 /// strike

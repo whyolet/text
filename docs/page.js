@@ -43,7 +43,7 @@ export const initPageUI = () => {
     ui.header,
     
     ib("calendar_month", "g", onOpenDate),  // Go to date
-    ib("search", "s", onSearch),
+    ib("search", "s", onSearch, {focused: true}),
     ib("find_in_page", "f", onFindForm),
     ib("anchor", "j", onAnchor),
 

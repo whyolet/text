@@ -35,7 +35,7 @@ export const initSearchUI = () => {
 /// onSearch
 
 export const onSearch = () => {
-  const query = ui.findInput.value || getQueryFromSel();
+  const query = getQueryFromSel();
   openScreen(screenTypes.search, {query});
 };
 
