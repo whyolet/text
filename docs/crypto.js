@@ -107,7 +107,7 @@ export const encrypt = async (data, props) => {
   const jsonified = JSON.stringify(data);
   const encoder = new TextEncoder();
   let bytes = encoder.encode(jsonified);
-  if (isExport) bytes = tryCompress(bytes);
+  if (isExport) bytes = await tryCompress(bytes);
 
   const encryptedBuffer = await crypto.subtle.encrypt(
     {
@@ -143,7 +143,8 @@ const tryCompress = async (bytes) => {
   const gzipped = plain.stream().pipeThrough(gzip);
   const response = new Response(gzipped);
   const blob = await response.blob();
-  return await blob.bytes();
+  const buffer = await blob.arrayBuffer();
+  return new Bytes(buffer);
 };
 
 /// decrypt: Bytes -> JSON -> object

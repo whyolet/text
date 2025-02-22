@@ -1,4 +1,4 @@
-import {onPageExport, onPageImport} from "./file.js";
+import {onBackupExport, onPageExport, onPageImport} from "./file.js";
 import {onFontForm} from "./font.js";
 import {onLineForm} from "./line.js";
 import {getPersisted, onLocalData} from "./local.js";
@@ -18,7 +18,7 @@ export const initMenuUI = () => {
       ib("file_save", "", onPageExport),
       ib("file_open", "", onPageImport),
       ib("key", "", onTodo),
-      ib("archive", "", onTodo),
+      ib("archive", "", onBackupExport),
       ib("unarchive", "", onTodo),
       ib("drive_export", "", onTodo),
       ib("layers", "", onTodo),

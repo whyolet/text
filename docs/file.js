@@ -1,3 +1,4 @@
+import {encrypt} from "./crypto.js";
 import {mem} from "./db.js";
 import {getNow} from "./nav.js";
 import {save} from "./page.js";
@@ -19,6 +20,35 @@ export const onPageExport = () => {
   );
 
   downloadURL(url, fileName);
+};
+
+/// onBackupExport
+
+export const onBackupExport = async () => {
+  const now = getNow()
+  .replace("T", "--")
+  .replaceAll(":", "-")
+  .replace(/\.\d+/, "");
+
+  const fileName = `whyolet-text--${now}.db`;
+
+  const bytes = await encrypt(
+    Object.values(mem.pages),
+    {isExport: true},
+  );
+
+  const blob = new Blob(
+    [bytes],
+    {type: "application/octet-stream"},
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  downloadURL(url, fileName);
+
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 60*1000);
 };
 
 /// downloadURL
