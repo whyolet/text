@@ -189,6 +189,12 @@ export const debounce = (timerName, millis, action) => {
   timerIds[timerName] = setTimeout(action, millis);
 };
 
+/// debug
+
+export const debug = (data) => {
+  alert(JSON.stringify(data));
+};
+
 /// toast
 
 let toastTimerId = 0;

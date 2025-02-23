@@ -356,12 +356,6 @@ export const saveUndoneOps = async () => {
   });
 };
 
-/// debug
-
-export const debug = (data) => {
-  alert(JSON.stringify(data));
-};
-
 /// close
 
 export const close = () => {

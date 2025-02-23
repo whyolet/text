@@ -1,7 +1,8 @@
-import {encrypt} from "./crypto.js";
+import {Bytes, decrypt, encrypt} from "./crypto.js";
+import * as db from "./db.js";
 import {mem} from "./db.js";
-import {getNow} from "./nav.js";
-import {save} from "./page.js";
+import {getNow, showOrHideOverdue} from "./nav.js";
+import {getPage, openPage, save} from "./page.js";
 import {o, on, toast, ui} from "./ui.js";
 
 /// onPageExport
@@ -32,8 +33,15 @@ export const onBackupExport = async () => {
 
   const fileName = `whyolet-text--${now}.db`;
 
+  const exportedPages = [];
+  for (const page of Object.values(mem.pages)) {
+    const exportedPage = Object.assign({}, page);
+    delete exportedPage.id;
+    exportedPages.push(exportedPage);
+  }
+
   const bytes = await encrypt(
-    Object.values(mem.pages),
+    exportedPages,
     {isExport: true},
   );
 
@@ -74,6 +82,79 @@ export const onPageImport = async () => {
   ui.ta.setSelectionRange(0, 0);
   ui.ta.scrollTop = 0;
   await save();
+};
+
+/// onBackupImport
+
+export const onBackupImport = async () => {
+  const buffer = await getUploaded();
+  if (buffer === null) return;
+
+  const bytes = new Bytes(buffer);
+  const importedPages = await decrypt(bytes, {isImport: true});
+  if (importedPages === null) return;
+
+  const safe = confirm(`Do you want to keep changes
+made after this backup?`);
+
+  const unsavedPages = [];
+  let needReopenPage = false;
+  let created = 0, updated = 0;
+  let outdated = 0, unchanged = 0;
+
+  for (const importedPage of importedPages) {
+    const tag = importedPage.tag;
+    let localPage = mem.pages[tag];
+
+    if (localPage) {
+      if (
+        localPage.edited ===
+        importedPage.edited
+      ) {
+        unchanged++;
+        continue;
+      }
+
+      if (
+        localPage.edited >
+        importedPage.edited
+      ) {
+        outdated++;
+        if (safe) continue;
+      }
+
+      updated++;
+    } else {
+      created++;
+      localPage = getPage(tag);
+    }
+
+    delete importedPage.id;
+    Object.assign(localPage, importedPage);
+    unsavedPages.push(localPage);
+
+    if (localPage === mem.page) needReopenPage = true;
+  }
+
+  const maxIndex = unsavedPages.length - 1;
+  for (const [i, unsavedPage] of unsavedPages.entries()) {
+    await db.savePage(unsavedPage, {
+      hasPrev: i > 0,
+      hasNext: i < maxIndex,
+    });
+  }
+
+  if (needReopenPage) {
+    await openPage(mem.page);
+  }
+
+  showOrHideOverdue();
+
+  alert(`Created pages: ${created}
+Updated pages: ${updated}
+${safe ? "\nSkipped" : "…including"} pages changed after backup: ${outdated
+}${safe ? "" : "\n"}
+Skipped unchanged paged: ${unchanged}`);
 };
 
 /// getUploaded

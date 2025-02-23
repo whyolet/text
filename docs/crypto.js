@@ -2,7 +2,7 @@ import {o, getRestartButton, showBanner} from "./ui.js";
 
 /// Bytes
 
-const Bytes = Uint8Array;
+export const Bytes = Uint8Array;
 
 Bytes.prototype.toHex ??= function () {
   return Array.from(this).map(
