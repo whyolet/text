@@ -154,7 +154,7 @@ made after this backup?`);
 Updated pages: ${updated}
 ${safe ? "\nSkipped" : "…including"} pages changed after backup: ${outdated
 }${safe ? "" : "\n"}
-Skipped unchanged paged: ${unchanged}`);
+Skipped unchanged pages: ${unchanged}`);
 };
 
 /// getUploaded
