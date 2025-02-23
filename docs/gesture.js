@@ -26,8 +26,8 @@ const onPointerDown = (event) => {
   const state = states.get(event.currentTarget);
   if (!state || !event.isPrimary) return;
 
-  state.startX = event.clientX;
-  state.startY = event.clientY;
+  state.startX = state.endX = event.clientX;
+  state.startY = state.endY = event.clientY;
 };
 
 /// onPointerMove
