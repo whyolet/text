@@ -1,4 +1,4 @@
-import {Bytes, decrypt, encrypt} from "./crypto.js";
+import {Bytes, decrypt, encrypt, setExportPassphrase} from "./crypto.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getNow, showOrHideOverdue} from "./nav.js";
@@ -184,4 +184,18 @@ const getUploaded = async (props) => {
     input.click();
     ui.body.removeChild(input);
   });
+};
+
+/// onSetExportPassphrase
+
+export const onSetExportPassphrase = () => {
+  const newValue = prompt(`A passphrase (few words)
+for backup and sync files:`);
+  if (newValue === null) return;
+
+  setExportPassphrase(newValue);
+
+  alert(`This passphrase will be kept in memory
+until you set a new passphrase
+or close this app.`);
 };

@@ -15,18 +15,23 @@ Bytes.fromHex ??= (hexes) => new Bytes(
   .map(match => parseInt(match[0], 16))
 );
 
-/// Current DB passphrase and key, not exported.
+/// Current passphrases and key, not exported from this module.
 
+let exportPassphrase = "";
 let dbPassphrase = "";
 let dbKey = null;
 
-/// Set DB passphrase and key.
+/// Set passphrases and key.
 
-export const setPassphrase = (newValue) => {
+export const setExportPassphrase = (newValue) => {
+  exportPassphrase = newValue;
+};
+
+export const setDbPassphrase = (newValue) => {
   dbPassphrase = newValue;
 };
 
-export const setKey = (newValue) => {
+export const setDbKey = (newValue) => {
   dbKey = newValue;
 };
 
@@ -46,12 +51,16 @@ export const getId = () => getRandomBytes(32).toHex();
 
 /// getKey
 
-export const getKey = async (salt) => {
+export const getKey = async (salt, props) => {
+  const {isExport} = props ?? {};
   const encoder = new TextEncoder();
 
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
-    encoder.encode(dbPassphrase),
+    encoder.encode(
+      isExport ? exportPassphrase
+      : dbPassphrase
+    ),
     "PBKDF2",
     false,
     ["deriveKey"],
@@ -101,7 +110,7 @@ export const getDbName = async () => {
 export const encrypt = async (data, props) => {
   const {isExport} = props ?? {};
   const salt = isExport ? getSalt() : null;
-  const key = isExport ? await getKey(salt) : dbKey;
+  const key = isExport ? await getKey(salt, {isExport}) : dbKey;
   const iv = getIV();
 
   const jsonified = JSON.stringify(data);
@@ -160,7 +169,7 @@ export const decrypt = async (bytes, props) => {
     return part;
   };
 
-  const key = isImport ? await getKey(cut(saltSize)) : dbKey;
+  const key = isImport ? await getKey(cut(saltSize), {isExport: true}) : dbKey;
   const iv = cut(ivSize);
   const encrypted = cut(bytes.length - (i - bytes.byteOffset));
 

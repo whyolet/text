@@ -1,4 +1,4 @@
-import {decrypt, encrypt, getDbName, getKey, getSalt, setKey} from "./crypto.js";
+import {decrypt, encrypt, getDbName, getKey, getSalt, setDbKey} from "./crypto.js";
 import {o, showBanner} from "./ui.js";
 import {createOp, getRevertedOp} from "./undo.js";
 
@@ -88,7 +88,7 @@ export const load = async () => await new Promise(async (doneLoading) => {
     idb.onversionchange = updateAppVersion;
 
     await loadOrCreateSalt();
-    setKey(await getKey(mem.salt));
+    setDbKey(await getKey(mem.salt));
 
     await Promise.all([
       loadConf(conf.mono, () => false),
