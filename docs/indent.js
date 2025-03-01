@@ -60,23 +60,35 @@ export const autoindent = () => {
 /// onIndent
 
 export const onIndent = async () => {
-  const {start, end, part} = getSel({wholeLines: true});
-  const multiline = part.includes("\n");
+  const {start, end} = getSel({withoutExpand: true});
 
-  const result = multiline ?
-    part
-    .split("\n")
-    .map(line =>
-      /\S/.test(line) ?
-      indent + line
-      : line
-    )
-    .join("\n")
-    : indent + part;
-  
-  ui.ta.setRangeText(
-    result, start, end,
-    multiline ? "select" : "end",
+  const {
+    start: wholeStart,
+    end: wholeEnd,
+    part,
+  } = getSel({wholeLines: true});
+
+  const isSingle = !part.includes("\n");
+  let firstAdd = null;
+
+  const result = part
+  .split("\n")
+  .map(line => {
+    const add = (
+      isSingle ||
+      /\S/.test(line)
+    ) ? indent : "";
+
+    firstAdd ??= add;
+    return add + line;
+  })
+  .join("\n");
+
+  ui.ta.setRangeText(result, wholeStart, wholeEnd);
+
+  ui.ta.setSelectionRange(
+    start + firstAdd.length,
+    end + (result.length - part.length),
   );
 
   await save();
@@ -85,8 +97,15 @@ export const onIndent = async () => {
 /// onDedent
 
 export const onDedent = async () => {
-  const {start, end, part} = getSel({wholeLines: true});
-  const multiline = part.includes("\n");
+  const {start, end} = getSel({withoutExpand: true});
+
+  const {
+    start: wholeStart,
+    end: wholeEnd,
+    part,
+  } = getSel({wholeLines: true});
+
+  let firstDel = null;
 
   const result = part
   .split("\n")
@@ -94,17 +113,21 @@ export const onDedent = async () => {
     let prefix = indent;
     while (prefix) {
       if (line.startsWith(prefix)) {
+        firstDel ??= prefix;
         return line.slice(prefix.length);
       }
       prefix = prefix.slice(1);
     }
+    firstDel ??= "";
     return line;
   })
   .join("\n");
-  
-  ui.ta.setRangeText(
-    result, start, end,
-    multiline ? "select" : "end",
+
+  ui.ta.setRangeText(result, wholeStart, wholeEnd);
+
+  ui.ta.setSelectionRange(
+    Math.max(wholeStart, start - firstDel.length),
+    Math.max(wholeStart, end - (part.length - result.length)),
   );
 
   await save();
