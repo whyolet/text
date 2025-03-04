@@ -15,12 +15,7 @@ export const onPageExport = () => {
     + (tag.includes(".") ? "" : ".txt")
   );
 
-  const url = (
-    "data:application/octet-stream;charset=utf-8,"
-    + encodeURIComponent(text)
-  );
-
-  downloadURL(url, fileName);
+  download(text, fileName, {isText: true});
 };
 
 /// onBackupExport
@@ -45,23 +40,21 @@ export const onBackupExport = async () => {
     {isExport: true},
   );
 
-  const blob = new Blob(
-    [bytes],
-    {type: "application/octet-stream"},
-  );
+  download(bytes, fileName);
+};
+
+/// download
+
+const download = (data, fileName, props) => {
+  const {isText} = props ?? {};
+
+  const blob = new Blob([data], {
+    type: isText ? "text/plain"
+      : "application/octet-stream",
+  });
 
   const url = URL.createObjectURL(blob);
 
-  downloadURL(url, fileName);
-
-  setTimeout(() => {
-    URL.revokeObjectURL(url);
-  }, 60*1000);
-};
-
-/// downloadURL
-
-const downloadURL = (url, fileName) => {
   const a = o("a.hidden", {
     href: url,
     download: fileName,
@@ -70,6 +63,10 @@ const downloadURL = (url, fileName) => {
   ui.body.appendChild(a);
   a.click();
   ui.body.removeChild(a);
+
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 60*1000);
 };
 
 /// onPageImport
@@ -167,17 +164,12 @@ const getUploaded = async (props) => {
 
     on(input, "cancel", () => done(null));
 
-    on(input, "change", () => {
+    on(input, "change", async () => {
       const file = input.files[0];
-
-      const reader = new FileReader();
-      on(reader, "abort", () => done(null));
-      on(reader, "error", () => done(null));
-      on(reader, "load", () => done(reader.result));
-
-      if (isText) {
-        reader.readAsText(file);
-      } else reader.readAsArrayBuffer(file);
+      done(
+        isText ? await file.text()
+        : await file.arrayBuffer()
+      );
     });
 
     ui.body.appendChild(input);
