@@ -278,6 +278,7 @@ b {
   grid-area: q;
   width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
   color: var(--high);
 }
 
