@@ -189,11 +189,7 @@ export const openPage = async (page) => {
   mem.pages[page.tag] = page;
   mem.textLength = page.text.length;
 
-  const today = getTodayPlus(0);
-  const header = (page.tag === today ?
-    `Today ${today}`
-    : page.tag
-  );
+  const header = getHeader(page);
   toast(header, {isPinned: true});
 
   if (tagChanged) {
@@ -216,11 +212,24 @@ export const openPage = async (page) => {
   await addToRecentTags(page.tag);
 };
 
+/// getHeader
+
+const getHeader = (page) => {
+  const today = getTodayPlus(0);
+  return (page.tag === today ?
+    `Today ${today}`
+    : page.tag
+  );
+};
+
 /// onHeader
 
 const onHeader = () => {
   hideAtticForms();
-  ui.frame.classList.toggle("zen-mode");
+  const zen = ui.frame.classList.toggle("zen-mode");
+  const header = zen ? "👁"
+    : getHeader(mem.page);
+  toast(header, {isPinned: true});
 }
 
 /// onInput
