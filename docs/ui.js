@@ -199,11 +199,15 @@ export const debug = (data) => {
 
 let toastTimerId = 0;
 let pinnedMessage = "";
+let pinnedIsIcon = false;
 const pinned = "pinned";
 
 export const toast = (message, props) => {
-  const {isPinned} = props ?? {};
-  if (isPinned) pinnedMessage = message;
+  const {isPinned, isIcon} = props ?? {};
+  if (isPinned) {
+    pinnedMessage = message;
+    pinnedIsIcon = isIcon;
+  }
 
   if (toastTimerId) {
     if (isPinned) return; // Keep showing time-limited message.
@@ -212,7 +216,8 @@ export const toast = (message, props) => {
     toastTimerId = 0;
   }
 
-  ui.header.textContent = message;
+  setHeader(message, {isIcon});
+
   const cls = ui.header.classList;
   if (isPinned) {
     cls.add(pinned);
@@ -222,9 +227,19 @@ export const toast = (message, props) => {
 
   toastTimerId = setTimeout(() => {
     toastTimerId = 0;
-    ui.header.textContent = pinnedMessage;
+    setHeader(pinnedMessage, {isIcon: pinnedIsIcon});
     cls.add(pinned);
   }, 1000);
+};
+
+/// setHeader
+
+const setHeader = (message, props) => {
+  const {isIcon} = props ?? {};
+  if (isIcon) {
+    ui.header.textContent = "";
+    ui.header.appendChild(o(".icon", message));
+  } else ui.header.textContent = message;
 };
 
 /// getInt
