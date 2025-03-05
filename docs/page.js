@@ -226,10 +226,10 @@ const getHeader = (page) => {
 
 const onHeader = () => {
   hideAtticForms();
-  const zen = ui.frame.classList.toggle("zen-mode");
-  const header = zen ? "👁"
+  const isZen = ui.frame.classList.toggle("zen-mode");
+  const header = isZen ? "visibility"
     : getHeader(mem.page);
-  toast(header, {isPinned: true});
+  toast(header, {isPinned: true, isIcon: isZen});
 }
 
 /// onInput
