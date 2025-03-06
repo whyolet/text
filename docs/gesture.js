@@ -11,6 +11,7 @@ export const detectGestures = (el, handlers) => {
     handlers,
     startX: 0,
     startY: 0,
+    startT: 0,
     endX: 0,
     endY: 0,
   });
@@ -28,6 +29,7 @@ const onPointerDown = (event) => {
 
   state.startX = state.endX = event.clientX;
   state.startY = state.endY = event.clientY;
+  state.startT = performance.now();
 };
 
 /// onPointerMove
@@ -46,7 +48,10 @@ const onPointerUp = (event) => {
   const state = states.get(event.currentTarget);
   if (!state || !event.isPrimary) return;
 
-  const {handlers, startX, startY, endX, endY} = state;
+  const {handlers, startX, startY, startT, endX, endY} = state;
+
+  const dT = performance.now() - startT;
+  if (dT > 500) return;
 
   const dX = endX - startX;
   const dY = endY - startY;
