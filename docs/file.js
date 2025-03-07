@@ -7,7 +7,7 @@ import {o, on, toast, ui} from "./ui.js";
 
 /// onPageExport
 
-export const onPageExport = () => {
+export const onPageExport = async () => {
   const {tag, text} = mem.page;
 
   const fileName = (
@@ -15,7 +15,7 @@ export const onPageExport = () => {
     + (tag.includes(".") ? "" : ".txt")
   );
 
-  download(text, fileName, {isText: true});
+  await saveFile("page", fileName, text, {isText: true});
 };
 
 /// onBackupExport
@@ -40,13 +40,33 @@ export const onBackupExport = async () => {
     {isExport: true},
   );
 
-  download(bytes, fileName);
+  await saveFile("backup", fileName, bytes);
 };
 
-/// download
+/// saveFile
 
-const download = (data, fileName, props) => {
+const saveFile = async (saverId, fileName, data, props) => {
   const {isText} = props ?? {};
+
+  if ("showSaveFilePicker" in window) {
+    let fileHandle;
+    try {
+      fileHandle = await showSaveFilePicker({
+        id: saverId,
+        startIn: "downloads",
+        suggestedName: fileName,
+      });
+    } catch (error) {
+      if (error.name === "AbortError") return;
+
+      throw error;
+    }
+
+    const writable = await fileHandle.createWritable();
+    await writable.write(data);
+    await writable.close();
+    return;
+  }
 
   const blob = new Blob([data], {
     type: isText ? "text/plain"
