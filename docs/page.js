@@ -10,7 +10,7 @@ import {detectGestures} from "./gesture.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
-import {getNow, getTodayPlus, hideAtticForms, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue} from "./nav.js";
+import {getNow, getToday, hideAtticForms, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onSelLine, onStrike, strikes} from "./sel.js";
 import {debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
@@ -222,7 +222,7 @@ export const openPage = async (page) => {
 /// getHeader
 
 const getHeader = (page) => {
-  const today = getTodayPlus(0);
+  const today = getToday();
   return (page.tag === today ?
     `Today ${today}`
     : page.tag

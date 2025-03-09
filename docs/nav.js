@@ -14,14 +14,21 @@ import {getDateInput, debounce, hide, o, on, getRestartButton, show, showBanner,
 const folder = "📂";
 const folderCodePoint = folder.codePointAt(0);
 
-/// getNow, getTodayPlus, isDateTag
+/// getNow in UTC
 
-export const getNow = () => (new Date()).toISOString();  // UTC
+export const getNow = () => (new Date()).toISOString();
 
-export const getTodayPlus = (days) => {
-  const date = new Date(Date.now() + days * 1000*60*60*24);
-  return date.toISOString().split("T")[0];
+/// getToday in local TZ
+
+export const getToday = () => {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 };
+
+/// isDateTag
 
 export const isDateTag = (tag) => /^\d+-\d{2}-\d{2}$/.test(tag);
 
@@ -187,7 +194,7 @@ export const onBack = () => {
 /// onOpenHome
 
 export const onOpenHome = () => {
-  const today = getTodayPlus(0);
+  const today = getToday();
   if (mem.page.tag === today) {
     toast("It's today already!");
     return;
@@ -199,7 +206,7 @@ export const onOpenHome = () => {
 /// showOrHideOverdue, onMoveOverdue
 
 export const showOrHideOverdue = () => {
-  const today = getTodayPlus(0);
+  const today = getToday();
   if (mem.page.tag !== today) {
     hide(ui.moveOverdue);
     return;
@@ -222,7 +229,7 @@ const isOverdue = (page, today) => (
 );
 
 export const onMoveOverdue = async () => {
-  const today = getTodayPlus(0);
+  const today = getToday();
   if (mem.page.tag !== today) {
     // Midnight happened.
     openScreen(screenTypes.page, {tag: today});

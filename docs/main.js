@@ -7,7 +7,7 @@ import {initInfoUI} from "./info.js";
 import {initLineUI} from "./line.js";
 import {getPersisted, tryPersist} from "./local.js";
 import {initMenuUI} from "./menu.js";
-import {getAppLock, getTodayPlus, initNavUI, openScreen, screenTypes} from "./nav.js";
+import {getAppLock, getToday, initNavUI, openScreen, screenTypes} from "./nav.js";
 import {initPageUI} from "./page.js";
 import {initSearchUI} from "./search.js";
 import {o, showBanner, ui} from "./ui.js";
@@ -35,7 +35,7 @@ for (const screenType in screenTypes)  {
   ui.body.appendChild(ui[screenType]);
 }
 
-openScreen(screenTypes.page, {tag: getTodayPlus(0)});
+openScreen(screenTypes.page, {tag: getToday()});
 
 const persisted = await getPersisted();
 if (!persisted) await tryPersist();
