@@ -3,6 +3,7 @@ import {onCut, onCopy, onPaste} from "./clipboard.js";
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
+import {onSaveFile, showOrHideSaveFile} from "./file.js";
 import {onFindForm} from "./find.js";
 import {applyFont} from "./font.js";
 import {detectGestures} from "./gesture.js";
@@ -20,6 +21,9 @@ import {onRedo, onUndo} from "./undo.js";
 export const initPageUI = () => {
   ui.moveOverdue = ib("history", "p", onMoveOverdue);  // Past
   hide(ui.moveOverdue);
+
+  ui.saveFile = ib("file_save", "s", onSaveFile);
+  hide(ui.saveFile);
 
   ui.header = o(".header");
   onClick(ui.header, onHeader);
@@ -39,12 +43,13 @@ export const initPageUI = () => {
 
     ib("menu", "m", onMenuForm),
     ui.moveOverdue,
+    ui.saveFile,
     
     ui.header,
-    
+
     ib("calendar_month", "g", onOpenDate),  // Go to date
-    ib("search", "s", onSearch, {focused: true}),
-    ib("find_in_page", "f", onFindForm),
+    ib("search", "F", onSearch, {focused: true}),  // // Ctrl+Shift+F
+    ib("find_in_page", "f", onFindForm),  // Ctrl+F
     ib("anchor", "j", onAnchor),
 
     /// center
@@ -99,6 +104,7 @@ export const getPage = (tag) => {
     text: "",
     done: true,
     edited: getNow(),  // text was updated by user
+    fileSaved: null,  // when
     ...zeroCursor
   };
 
@@ -209,6 +215,7 @@ export const openPage = async (page) => {
 
   updateLineFormOnSelChange();
   showOrHideOverdue();
+  showOrHideSaveFile();
   await addToRecentTags(page.tag);
 };
 
@@ -280,4 +287,5 @@ export const save = async (props) => {
   }
 
   await db.savePage(page, props);
+  showOrHideSaveFile();
 };

@@ -259,8 +259,8 @@ b {
 
   grid-template-areas:
     /* Areas/shortcuts */
-    "m p q q q q q q q g s"
-    ". t t t t t t t t t f"
+    "m s q q q q q q q g F"
+    "p t t t t t t t t t f"
     ". t t t t t t t t t j"
     ". t t t t t t t t t ."
     "o t t t t t t t t t u"

@@ -33,6 +33,7 @@ export const mem = Object.seal({
   page: null,
   textLength: 0,  // for `autoindent`
   oldPages: null, // for `createOp`
+  fileHandles: {},
 });
 
 /// onDbError, updateAppVersion

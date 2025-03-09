@@ -3,7 +3,7 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getNow, showOrHideOverdue} from "./nav.js";
 import {getPage, openPage, save} from "./page.js";
-import {o, on, toast, ui} from "./ui.js";
+import {hide, o, on, show, toast, ui} from "./ui.js";
 
 /// onPageExport
 
@@ -15,7 +15,51 @@ export const onPageExport = async () => {
     + (tag.includes(".") ? "" : ".txt")
   );
 
-  await saveFile("page", fileName, text, {isText: true});
+  const fileHandle = await saveFile({
+    fileName,
+    data: text,
+    isText: true,
+  });
+  if (!fileHandle) return;
+
+  mem.fileHandles[tag] = fileHandle;
+  mem.page.fileSaved = getNow();
+  showOrHideSaveFile();
+};
+
+/// showOrHideSaveFile
+
+export const showOrHideSaveFile = () => {
+  const fileHandle = mem.fileHandles[mem.page.tag];
+  if (
+    fileHandle &&
+    mem.page.fileSaved < mem.page.edited
+  ) {
+    show(ui.saveFile);
+  } else hide(ui.saveFile);
+};
+
+/// onSaveFile
+
+export const onSaveFile = async () => {
+  const fileHandle = mem.fileHandles[mem.page.tag];
+  if (!fileHandle) return;
+
+  try {
+    await saveFile({
+      fileHandle,
+      data: mem.page.text,
+      isText: true,
+    });
+  } catch (error) {
+    if (error.name !== "InvalidStateError") throw error;
+
+    onPageExport();
+    return;
+  }
+
+  mem.page.fileSaved = getNow();
+  showOrHideSaveFile();
 };
 
 /// onBackupExport
@@ -31,7 +75,7 @@ export const onBackupExport = async () => {
   const exportedPages = [];
   for (const page of Object.values(mem.pages)) {
     const exportedPage = Object.assign({}, page);
-    delete exportedPage.id;
+    deleteLocalProps(exportedPage);
     exportedPages.push(exportedPage);
   }
 
@@ -40,32 +84,51 @@ export const onBackupExport = async () => {
     {isExport: true},
   );
 
-  await saveFile("backup", fileName, bytes);
+  await saveFile({
+    saverId: "backup",
+    fileName,
+    data: bytes,
+  });
+};
+
+/// deleteLocalProps
+
+const deleteLocalProps = (pageCopy) => {
+  delete pageCopy.id;
+  delete pageCopy.fileSaved;
 };
 
 /// saveFile
 
-const saveFile = async (saverId, fileName, data, props) => {
-  const {isText} = props ?? {};
+const saveFile = async (props) => {
+  const {
+    saverId = "page",
+    fileHandle: handle,
+    fileName,
+    data,
+    isText,
+  } = props ?? {};
 
   if ("showSaveFilePicker" in window) {
-    let fileHandle;
-    try {
-      fileHandle = await showSaveFilePicker({
-        id: saverId,
-        startIn: "downloads",
-        suggestedName: fileName,
-      });
-    } catch (error) {
-      if (error.name === "AbortError") return;
+    let fileHandle = handle;
+    if (!fileHandle) {
+      try {
+        fileHandle = await showSaveFilePicker({
+          id: saverId,
+          startIn: "downloads",
+          suggestedName: fileName,
+        });
+      } catch (error) {
+        if (error.name === "AbortError") return null;
 
-      throw error;
+        throw error;
+      }
     }
 
     const writable = await fileHandle.createWritable();
     await writable.write(data);
     await writable.close();
-    return;
+    return fileHandle;
   }
 
   const blob = new Blob([data], {
@@ -87,6 +150,7 @@ const saveFile = async (saverId, fileName, data, props) => {
   setTimeout(() => {
     URL.revokeObjectURL(url);
   }, 60*1000);
+  return null;
 };
 
 /// onPageImport
@@ -146,7 +210,7 @@ made after this backup?`);
       localPage = getPage(tag);
     }
 
-    delete importedPage.id;
+    deleteLocalProps(importedPage);
     Object.assign(localPage, importedPage);
     unsavedPages.push(localPage);
 

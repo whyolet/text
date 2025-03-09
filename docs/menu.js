@@ -1,4 +1,4 @@
-import {onBackupExport, onBackupImport, onSetExportPassphrase, onPageExport, onPageImport} from "./file.js";
+import {onBackupExport, onBackupImport, onPageExport, onPageImport, onSetExportPassphrase} from "./file.js";
 import {onFontForm} from "./font.js";
 import {onLineForm} from "./line.js";
 import {getPersisted, onLocalData} from "./local.js";
