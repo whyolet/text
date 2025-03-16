@@ -3,7 +3,7 @@ set -eu
 
 for icon_name in Icon Icon-maskable
 do
-  for pixels in 192 512
+  for pixels in 120 192 512
   do
     inkscape \
       -w $pixels \
@@ -12,3 +12,6 @@ do
       $icon_name.svg
   done
 done
+
+# 120 is needed for Google Drive OAuth only, so:
+rm Icon-maskable-120.png
