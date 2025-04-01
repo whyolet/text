@@ -26,6 +26,7 @@ export const initSearchUI = () => {
   ui.found = o(".items");
 
   ui.search = o(".search",
+    o(".icon", "search"),
     ui.searchInput,
     ib("close", "x", onClearOrBack),
     ui.found,

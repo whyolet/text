@@ -6,7 +6,7 @@ import {initFontUI} from "./font.js";
 import {initInfoUI} from "./info.js";
 import {initLineUI} from "./line.js";
 import {getPersisted, tryPersist} from "./local.js";
-import {initMenuUI} from "./menu.js";
+import {initMenuUI, openMenuInfo} from "./menu.js";
 import {getAppLock, getToday, initNavUI, openScreen, screenTypes} from "./nav.js";
 import {initPageUI} from "./page.js";
 import {initSearchUI} from "./search.js";
@@ -35,7 +35,11 @@ for (const screenType in screenTypes)  {
   ui.body.appendChild(ui[screenType]);
 }
 
-openScreen(screenTypes.page, {tag: getToday()});
+if (location.hash === "#about") {
+  openMenuInfo({withoutClose: true});
+} else {
+  openScreen(screenTypes.page, {tag: getToday()});
 
-const persisted = await getPersisted();
-if (!persisted) await tryPersist();
+  const persisted = await getPersisted();
+  if (!persisted) await tryPersist();
+}

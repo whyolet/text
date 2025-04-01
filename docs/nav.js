@@ -49,7 +49,7 @@ export const getAppLock = async () => {
   showBanner({},
     "Paused!",
     o("",
-      "You've opened Whyolet Text", o("br"),
+      "You've opened " + ui.appName, o("br"),
       "in another tab.", o("br"),
       o("br"),
       "Please close it here or:"
@@ -117,8 +117,8 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
     openSearch(screen.props.query);
 
   } else if (screen.type === screenTypes.info) {
-    const {header, items} = screen.props;
-    openInfo(header, items);
+    const {header, items, props} = screen.props;
+    openInfo(header, items, props);
 
   } else throw new Error(screen.type);
 });

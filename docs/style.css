@@ -387,12 +387,12 @@ textarea.mono {
   height: 100%;
 
   display: grid;
-  grid-template-columns: 1fr var(--icon);
+  grid-template-columns: var(--icon) 1fr var(--icon);
   grid-template-rows: var(--icon) 1fr;
 
   grid-template-areas:
-    "h x"
-    "i i";
+    "H h x"
+    "i i i";
 
   place-items: center;
 }

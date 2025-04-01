@@ -13,6 +13,7 @@
     "/file.js",
     "/find.js",
     "/font.js",
+    "/gdrive.js",
     "/gesture.js",
     "/indent.js",
     "/info.js",

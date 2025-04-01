@@ -52,9 +52,13 @@ export const o = (tag_cls, ...kids) => {
 /// UI elements and data.
 
 export const ui = {
+  appName: "Whyolet Text",
   body: document.body,
   isActive: true,
+  supportEmail: "support@whyolet.com",
 };
+
+ui.supportHref = `mailto:${ui.supportEmail}?subject=Whyolet%20Text`;
 
 /// on, onClick
 

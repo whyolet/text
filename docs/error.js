@@ -1,4 +1,4 @@
-import {o, onClick, getRestartButton, showBanner} from "./ui.js";
+import {o, onClick, getRestartButton, showBanner, ui} from "./ui.js";
 
 const onError = (event) => {
 
@@ -36,8 +36,7 @@ event.reason && event.reason.stack ||
 
   onClick(sendButton, () => {
     location.href = (
-      "mailto:support@whyolet.com" +
-      "?subject=Whyolet%20Text" +
+      ui.supportHref +
       "&body=" +
       encodeURIComponent(details)
     );
@@ -50,7 +49,7 @@ event.reason && event.reason.stack ||
     o("",
       "Please help to fix it", o("br"),
       "by sending details to", o("br"),
-      o("b", "support@whyolet.com"),
+      o("b", ui.supportEmail),
     ),
     o("",
       copyButton,
