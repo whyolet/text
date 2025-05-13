@@ -72,6 +72,18 @@ export const onBackupExport = async () => {
 
   const fileName = `whyolet-text--${now}.db`;
 
+  const bytes = await getExportedBytes();
+
+  await saveFile({
+    saverId: "backup",
+    fileName,
+    data: bytes,
+  });
+};
+
+/// getExportedBytes
+
+export const getExportedBytes = async () => {
   const exportedPages = [];
   for (const page of Object.values(mem.pages)) {
     const exportedPage = Object.assign({}, page);
@@ -79,16 +91,10 @@ export const onBackupExport = async () => {
     exportedPages.push(exportedPage);
   }
 
-  const bytes = await encrypt(
+  return await encrypt(
     exportedPages,
     {isExport: true},
   );
-
-  await saveFile({
-    saverId: "backup",
-    fileName,
-    data: bytes,
-  });
 };
 
 /// deleteLocalProps
@@ -171,11 +177,20 @@ export const onBackupImport = async () => {
   const buffer = await getUploaded();
   if (buffer === null) return;
 
+  await importBackup(buffer);
+};
+
+/// importBackup
+
+export const importBackup = async (buffer, props) => {
+  const {isSync} = props ?? {};
+
   const bytes = new Bytes(buffer);
   const importedPages = await decrypt(bytes, {isImport: true});
-  if (importedPages === null) return;
+  if (importedPages === null) return false;
 
-  const safe = confirm(`Do you want to keep changes
+  const safe = isSync ? true
+    : confirm(`Do you want to keep changes
 made after this backup?`);
 
   const unsavedPages = [];
@@ -229,13 +244,19 @@ made after this backup?`);
     await openPage(mem.page);
   }
 
+  if (isSync) return true;
+
   showOrHideOverdue();
 
-  alert(`Created pages: ${created}
+  alert(
+`Created pages: ${created}
 Updated pages: ${updated}
 ${safe ? "\nSkipped" : "…including"} pages changed after backup: ${outdated
 }${safe ? "" : "\n"}
-Skipped unchanged pages: ${unchanged}`);
+Skipped unchanged pages: ${unchanged}`,
+  );
+
+  return true;
 };
 
 /// getUploaded

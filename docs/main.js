@@ -5,18 +5,17 @@ import {initFindUI} from "./find.js";
 import {initFontUI} from "./font.js";
 import {initInfoUI} from "./info.js";
 import {initLineUI} from "./line.js";
-import {getPersisted, tryPersist} from "./local.js";
-import {initMenuUI, openMenuInfo} from "./menu.js";
-import {getAppLock, getToday, initNavUI, openScreen, screenTypes} from "./nav.js";
+import {initMenuUI} from "./menu.js";
+import {getAppLock, initNavUI, openFirstScreen, screenTypes} from "./nav.js";
 import {initPageUI} from "./page.js";
 import {initSearchUI} from "./search.js";
-import {o, showBanner, ui} from "./ui.js";
+import {showBanner, ui} from "./ui.js";
 
 showBanner({isActive: true},
   "Loading...",
 );
 
-getAppLock();
+getAppLock();  // No await!
 
 setDbPassphrase("");
 await db.load();
@@ -35,11 +34,4 @@ for (const screenType in screenTypes)  {
   ui.body.appendChild(ui[screenType]);
 }
 
-if (location.hash === "#about") {
-  openMenuInfo({withoutClose: true});
-} else {
-  openScreen(screenTypes.page, {tag: getToday()});
-
-  const persisted = await getPersisted();
-  if (!persisted) await tryPersist();
-}
+await openFirstScreen();

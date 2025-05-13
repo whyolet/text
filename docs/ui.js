@@ -207,14 +207,17 @@ let pinnedIsIcon = false;
 const pinned = "pinned";
 
 export const toast = (message, props) => {
-  const {isPinned, isIcon} = props ?? {};
+  const {isIcon, isPinned, keepTimer} = props ?? {};
   if (isPinned) {
     pinnedMessage = message;
     pinnedIsIcon = isIcon;
   }
 
   if (toastTimerId) {
-    if (isPinned) return; // Keep showing time-limited message.
+    if (isPinned || keepTimer) {
+      // Keep showing time-limited message.
+      return;
+    }
 
     clearTimeout(toastTimerId);
     toastTimerId = 0;

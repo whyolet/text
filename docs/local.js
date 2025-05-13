@@ -35,7 +35,7 @@ export const onLocalData = async () => {
   if (!persisted) persisted = await tryPersist();
 
   if (persisted) {
-    openInfoScreen(header, [
+    await openInfoScreen(header, [
       "Good news: your web browser has agreed not to delete your local data.",
       "However, to be safe, use the menu to backup or sync your data.",
     ]);
@@ -48,7 +48,7 @@ export const onLocalData = async () => {
   );
   onClick(requestPermButton, onRequestPerm);
 
-  openInfoScreen(header, [
+  await openInfoScreen(header, [
     "Bad news: your web browser plans to delete your local data.",
     'To avoid this, click "Install app" or "Add to Home Screen" in the browser menu, and open the installed app.',
     o("",

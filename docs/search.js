@@ -2,7 +2,7 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {isDateTag, onBack, openScreen, screenTypes} from "./nav.js";
 import {getQueryFromSel} from "./sel.js";
-import {ib, o, on, onClick, ui} from "./ui.js";
+import {hide, ib, o, on, onClick, ui} from "./ui.js";
 
 /// addToRecentTags
 
@@ -31,13 +31,14 @@ export const initSearchUI = () => {
     ib("close", "x", onClearOrBack),
     ui.found,
   );
+  hide(ui.search);
 };
 
 /// onSearch
 
-export const onSearch = () => {
+export const onSearch = async () => {
   const query = getQueryFromSel();
-  openScreen(screenTypes.search, {query});
+  await openScreen(screenTypes.search, {query});
 };
 
 /// openSearch

@@ -90,6 +90,7 @@ export const initPageUI = () => {
     ui.moveToDateInput,
     ui.frame,
   );
+  hide(ui.page);
 };
 
 /// getPage, zeroCursor
@@ -163,12 +164,12 @@ export const splitDoneText = (page) => {
 
 /// openNextDate
 
-const openNextDate = (props) => {
+const openNextDate = async (props) => {
   const {forward = true} = props ?? {};
   const {tag} = mem.page;
 
   if (!isDateTag(tag)) {
-    onOpenHome();
+    await onOpenHome();
     return;
   }
 
@@ -178,7 +179,7 @@ const openNextDate = (props) => {
     1000*60*60*24
   )).toISOString().split("T")[0];
 
-  openScreen(screenTypes.page, {tag: nextTag});
+  await openScreen(screenTypes.page, {tag: nextTag});
 };
 
 /// openPage/ByTag
@@ -199,8 +200,8 @@ export const openPage = async (page) => {
   toast(header, {isPinned: true});
 
   if (tagChanged) {
-    // Flash changed tag.
-    toast(header);
+    // Flash changed tag, unless another time-limited toast is shown, e.g. "Synced OK".
+    toast(header, {keepTimer: true});
   }
 
   ui.ta.value = page.text;

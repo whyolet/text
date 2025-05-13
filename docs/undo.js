@@ -160,7 +160,7 @@ const applyOp = async (opId, props) => {
 
   if (page.tag === mem.page.tag) {
     await openPage(page);
-  } else openScreen(screenTypes.page, {
+  } else await openScreen(screenTypes.page, {
       tag: page.tag,
       withoutSave: true,
   });

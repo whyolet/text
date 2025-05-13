@@ -60,8 +60,8 @@ export const hideMenuForm = () => {
 
 /// openMenuInfo
 
-export const openMenuInfo = (props) => {
-  openInfoScreen(ui.appName, [
+export const openMenuInfo = async (props) => {
+  await openInfoScreen(ui.appName, [
     "Personal tasks/text editor.",
     o("",
       o("b", "Help:"),
@@ -98,7 +98,7 @@ export const openMenuInfo = (props) => {
           o("a", {href: "https://whyolet.com/", target: "_blank"}, "Whyolet"),
           " / ",
           o("a", {href: "https://denisr.com/", target: "_blank"}, "Denis Ryzhkov"),
-          " with design review by ",
+          " with UX review by ",
           o("a", {href: "https://www.behance.net/uxAnn/", target: "_blank"}, "Ann Ryzhkova"),
         ),
         o("li", 'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.'),

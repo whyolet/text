@@ -3,9 +3,11 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
 import {hideFontForm} from "./font.js";
-import {openInfo} from "./info.js";
+import {onRedirect} from "./gdrive.js";
+import {info, openInfo, openInfoScreen} from "./info.js";
 import {hideLineForm} from "./line.js";
-import {hideMenuForm} from "./menu.js";
+import {getPersisted, tryPersist} from "./local.js";
+import {hideMenuForm, openMenuInfo} from "./menu.js";
 import {getDone, getPage, openPage, openPageByTag, save, splitDoneText, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
 import {getSel, strikes} from "./sel.js";
@@ -58,6 +60,44 @@ export const getAppLock = async () => {
   );
 };
 
+/// openFirstScreen
+
+export const openFirstScreen = async () => {
+  const hash = location.hash;
+
+  /// about
+
+  if (hash === "#about") {
+    await openMenuInfo({withoutClose: true});
+    return;
+  }
+
+  /// sync
+
+  if (hash.includes("state")) {
+    history.replaceState(history.state, "", location.pathname);
+
+    await openScreen(screenTypes.page, {
+      tag: mem.recentTags[0] || getToday(),
+      historyOnly: true,
+    });
+
+    await openInfoScreen("Sync", [
+      "Please wait...",
+    ]);
+
+    await onRedirect(hash);
+    return;
+  }
+
+  /// today
+
+  await openScreen(screenTypes.page, {tag: getToday()});
+
+  const persisted = await getPersisted();
+  if (!persisted) await tryPersist();
+};
+
 /// openScreen, screenTypes
 
 export const screenTypes = Object.seal({
@@ -68,7 +108,10 @@ export const screenTypes = Object.seal({
 
 const screens = [null];
 
-export const openScreen = (type, props) => {
+export const openScreen = async (type, props) => {
+  const {historyOnly} = props ?? {};
+  if (historyOnly) delete props.historyOnly;
+
   const i = (history.state || 0) + 1;
   screens[i] = {type, props};
 
@@ -76,13 +119,14 @@ export const openScreen = (type, props) => {
     history.pushState(i, "");
   } else history.replaceState(i, "");
 
-  // `pushState/replaceState` may or may not trigger `popstate`, so we call debounced `onSetState`.
-  onSetState({state: i});
+  // `pushState/replaceState` never trigger `popstate`.
+  if (historyOnly) return;
+  await onSetState({state: i});
 };
 
 /// onSetState
 
-const onSetState = (event) => debounce("onSetState", 100, async () => {
+const onSetState = async (event) => {
   const i = event.state;
   if (!i || !ui.isActive) return;
 
@@ -98,6 +142,7 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
       show(el);
     } else hide(el);
   }
+  info.closed = true;
 
   if (screen.type === screenTypes.page) {
     const {tag, query} = screen.props;
@@ -120,8 +165,8 @@ const onSetState = (event) => debounce("onSetState", 100, async () => {
     const {header, items, props} = screen.props;
     openInfo(header, items, props);
 
-  } else throw new Error(screen.type);
-});
+  } else throw Error(screen.type);
+};
 
 /// initNavUI
 
@@ -150,8 +195,8 @@ export const onOpenDate = () => {
   showDateInput(ui.openDateInput);
 };
 
-const onOpenDateInput = (date) => {
-  openScreen(screenTypes.page, {tag: date});
+const onOpenDateInput = async (date) => {
+  await openScreen(screenTypes.page, {tag: date});
 };
 
 /// onOpenTag
@@ -180,7 +225,7 @@ export const onOpenTag = async () => {
     return;
   }
 
-  openScreen(screenTypes.page, {tag});
+  await openScreen(screenTypes.page, {tag});
 };
 
 /// onBack
@@ -193,14 +238,14 @@ export const onBack = () => {
 
 /// onOpenHome
 
-export const onOpenHome = () => {
+export const onOpenHome = async () => {
   const today = getToday();
   if (mem.page.tag === today) {
     toast("It's today already!");
     return;
   }
 
-  openScreen(screenTypes.page, {tag: today});
+  await openScreen(screenTypes.page, {tag: today});
 };
 
 /// showOrHideOverdue, onMoveOverdue
@@ -232,12 +277,9 @@ export const onMoveOverdue = async () => {
   const today = getToday();
   if (mem.page.tag !== today) {
     // Midnight happened.
-    openScreen(screenTypes.page, {tag: today});
-    // Opening is debounced, so:
-    setTimeout(() => {
-      alert("Welcome to a new day!");
-      onMoveOverdue();
-    }, 500);
+    await openScreen(screenTypes.page, {tag: today});
+    alert("Welcome to a new day!");
+    await onMoveOverdue();
     return;
   }
 
