@@ -7,7 +7,7 @@ import {onRedirect} from "./gdrive.js";
 import {info, openInfo, openInfoScreen} from "./info.js";
 import {hideLineForm} from "./line.js";
 import {getPersisted, tryPersist} from "./local.js";
-import {hideMenuForm, openMenuInfo} from "./menu.js";
+import {hideMenuForm} from "./menu.js";
 import {getDone, getPage, openPage, openPageByTag, save, splitDoneText, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
 import {getSel, strikes} from "./sel.js";
@@ -64,13 +64,6 @@ export const getAppLock = async () => {
 
 export const openFirstScreen = async () => {
   const hash = location.hash;
-
-  /// about
-
-  if (hash === "#about") {
-    await openMenuInfo({withoutClose: true});
-    return;
-  }
 
   /// sync
 

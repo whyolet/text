@@ -108,7 +108,14 @@ export const ib = (name, shortcut, handler, props) => {
     const input = focused && ui.focusedInput || ui.ta;
     input.focus();
     if (input === ui.ta) await save();
-    if (handler) handler();
+    if (!handler) return;
+
+    if (typeof handler === "string") {
+      open(handler, "_blank");
+      return;
+    };
+
+    handler();
   });
 
   return el;
