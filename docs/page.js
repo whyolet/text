@@ -169,7 +169,6 @@ const openNextDate = async (props) => {
   const {tag} = mem.page;
 
   if (!isDateTag(tag)) {
-    await onOpenHome();
     return;
   }
 
@@ -200,8 +199,8 @@ export const openPage = async (page) => {
   toast(header, {isPinned: true});
 
   if (tagChanged) {
-    // Flash changed tag, unless another time-limited toast is shown, e.g. "Synced OK".
-    toast(header, {keepTimer: true});
+    // Flash changed tag, unless a not shy toast is shown, e.g. "Synced OK".
+    toast(header, {isShy: true});
   }
 
   ui.ta.value = page.text;

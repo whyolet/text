@@ -209,25 +209,30 @@ export const debug = (data) => {
 /// toast
 
 let toastTimerId = 0;
+let toastTimerIsShy = false;
 let pinnedMessage = "";
 let pinnedIsIcon = false;
 const pinned = "pinned";
 
 export const toast = (message, props) => {
-  const {isIcon, isPinned, keepTimer} = props ?? {};
+  const {isIcon, isPinned, isShy} = props ?? {};
   if (isPinned) {
     pinnedMessage = message;
     pinnedIsIcon = isIcon;
   }
 
   if (toastTimerId) {
-    if (isPinned || keepTimer) {
-      // Keep showing time-limited message.
+    if (
+      isPinned ||
+      isShy && !toastTimerIsShy
+    ) {
+      // Keep showing another message.
       return;
     }
 
     clearTimeout(toastTimerId);
     toastTimerId = 0;
+    toastTimerIsShy = false;
   }
 
   setHeader(message, {isIcon});
@@ -241,9 +246,12 @@ export const toast = (message, props) => {
 
   toastTimerId = setTimeout(() => {
     toastTimerId = 0;
+    toastTimerIsShy = false;
+
     setHeader(pinnedMessage, {isIcon: pinnedIsIcon});
     cls.add(pinned);
   }, 1000);
+  toastTimerIsShy = isShy;
 };
 
 /// setHeader

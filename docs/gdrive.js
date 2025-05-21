@@ -65,6 +65,12 @@ export const onRedirect = async (hash) => {
   const url = "https://www.googleapis.com/drive/v3/files?" + search.toString();
 
   const response = await fetch(url, options);
+  if (info.closed) return;
+
+  if (!response.ok) throw Error(
+    await response.text(),
+  );
+
   const {files} = await response.json();
   if (info.closed) return;
 
