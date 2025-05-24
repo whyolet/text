@@ -54,10 +54,13 @@ const onReplaceForm = () => {
 
 /// showFindForm
 
-export const showFindForm = () => {
+export const showFindForm = (props) => {
+  const {withoutChanges} = props ?? {};
+
   hideAtticForms();
   expand(ui.attic);
   show(ui.findForm);
+  if (withoutChanges) return;
 
   const query = getQueryFromSel();
   ui.findInput.value = query;
