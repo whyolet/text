@@ -1,4 +1,5 @@
 import {anchor} from "./anchor.js";
+import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
@@ -99,31 +100,32 @@ export const screenTypes = Object.seal({
   search: "search",
 });
 
-const screens = [null];
+const screens = {};
 
 export const openScreen = async (type, props) => {
   const {historyOnly} = props ?? {};
   if (historyOnly) delete props.historyOnly;
 
-  const i = (history.state || 0) + 1;
-  screens[i] = {type, props};
+  const screenId = getId();
+  screens[screenId] = {type, props};
 
   if (history.state) {
-    history.pushState(i, "");
-  } else history.replaceState(i, "");
+    history.pushState(screenId, "");
+  } else {
+    history.replaceState(screenId, "");
+  }
 
-  // `pushState/replaceState` never trigger `popstate`.
-  if (historyOnly) return;
-  await onSetState({state: i});
+  // `pushState/replaceState` never trigger `popstate/onSetState`.
+  if (!historyOnly) await onSetState({state: screenId});
 };
 
 /// onSetState
 
 const onSetState = async (event) => {
-  const i = event.state;
-  if (!i || !ui.isActive) return;
+  const screenId = event.state;
+  if (!screenId || !ui.isActive) return;
 
-  const screen = screens[i];
+  const screen = screens[screenId];
   if (!screen) return;
 
   const {withoutSave} = screen.props ?? {};
@@ -224,9 +226,13 @@ export const onOpenTag = async () => {
 /// onBack
 
 export const onBack = () => {
-  if (history.state > 1) {
-    history.back();
-  } else toast("Open something first!");
+  // In case `back()` does nothing:
+  toast("folder_open", {
+    isIcon: true,
+    isShy: true,
+  });
+
+  history.back();
 };
 
 /// onOpenHome
