@@ -147,10 +147,10 @@ const onSetState = async (event) => {
       // Find only once: when page is opened from Search, not when it is opened later on Back.
       screen.props.query = "";
 
-      showFindForm();
+      showFindForm({withoutChanges: true});
       ui.findInput.value = query;
       Object.assign(mem.page, zeroCursor);
-      onFindNext();
+      await onFindNext();
     }
 
   } else if (screen.type === screenTypes.search) {
