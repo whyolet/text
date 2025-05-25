@@ -216,6 +216,7 @@ export const openPage = async (page) => {
   updateLineFormOnSelChange();
   showOrHideOverdue();
   showOrHideSaveFile();
+  ui.frame.classList.remove(zenMode);
   await addToRecentTags(page.tag);
 };
 
@@ -231,9 +232,11 @@ const getHeader = (page) => {
 
 /// onHeader
 
+const zenMode = "zen-mode";
+
 const onHeader = () => {
   hideAtticForms();
-  const isZen = ui.frame.classList.toggle("zen-mode");
+  const isZen = ui.frame.classList.toggle(zenMode);
   const header = isZen ? "visibility"
     : getHeader(mem.page);
   toast(header, {isPinned: true, isIcon: isZen});
