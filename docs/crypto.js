@@ -163,15 +163,17 @@ export const decrypt = async (bytes, props) => {
   const buffer = bytes.buffer;
   let i = bytes.byteOffset;
 
+  /// `cut(N)` bytes,
+  /// `cut()` the rest of the buffer.
   const cut = (length) => {
     const part = new Bytes(buffer, i, length);
-    i += length;
+    i += length ?? 0;
     return part;
   };
 
   const key = isImport ? await getKey(cut(saltSize), {isExport: true}) : dbKey;
   const iv = cut(ivSize);
-  const encrypted = cut(bytes.length - (i - bytes.byteOffset));
+  const encrypted = cut();
 
   let decrypted;
   try {
