@@ -1,4 +1,4 @@
-import {Bytes, decrypt, encrypt, setExportPassphrase} from "./crypto.js";
+import {Bytes, decrypt, encrypt, setExportKey1} from "./crypto.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getNow, showOrHideOverdue} from "./nav.js";
@@ -290,7 +290,7 @@ export const onSetExportPassphrase = () => {
 for backup and sync files:`);
   if (newValue === null) return;
 
-  setExportPassphrase(newValue);
+  setExportKey1(newValue);
 
   alert(`This passphrase will be kept in memory
 until you set a new passphrase

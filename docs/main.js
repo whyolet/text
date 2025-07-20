@@ -1,5 +1,4 @@
 import "./error.js";
-import {setDbPassphrase} from "./crypto.js";
 import * as db from "./db.js";
 import {initFindUI} from "./find.js";
 import {initFontUI} from "./font.js";
@@ -17,8 +16,7 @@ showBanner({isActive: true},
 
 getAppLock();  // No await!
 
-setDbPassphrase("");
-await db.load();
+await db.load("");
 
 initNavUI();
 initMenuUI();

@@ -1,4 +1,4 @@
-import {decrypt, encrypt, getDbName, getKey, getSalt, setDbKey} from "./crypto.js";
+import {decrypt, encrypt, getDbName, getSalt, setDbKey, setExportKey1} from "./crypto.js";
 import {o, showBanner} from "./ui.js";
 import {createOp, getRevertedOp} from "./undo.js";
 
@@ -53,8 +53,8 @@ const updateAppVersion = () => {
 
 /// Load from db to mem.
 
-export const load = async () => await new Promise(async (doneLoading) => {
-  const dbName = await getDbName();
+export const load = async (passphrase) => await new Promise(async (doneLoading) => {
+  const dbName = await getDbName(passphrase);
   const openingDb = indexedDB.open(dbName, 1);
 
   /// onerror while opening
@@ -91,7 +91,9 @@ export const load = async () => await new Promise(async (doneLoading) => {
     idb.onversionchange = updateAppVersion;
 
     await loadOrCreateSalt();
-    setDbKey(await getKey(mem.salt));
+    await setDbKey(passphrase, mem.salt);
+    await setExportKey1(passphrase);
+    passphrase = "";  // forget asap!
 
     await Promise.all([
       loadConf(conf.nonce, () => ""),
