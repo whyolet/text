@@ -120,7 +120,7 @@ const onFindForward = async (forward) => {
   if (!lowerQuery) {
     ui.findInput.focus();
     toast("Find what?");
-    return;
+    return false;
   }
 
   const lowerText = mem.page.text.toLowerCase();
@@ -136,10 +136,14 @@ const onFindForward = async (forward) => {
     lowerText.indexOf(lowerQuery, start)
     : lowerText.lastIndexOf(lowerQuery, start)
   );
-  if (found === -1) return toast("Not found!");
+  if (found === -1) {
+    toast("Not found!");
+    return false;
+  }
 
   ui.ta.setSelectionRange(found, found + lowerQuery.length);
   await save();
+  return true;
 };
 
 /// onReplaceOne, onReplaceAll
