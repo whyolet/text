@@ -35,6 +35,7 @@ export const mem = Object.seal({
   page: null,
   textLength: 0,  // for `autoindent`
   oldPages: null, // for `createOp`
+  screens: {},
   fileHandles: {},
 });
 
@@ -199,6 +200,8 @@ const loadPages = async () => {
 
   mem.pages = {};
   mem.oldPages = {};
+  mem.screens = {};
+  mem.fileHandles = {};
   for (const page of pages) {
     mem.pages[page.tag] = page;
     mem.oldPages[page.tag] = Object.assign({}, page);

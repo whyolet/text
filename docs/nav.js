@@ -3,7 +3,7 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
-import {hideFontForm} from "./font.js";
+import {applyFont, hideFontForm} from "./font.js";
 import {onRedirect} from "./gdrive.js";
 import {info, openInfo, openInfoScreen} from "./info.js";
 import {hideLineForm} from "./line.js";
@@ -100,14 +100,12 @@ export const screenTypes = Object.seal({
   search: "search",
 });
 
-const screens = {};
-
 export const openScreen = async (type, props) => {
   const {historyOnly} = props ?? {};
   if (historyOnly) delete props.historyOnly;
 
   const screenId = getId();
-  screens[screenId] = {type, props};
+  mem.screens[screenId] = {type, props};
 
   if (history.state) {
     history.pushState(screenId, "");
@@ -125,7 +123,7 @@ const onSetState = async (event) => {
   const screenId = event.state;
   if (!screenId || !ui.isActive) return;
 
-  const screen = screens[screenId];
+  const screen = mem.screens[screenId];
   if (!screen) return;
 
   const {withoutSave} = screen.props ?? {};
@@ -382,4 +380,22 @@ const onFocus = (event) => {
     ui.replaceInput,
   ].includes(el)) ui.focusedInput = el;
   // `document.activeElement` may be `body` on button click!
+};
+
+/// switchDb
+
+export const switchDb = async (passphrase) => {
+  await openInfoScreen("Multiverse", [
+    "The dot opens the door to another world.",
+    "Please wait...",
+  ], {withoutClose: true});
+
+  hideAtticForms();
+  db.close();
+
+  setTimeout(async () => {
+    await db.load(passphrase);
+    applyFont();
+    await openScreen(screenTypes.page, {tag: getToday()});
+  }, 2000);
 };

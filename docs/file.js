@@ -1,7 +1,7 @@
 import {Bytes, decrypt, encrypt, setExportKey1} from "./crypto.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
-import {getNow, showOrHideOverdue} from "./nav.js";
+import {getNow, showOrHideOverdue, switchDb} from "./nav.js";
 import {getPage, openPage, save} from "./page.js";
 import {hide, o, on, show, toast, ui} from "./ui.js";
 
@@ -290,9 +290,14 @@ export const onSetExportPassphrase = () => {
 for backup and sync files:`);
   if (newValue === null) return;
 
-  setExportKey1(newValue);
+  if (newValue.startsWith(".")) {
+    switchDb(newValue.slice(1));
+    // It calls `setExportKey1` too.
+  } else setExportKey1(newValue);
 
-  alert(`This passphrase will be kept in memory
-until you set a new passphrase
+  alert(`Backup and sync files
+will be encrypted and decrypted
+using this passphrase
+until you set a new one
 or close this app.`);
 };
