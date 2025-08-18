@@ -1,6 +1,6 @@
 import * as db from "./db.js";
 import {mem} from "./db.js";
-import {isDateTag, onBack, openScreen, screenTypes} from "./nav.js";
+import {isDateTag, openScreen, screenTypes} from "./nav.js";
 import {getQueryFromSel} from "./sel.js";
 import {hide, ib, o, on, onClick, ui} from "./ui.js";
 
@@ -136,5 +136,5 @@ const onClearOrBack = () => {
   if (ui.searchInput.value) {
     ui.searchInput.value = "";
     onSearchInput();
-  } else onBack();
+  } else history.back();
 };

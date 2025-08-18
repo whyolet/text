@@ -1,4 +1,4 @@
-import {onBack, openScreen, screenTypes} from "./nav.js";
+import {openScreen, screenTypes} from "./nav.js";
 import {hide, ib, o, show, ui} from "./ui.js";
 
 /// To check if info screen got closed.
@@ -14,7 +14,7 @@ export const initInfoUI = () => {
 
   ui.infoClose = ib("close", "x", () => {
     info.closed = true;
-    onBack();
+    history.back();
   });
 
   ui.infoItems = o(".items");
