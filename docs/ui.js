@@ -1,5 +1,6 @@
 import * as db from "./db.js";
 import {mem} from "./db.js";
+import {unidle} from "./nav.js";
 import {save} from "./page.js";
 
 /// o
@@ -104,6 +105,7 @@ export const ib = (name, shortcut, handler, props) => {
 
   onClick(el, async () => {
     if (!ui.isActive) return;
+    unidle();
 
     const input = focused && ui.focusedInput || ui.ta;
     input.focus();

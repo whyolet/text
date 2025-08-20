@@ -399,3 +399,11 @@ export const switchDb = async (passphrase) => {
     await openScreen(screenTypes.page, {tag: getToday()});
   }, 2000);
 };
+
+/// idle
+
+export const unidle = () => debounce("idle", 1000*60*5, onIdle);
+
+const onIdle = () => {
+  if (mem.isSecret) switchDb("");
+};

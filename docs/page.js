@@ -10,7 +10,7 @@ import {detectGestures} from "./gesture.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
-import {getNow, getToday, hideAtticForms, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue} from "./nav.js";
+import {getNow, getToday, hideAtticForms, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onSelLine, onStrike, strikes} from "./sel.js";
 import {debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
@@ -255,6 +255,7 @@ const onInput = () => {
 
 export const save = async (props) => {
   debounce("save");
+  unidle();
 
   const page = mem.page;
   if (!page) return;

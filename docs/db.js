@@ -37,6 +37,7 @@ export const mem = Object.seal({
   oldPages: null, // for `createOp`
   screens: {},
   fileHandles: {},
+  isSecret: false,
 });
 
 /// onDbError, updateAppVersion
@@ -94,6 +95,7 @@ export const load = async (passphrase) => await new Promise(async (doneLoading) 
     await loadOrCreateSalt();
     await setDbKey(passphrase, mem.salt);
     await setExportKey1(passphrase);
+    mem.isSecret = !!passphrase;
     passphrase = "";  // forget asap!
 
     await Promise.all([
