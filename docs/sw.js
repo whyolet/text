@@ -61,12 +61,20 @@
 
   const cacheResponse = async (request) => {
     const url = request.url;
+
+    if (new URL(url).origin !== location.origin) {
+      return await fetch(request, {
+        cache: "no-store",
+        // Sync freshness and privacy.
+      });
+    }
+
     const cacheMode = moreStatic.some(
       (ext) => url.endsWith(ext)
     ) ? "default" : "no-cache";
 
     const responsePromise = fetch(request, {
-      cache: cacheMode
+      cache: cacheMode,
     })
     .then(async (response) => {
       if (response.ok) {
