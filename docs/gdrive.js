@@ -11,6 +11,19 @@ const syncedFileName = "whyolet-text.db";
 /// onGDriveSync
 
 export const onGDriveSync = async () => {
+  if (mem.isSecret) {
+    alert(`Syncing this secret world
+with the "${syncedFileName}" file
+at your Google Drive
+would break the privacy!
+
+Please ⬇️Export the encrypted DB file,
+move it privately to another device,
+⬆️Import it there to the same secret world,
+rename and delete the file.`);
+    return;
+  }
+
   mem.nonce = getId();
   await db.saveConf(db.conf.nonce);
 
