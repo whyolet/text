@@ -1,4 +1,4 @@
-import {o, getRestartButton, showBanner} from "./ui.js";
+import {debug, o, getRestartButton, showBanner} from "./ui.js";
 
 /// Bytes
 
@@ -125,7 +125,13 @@ const getExportKey2 = async (exportSalt2) => {
 const getDbNameSalt = () => {
   const saltName = "dbNameSalt";
   let hexSalt = localStorage.getItem(saltName);
+  try {
   if (hexSalt) return Bytes.fromHex(hexSalt);
+  } catch (e) {
+    debug(hexSalt);
+    debug(hexSalt.length);
+    throw e;
+  }
 
   const salt = getSalt();
   localStorage.setItem(saltName, salt.toHex());
