@@ -1,4 +1,5 @@
 import {Bytes, decrypt, encrypt, setExportKey1} from "./crypto.js";
+import {getCSV, getPagesFromCSV} from "./csv.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getNow, showOrHideOverdue, switchDb} from "./nav.js";
@@ -64,20 +65,29 @@ export const onSaveFile = async () => {
 
 /// onBackupExport
 
-export const onBackupExport = async () => {
+export const onBackupExportDB = async () => await onBackupExport("db");
+
+export const onBackupExportCSV = async () => await onBackupExport("csv");
+
+const onBackupExport = async (format) => {
   const now = getNow()
   .replace("T", "--")
   .replaceAll(":", "-")
   .replace(/\.\d+/, "");
 
-  const fileName = `whyolet-text--${now}.db`;
+  const fileName = `whyolet-text--${now}.${format}`;
 
-  const bytes = await getExportedBytes();
+  const data = (
+    format === "db"
+    ? await getExportedBytes()
+    : getCSV()
+  );
 
   await saveFile({
     saverId: "backup",
     fileName,
-    data: bytes,
+    data,
+    isText: format === "csv",
   });
 };
 
@@ -162,10 +172,10 @@ const saveFile = async (props) => {
 /// onPageImport
 
 export const onPageImport = async () => {
-  const text = await getUploaded({isText: true});
-  if (text === null) return;
+  const file = await getUploaded();
+  if (file === null) return;
 
-  ui.ta.value = text;
+  ui.ta.value = await file.text();
   ui.ta.setSelectionRange(0, 0);
   ui.ta.scrollTop = 0;
   await save();
@@ -174,19 +184,31 @@ export const onPageImport = async () => {
 /// onBackupImport
 
 export const onBackupImport = async () => {
-  const buffer = await getUploaded();
-  if (buffer === null) return;
+  const file = await getUploaded();
+  if (file === null) return;
 
-  await importBackup(buffer);
+  const isCSV = file.name.toLowerCase().endsWith(".csv");
+
+  const data = await (isCSV
+    ? file.text()
+    : file.arrayBuffer()
+  );
+  await importBackup(data, {isCSV});
 };
 
 /// importBackup
 
-export const importBackup = async (buffer, props) => {
-  const {isSync} = props ?? {};
+export const importBackup = async (data, props) => {
+  const {isCSV, isSync} = props ?? {};
 
-  const bytes = new Bytes(buffer);
-  const importedPages = await decrypt(bytes, {isImport: true});
+  const importedPages = (
+    isCSV
+    ? getPagesFromCSV(data)
+    : await decrypt(
+      new Bytes(data),
+      {isImport: true},
+    )
+  );
   if (importedPages === null) return false;
 
   const safe = isSync ? true
@@ -262,8 +284,6 @@ Skipped unchanged pages: ${unchanged}`,
 /// getUploaded
 
 const getUploaded = async (props) => {
-  const {isText} = props ?? {};
-
   return await new Promise(done => {
     const input = o("input.hidden", {"type": "file"});
 
@@ -271,10 +291,7 @@ const getUploaded = async (props) => {
 
     on(input, "change", async () => {
       const file = input.files[0];
-      done(
-        isText ? await file.text()
-        : await file.arrayBuffer()
-      );
+      done(file);
     });
 
     ui.body.appendChild(input);

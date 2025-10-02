@@ -1,4 +1,4 @@
-import {onBackupExport, onBackupImport, onPageExport, onPageImport, onSetExportPassphrase} from "./file.js";
+import {onBackupExportDB, onBackupExportCSV, onBackupImport, onPageExport, onPageImport, onSetExportPassphrase} from "./file.js";
 import {onFontForm} from "./font.js";
 import {openInfoScreen} from "./info.js";
 import {onLineForm} from "./line.js";
@@ -15,15 +15,16 @@ export const initMenuUI = () => {
   ui.menuForm = o(".menu-form hidden",
     o(".main",
       ib("help", "", "https://whyolet.com/text/"),
-      ib("format_size", "", onFontForm),
-      ib("123", "", onLineForm),
       ui.localDataButton,
       ib("file_save", "", onPageExport),
       ib("file_open", "", onPageImport),
       ib("key", "", onSetExportPassphrase),
-      ib("archive", "", onBackupExport),
-      ib("unarchive", "", onBackupImport),
       ib("drive_export", "", onGDriveSync),
+      ib("archive", "", onBackupExportDB),
+      ib("unarchive", "", onBackupImport),
+      ib("csv", "", onBackupExportCSV),
+      ib("format_size", "", onFontForm),
+      ib("123", "", onLineForm),
     ),
     ib("close", "x", hideMenuForm),
   );

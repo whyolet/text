@@ -8,6 +8,7 @@
     "/anchor.js",
     "/clipboard.js",
     "/crypto.js",
+    "/csv.js",
     "/db.js",
     "/error.js",
     "/file.js",
