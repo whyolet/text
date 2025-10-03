@@ -44,7 +44,12 @@ export const getCSV = () => {
 /// getPagesFromCSV
 
 export const getPagesFromCSV = (data) => {
-  const text = data.replaceAll("\r\n", "\n");
+  const text = (
+    data.startsWith('\uFEFF')
+    ? data.slice(1)
+    : data
+  ).replaceAll("\r\n", "\n");
+
   const len = text.length;
   const rows = [];
   let row = [];
