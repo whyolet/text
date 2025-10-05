@@ -37,6 +37,7 @@ export const mem = Object.seal({
   oldPages: null, // for `createOp`
   screens: {},
   fileHandles: {},
+  searchQuery: "",
   isSecret: false,
 });
 
@@ -204,6 +205,7 @@ const loadPages = async () => {
   mem.oldPages = {};
   mem.screens = {};
   mem.fileHandles = {};
+  mem.searchQuery = "";
   for (const page of pages) {
     mem.pages[page.tag] = page;
     mem.oldPages[page.tag] = Object.assign({}, page);

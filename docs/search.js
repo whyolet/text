@@ -37,7 +37,7 @@ export const initSearchUI = () => {
 /// onSearch
 
 export const onSearch = async () => {
-  const query = getQueryFromSel();
+  const query = getQueryFromSel() || mem.searchQuery;
   await openScreen(screenTypes.search, {query});
 };
 
@@ -52,8 +52,9 @@ export const openSearch = (query) => {
 /// onSearchInput
 
 const onSearchInput = () => {
-  const query = ui.searchInput.value;
   const items = [];
+  const query = ui.searchInput.value;
+  mem.searchQuery = query;
 
   if (query) {
     const lowerQuery = query.toLowerCase();
@@ -125,7 +126,11 @@ const addHeader = (items, icon, text) => {
 const add = (items, tag, query) => {
   const el = o(".item button", tag);
   onClick(el, () => {
-    openScreen(screenTypes.page, {tag, query});
+    openScreen(screenTypes.page, {
+      replace: true,
+      tag,
+      query,
+    });
   });
   items.push(el);
 };

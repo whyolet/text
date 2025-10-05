@@ -101,13 +101,14 @@ export const screenTypes = Object.seal({
 });
 
 export const openScreen = async (type, props) => {
-  const {historyOnly} = props ?? {};
+  const {replace, historyOnly} = props ?? {};
+  if (replace) delete props.replace;
   if (historyOnly) delete props.historyOnly;
 
   const screenId = getId();
   mem.screens[screenId] = {type, props};
 
-  if (history.state) {
+  if (history.state && !replace) {
     history.pushState(screenId, "");
   } else {
     history.replaceState(screenId, "");
