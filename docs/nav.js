@@ -255,7 +255,7 @@ export const onOpenHome = async () => {
 
 export const showOrHideOverdue = () => {
   const today = getToday();
-  if (mem.page.tag !== today) {
+  if (mem.page?.tag !== today) {
     hide(ui.moveOverdue);
     return;
   }
