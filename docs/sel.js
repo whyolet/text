@@ -7,11 +7,11 @@ import {toast, ui} from "./ui.js";
 
 export const getSel = (props) => {
   const {
-    focused,
-    withNewline,
-    withoutExpand,
-    withoutIndent,
-    wholeLines,
+    focused,  // Use focused input field, if any. Main textarea is used by default.
+    withoutExpand,  // Get selection as is, ignore next flags.
+    wholeLines,  // Expand both cursor and non-empty selection to whole lines. By default only a cursor is expanded.
+    withNewline,  // Include newline character of the last line.
+    withoutIndent,  // Exclude indentation of the first line.
   } = props ?? {};
 
   const input = focused && ui.focusedInput || ui.ta;
@@ -50,12 +50,14 @@ export const getQueryFromSel = () => {
     withoutExpand: true,
   });
 
-  return isTa ? (
-    (
-      start === end ||
-      part.includes("\n")
-    ) ? "" : part
-  ) : input.value;
+  if (!isTa) return input.value;
+
+  if (
+    start === end ||
+    part.includes("\n")
+  ) return "";
+
+  return part;
 };
 
 /// strike
@@ -173,9 +175,10 @@ export const onMoveDown = async () => {
 
 /// onSelAll
 
-export const onSelAll = () => {
+export const onSelAll = async () => {
   const input = ui.focusedInput || ui.ta;
   input.setSelectionRange(0, input.value.length);
+  await save();
 }
 
 /// onSelLine
@@ -187,7 +190,7 @@ export const onSelLine = async () => {
   });
 
   if (start !== end) {
-    /// Grow to the next line.
+    /// Keep clicking `onSelLine` to add lines to selection.
 
     const {start, end, input} = getSel({
       focused: true,
@@ -198,8 +201,9 @@ export const onSelLine = async () => {
     input.setSelectionRange(start, end);
   }
 
+  // No `else` here, just a scoped block to use simple var names.
   {
-    /// Select whole current lines.
+    /// Select whole current lines without newline in the end.
 
     const {start, end, input, isTa} = getSel({
       focused: true,

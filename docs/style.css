@@ -111,9 +111,7 @@ html,
 body {
   width: 100%;
   height: 100%;
-}
 
-body {
   /* Disable "pull-to-refresh" */
   overscroll-behavior-y: contain;
 }
@@ -325,8 +323,8 @@ textarea.mono {
 
 .menu-form,
 .line-form {
-  grid-template-columns: 1fr var(--icon);
   grid-template-areas: "m x";
+  grid-template-columns: 1fr var(--icon);
 }
 
 .font-form {

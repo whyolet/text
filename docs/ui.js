@@ -91,8 +91,15 @@ export const expand = (el) => el.classList.remove(collapsed);
 
 /// Icon Button.
 
-export const ib = (name, shortcut, handler, props) => {
-  const {focused} = props ?? {};
+export const ib = (
+  icon,  // Web icon name from https://fonts.google.com/icons
+  shortcut,  // CSS `grid-area` for now. TODO: `Ctrl+...` keyboard shortcut.
+  handler,  // Function to call or URL to open on click.
+  props,
+ ) => {
+  const {
+    focused,  // If valid for input fields too, not just for the main textarea.
+  } = props ?? {};
 
   const el = o(".icon button",
     {
@@ -100,7 +107,7 @@ export const ib = (name, shortcut, handler, props) => {
         `grid-area: ${shortcut}`
         : null,
     },
-    name,
+    icon,
   );
 
   onClick(el, async () => {
@@ -133,8 +140,9 @@ export const showBanner = (props, ...items) => {
   if (!isActive) db.close();
 
   items = items.map(item =>
-    item instanceof Node ?
-    item : o("", item)
+    item instanceof Node
+      ? item
+      : o("", item)
   );
 
   items[0]?.classList.add("header");

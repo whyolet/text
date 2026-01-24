@@ -48,7 +48,7 @@ export const initPageUI = () => {
     ui.header,
 
     ib("calendar_month", "g", onOpenDate),  // Go to date
-    ib("search", "F", onSearch, {focused: true}),  // // Ctrl+Shift+F
+    ib("search", "F", onSearch, {focused: true}),  // Ctrl+Shift+F
     ib("find_in_page", "f", onFindForm),  // Ctrl+F
     ib("anchor", "j", onAnchor),
 
@@ -103,7 +103,7 @@ export const getPage = (tag) => {
     id: getId(),  // local, for save
     tag,
     text: "",
-    done: true,
+    done: true, // no `notDoneText`
     edited: getNow(),  // text was updated by user
     fileSaved: null,  // when
     ...zeroCursor
@@ -136,7 +136,7 @@ export const splitDoneText = (page) => {
   const {text} = page;
   const i = text.indexOf(anchor);
 
-  const moving = (i === -1 ?
+  const movable = (i === -1 ?
     text : text.slice(0, i)
   ).trim();
 
@@ -144,7 +144,7 @@ export const splitDoneText = (page) => {
     "" : text.slice(i)
   ).trim();
 
-  const lines = moving.split("\n");
+  const lines = movable.split("\n");
   const notDoneLines = [];
   const doneLines = [];
 

@@ -1,6 +1,5 @@
 import {onBackupExportDB, onBackupExportCSV, onBackupImport, onPageExport, onPageImport, onSetExportPassphrase} from "./file.js";
 import {onFontForm} from "./font.js";
-import {openInfoScreen} from "./info.js";
 import {onLineForm} from "./line.js";
 import {getPersisted, onLocalData} from "./local.js";
 import {hideAtticForms} from "./nav.js";

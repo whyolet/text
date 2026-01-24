@@ -119,14 +119,13 @@ const deleteLocalProps = (pageCopy) => {
 const saveFile = async (props) => {
   const {
     saverId = "page",
-    fileHandle: handle,
     fileName,
     data,
     isText,
   } = props ?? {};
+  let {fileHandle} = props ?? {};
 
   if ("showSaveFilePicker" in window) {
-    let fileHandle = handle;
     if (!fileHandle) {
       try {
         fileHandle = await showSaveFilePicker({
@@ -146,6 +145,8 @@ const saveFile = async (props) => {
     await writable.close();
     return fileHandle;
   }
+
+  /// No `showSaveFilePicker`
 
   const blob = new Blob([data], {
     type: isText ? "text/plain"
@@ -266,9 +267,9 @@ made after this backup?`);
     await openPage(mem.page);
   }
 
-  if (isSync) return true;
-
   showOrHideOverdue();
+
+  if (isSync) return true;
 
   alert(
 `Created pages: ${created}

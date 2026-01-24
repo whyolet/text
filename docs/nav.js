@@ -38,7 +38,8 @@ export const isDateTag = (tag) => /^\d+-\d{2}-\d{2}$/.test(tag);
 /// getAppLock
 ///
 /// Usage: getAppLock();
-/// Note NO `await` to avoid blocking current thread until another tab calls `getAppLock` too.
+/// Note NO `await` to avoid blocking current thread.
+/// Banner is shown when another tab calls `getAppLock`, stealing our lock.
 
 export const getAppLock = async () => {
   try {
@@ -69,8 +70,10 @@ export const openFirstScreen = async () => {
   /// sync
 
   if (hash.includes("state")) {
+    // Hide the hash.
     history.replaceState(history.state, "", location.pathname);
 
+    // Prepare where to go back from sync screen.
     await openScreen(screenTypes.page, {
       tag: mem.recentTags[0] || getToday(),
       historyOnly: true,
@@ -136,6 +139,8 @@ const onSetState = async (event) => {
       show(el);
     } else hide(el);
   }
+
+  // `openInfo` will set `false`.
   info.closed = true;
 
   if (screen.type === screenTypes.page) {
@@ -204,12 +209,12 @@ export const onOpenTag = async () => {
   const start = head.search(/[^─\s]*$/);
   const end = cursor + tail.match(/[^─\s]*/)[0].length;
 
-  const hashtag = text.slice(start, end);
-  const tag = hashtag.replaceAll(folder, "");
+  const folderAndTag = text.slice(start, end);
+  const tag = folderAndTag.replaceAll(folder, "");
 
   if (!tag) return toast("Click a word first!");
 
-  if (hashtag.codePointAt(0) !== folderCodePoint) {
+  if (folderAndTag.codePointAt(0) !== folderCodePoint) {
     ui.ta.setRangeText(folder, start, start);
     await save();
   }
@@ -225,7 +230,7 @@ export const onOpenTag = async () => {
 /// onBack
 
 export const onBack = () => {
-  // In case `back()` does nothing:
+  // In case `back()` does nothing, hint to click "open" first.
   toast("folder_open", {
     isIcon: true,
     isShy: true,
@@ -323,9 +328,7 @@ will not be moved.`
   if (text) parts.push(text);
 
   Object.assign(mem.page, {
-    text: parts
-      .filter(value => value)
-      .join("\n"),
+    text: parts.join("\n"),
     edited: now,
   }, zeroCursor);
 

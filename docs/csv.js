@@ -108,7 +108,13 @@ is not found!`);
 
   const pages = [];
   for (const row of rows) {
-    if (row.length !== importedKeys.length) continue;
+    if (row.length !== importedKeys.length) {
+      alert(`Failed to match ${importedKeys.length} columns
+${JSON.stringify(importedKeys)}
+and a row with ${row.length} cells
+${JSON.stringify(row)}`);
+      return null;
+    }
 
     const page = Object.assign({}, defaultPage);
     for (let i = 0; i < row.length; i++) {
