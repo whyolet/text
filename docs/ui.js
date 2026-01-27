@@ -16,6 +16,7 @@ import {save} from "./page.js";
  * )
  *
  * `null` attrs and kids are skipped.
+ * Array of kids is flattened - for reusable sub-arrays.
  * Non-`Node` objects become attrs.
  * Primitives like `string` become text nodes.
  * Default `o()` has `div` tag, no class, no attrs, no kids.
@@ -26,7 +27,7 @@ export const o = (tag_cls, ...kids) => {
   const el = document.createElement(tag || "div");
   if (cls) el.className = cls;
 
-  for (const kid of kids) {
+  for (const kid of kids.flat()) {
     if (kid === null) continue;
 
     if (kid instanceof Node) {

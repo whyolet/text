@@ -45,7 +45,7 @@ export const openInfo = (header, items, props) => {
   info.closed = false;
 
   ui.infoItems.textContent = "";
-  for (const item of items) {
+  for (const item of items.flat()) {
     ui.infoItems.appendChild(
       item instanceof Node ?
       item : o("", item)

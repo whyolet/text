@@ -4,7 +4,7 @@ import {createOp, getRevertedOp} from "./undo.js";
 
 /// idb, stores, conf, mem
 
-let idb;
+let idb, idbName;
 
 const stores = Object.seal({
   page: "page",
@@ -57,8 +57,8 @@ const updateAppVersion = () => {
 /// Load from db to mem.
 
 export const load = async (passphrase) => await new Promise(async (doneLoading) => {
-  const dbName = await getDbName(passphrase);
-  const openingDb = indexedDB.open(dbName, 1);
+  idbName = await getDbName(passphrase);
+  const openingDb = indexedDB.open(idbName, 1);
 
   /// onerror while opening
 
@@ -374,4 +374,52 @@ export const saveUndoneOps = async () => {
 export const close = () => {
   if (!idb) return;
   idb.close();
+};
+
+/// deleteLocalData
+
+export const deleteLocalData = async () => {
+  localStorage.clear();
+  close();
+  const dbNames = [];
+  const listIsSupported = "databases" in indexedDB;
+
+  if (listIsSupported) {
+    const dbs = await indexedDB.databases();
+    for (const db of dbs) {
+      dbNames.push(db.name);
+    }
+  } else dbNames.push(idbName);
+
+  await new Promise(done => {
+    let deleted = 0;
+
+    const onSuccess = () => {
+      deleted++;
+      if (
+        deleted === dbNames.length
+      ) done();
+    };
+
+    const onError = (event) => {
+      throw event.target.error;
+    };
+
+    for (const dbName of dbNames) {
+      const deletingDb = indexedDB.deleteDatabase(dbName);
+      deletingDb.onerror = onError;
+      deletingDb.onsuccess = onSuccess;
+    }
+  });
+
+  if (!listIsSupported) {
+    alert(`Your browser fails to list all databases.
+Current database is deleted.
+
+For full cleanup please:
+1. Open text.whyolet.com in web browser.
+2. Click the settings icon in the address bar.
+3. Select "Cookies and site data".
+4. Click "Delete".`);
+  }
 };

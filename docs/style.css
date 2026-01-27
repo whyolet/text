@@ -172,10 +172,15 @@ a:active > .icon,
   background-color: var(--hint);
 }
 
-/** bold **/
+/** emphasis **/
 
 b {
   font-weight: 700;
+}
+
+.hr {
+  border-top: var(--thin);
+  height: 1px;
 }
 
 /** header **/

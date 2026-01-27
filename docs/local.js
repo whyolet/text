@@ -1,6 +1,7 @@
+import * as db from "./db.js";
 import {openInfoScreen} from "./info.js";
 import {showMenuForm} from "./menu.js";
-import {o, onClick} from "./ui.js";
+import {getRestartButton, o, onClick, showBanner} from "./ui.js";
 
 /// isPersistSupported
 
@@ -30,14 +31,33 @@ export const tryPersist = async () => {
 /// onLocalData
 
 export const onLocalData = async () => {
-  const header = "Local data";
+  const header = "Your data";
+
+  const deleteButton = o(".rounded button",
+    o(".icon", "delete_forever"),
+    " Delete your data",
+  );
+  onClick(deleteButton, onDeleteLocalData);
+
+  const dangerZone = [
+    o(".hr"),
+    o("b", "DANGER ZONE"),
+    "If you uninstall web app from home screen, you can still access your data from web browser.",
+    o("",
+      "If you use the button below, there is no way back, unless you have a backup file or another device with this data.",
+      o(".centered", deleteButton),
+    ),
+  ];
+
   let persisted = await getPersisted();
   if (!persisted) persisted = await tryPersist();
 
   if (persisted) {
     await openInfoScreen(header, [
-      "Good news: your web browser has agreed not to delete your local data.",
+      "Good news: your web browser has agreed not to delete your data.",
       "However, to be safe, use the menu to backup or sync your data.",
+      "", "",
+      dangerZone,
     ]);
     return;
   }
@@ -49,7 +69,7 @@ export const onLocalData = async () => {
   onClick(requestPermButton, onRequestPerm);
 
   await openInfoScreen(header, [
-    "Bad news: your web browser plans to delete your local data.",
+    "Bad news: your web browser plans to delete your data.",
     'To avoid this, click "Install app" or "Add to Home Screen" in the browser menu, and open the installed app.',
     o("",
       'If you still see this warning, please request "Notification" permission ',
@@ -62,6 +82,7 @@ export const onLocalData = async () => {
         requestPermButton,
       ),
     ),
+    dangerZone,
   ]);
 };
 
@@ -109,4 +130,31 @@ const onSuccess = () => {
   alert("Success!");
   history.back();
   setTimeout(onLocalData, 200);
+};
+
+/// onDeleteLocalData
+
+const onDeleteLocalData = async () => {
+  const answer = prompt('Do you want to delete all your data from this app on this device? Type "yes" to confirm.');
+
+  if (!answer || answer.trim().toLowerCase() !== "yes") {
+    alert(`Deletion was canceled.
+Your data is still here.`);
+    return;
+  }
+
+  await db.deleteLocalData();
+
+  showBanner({},
+    "Your data is deleted",
+    o("",
+      "You've successfully deleted your data",
+      o("br"),
+      "from this app on this device.",
+      o("br"),
+      o("br"),
+      "You can start from scratch now.",
+    ),
+    getRestartButton(),
+  );
 };
