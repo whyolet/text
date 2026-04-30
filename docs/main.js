@@ -8,7 +8,13 @@ import {initMenuUI} from "./menu.js";
 import {getAppLock, initNavUI, openFirstScreen, screenTypes} from "./nav.js";
 import {initPageUI} from "./page.js";
 import {initSearchUI} from "./search.js";
-import {showBanner, ui} from "./ui.js";
+import {on, showBanner, ui} from "./ui.js";
+
+on(window, "load", () => {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./sw.js");
+  }
+});
 
 showBanner({isActive: true},
   "Loading...",
