@@ -338,7 +338,7 @@ export const saveUndoneOps = async () => {
   });
 
   const encryptedOps = event.target.result;
-  if (!encryptedOps) return;
+  if (!encryptedOps || encryptedOps.length === 0) return;
 
   encryptedOps.reverse();
 
