@@ -391,6 +391,10 @@ export const deleteLocalData = async () => {
     }
   } else dbNames.push(idbName);
 
+  if (dbNames.length === 0) {
+    return;
+  }
+
   await new Promise(done => {
     let deleted = 0;
 
