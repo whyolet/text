@@ -160,6 +160,12 @@ const onReplaceOne = async () => {
 };
 
 const onReplaceAll = async () => {
+  if (!ui.findInput.value) {
+    ui.findInput.focus();
+    toast("Find what?");
+    return;
+  }
+
   const oldText = mem.page.text;
   const newText = oldText.replaceAll(
     ui.findInput.value,
