@@ -124,7 +124,7 @@ ${JSON.stringify(row)}`);
       page[key] = parser(row[i]);
     }
     if (!("done" in page)) {
-      page.done = getDone(page.text);
+      page.done = getDone(page);
     }
     pages.push(page);
   }
