@@ -59,8 +59,7 @@ rename and delete the file.`);
 
 export const onRedirect = async (hash) => {
   const accessToken = await getAccessToken(hash);
-  if (info.closed) return;
-  if (!accessToken) return syncFailed();
+  if (info.closed || !accessToken) return;
 
   const options = {
     cache: "no-store",
