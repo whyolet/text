@@ -172,11 +172,9 @@ const openNextDate = async (props) => {
     return;
   }
 
-  const nextTag = (new Date(
-    Date.parse(tag) +
-    (forward ? 1 : -1) *
-    1000*60*60*24
-  )).toISOString().split("T")[0];
+  const date = new Date(tag);
+  date.setUTCDate(date.getUTCDate() + (forward ? 1 : -1));
+  const nextTag = date.toISOString().split("T")[0];
 
   await openScreen(screenTypes.page, {tag: nextTag});
 };
