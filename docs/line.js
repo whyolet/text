@@ -111,5 +111,5 @@ export const getLineEnd = (lineNumber) => {
     lineNumber > 0 &&
     (i = text.indexOf("\n", i + 1)) !== -1
   ) lineNumber--;
-  return i > 0 ? i : text.length;
+  return i >= 0 ? i : text.length;
 };
