@@ -61,7 +61,7 @@
   });
 
   const cacheResponse = async (request) => {
-    const url = request.url;
+    const url = request.url.split("?")[0];
 
     if (new URL(url).origin !== location.origin) {
       return await fetch(request, {
