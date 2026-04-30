@@ -85,7 +85,7 @@
       return response;
     });
 
-    const cachedResponse = await caches.match(request);
+    const cachedResponse = await caches.match(request, {ignoreSearch: true});
     if (cachedResponse) {
       responsePromise.catch(() => {});
       return cachedResponse;
