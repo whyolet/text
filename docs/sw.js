@@ -26,7 +26,7 @@
     "/page.js",
     "/search.js",
     "/sel.js",
-    "/sw.js",
+    // "/sw.js",
     "/ui.js",
     "/undo.js",
     "/style.css",
@@ -85,10 +85,12 @@
       return response;
     });
 
-    return (
-      await caches.match(request)
-    ) || (
-      await responsePromise
-    );
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      responsePromise.catch(() => {});
+      return cachedResponse;
+    }
+
+    return await responsePromise;
   };
 })();
