@@ -180,6 +180,7 @@ export const onPageImport = async () => {
   ui.ta.setSelectionRange(0, 0);
   ui.ta.scrollTop = 0;
   await save();
+  toast("Loaded " + file.name);
 };
 
 /// onBackupImport
