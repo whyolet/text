@@ -2,7 +2,7 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getExportedBytes, importBackup} from "./file.js";
-import {info} from "./info.js";
+import {info, openInfoScreen} from "./info.js";
 import {o, toast, ui} from "./ui.js";
 
 const scope = "https://www.googleapis.com/auth/drive.file";
@@ -25,34 +25,33 @@ rename and delete the file.`);
   }
 
   mem.nonce = getId();
-  await db.saveConf(db.conf.nonce);
 
-  const form = o("form", {
-    method: "GET",
-    action: "https://accounts.google.com/o/oauth2/v2/auth",
-  });
-
-  const params = {
+  const params = new URLSearchParams({
     client_id: "688517838791-tuli5btteuvei4m8el5t8e7lv11c653i.apps.googleusercontent.com",
     prompt: "select_account",
     scope,
     state: mem.nonce,
     response_type: "token",
     redirect_uri: "https://text.whyolet.com/",
-  };
+  });
 
-  for (const [name, value] of Object.entries(params)) {
-    form.appendChild(
-      o("input", {
-        "type": "hidden",
-        name,
-        value,
-      }),
-    );
+  const url = "https://accounts.google.com/o/oauth2/v2/auth?" + params.toString();
+
+  const width = Math.min(500, innerWidth);
+  const height = Math.min(600, innerHeight);
+  const left = screenX + (outerWidth - width) / 2;
+  const top = screenY + (outerHeight - height) / 2;
+  const popup = open(url, "_blank", `popup,left=${left},top=${top},width=${width},height=${height}`);
+
+  if (!popup) {
+    alert("Please allow popup!");
+    mem.nonce = "";
+    return;
   }
 
-  ui.body.appendChild(form);
-  form.submit();
+  await openInfoScreen("Sync", [
+    "Please wait...",
+  ]);
 };
 
 /// onRedirect
@@ -123,7 +122,6 @@ export const getAccessToken = async (hash) => {
   ) return syncFailed("outdated or incorrect link.");
 
   mem.nonce = "";
-  await db.saveConf(db.conf.nonce);
   return params.access_token;
 };
 

@@ -62,33 +62,19 @@ export const getAppLock = async () => {
   );
 };
 
+/// onMessage
+
+const onMessage = (event) => {
+  if (event.origin !== location.origin) return;
+
+  if (event.data.type === "oauth-redirect") {
+    onRedirect(event.data.hash);
+  }
+};
+
 /// openFirstScreen
 
 export const openFirstScreen = async () => {
-  const hash = location.hash;
-
-  /// sync
-
-  if (hash.includes("state")) {
-    // Hide the hash.
-    history.replaceState(history.state, "", location.pathname);
-
-    // Prepare where to go back from sync screen.
-    await openScreen(screenTypes.page, {
-      tag: mem.recentTags[0] || getToday(),
-      historyOnly: true,
-    });
-
-    await openInfoScreen("Sync", [
-      "Please wait...",
-    ]);
-
-    await onRedirect(hash);
-    return;
-  }
-
-  /// today
-
   await openScreen(screenTypes.page, {tag: getToday()});
 
   const persisted = await getPersisted();
@@ -170,6 +156,7 @@ const onSetState = async (event) => {
 /// initNavUI
 
 export const initNavUI = () => {
+  on(window, "message", onMessage);
   on(window, "popstate", onSetState);
   on(document, "focusin", onFocus);
 

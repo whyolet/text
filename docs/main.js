@@ -1,3 +1,4 @@
+import "./intercept.js";
 import "./error.js";
 import * as db from "./db.js";
 import {initFindUI} from "./find.js";

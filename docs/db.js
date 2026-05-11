@@ -14,7 +14,6 @@ const stores = Object.seal({
 
 export const conf = Object.seal({
   salt: "salt",
-  nonce: "nonce",
   mono: "mono",
   zoom: "zoom",
   recentTags: "recentTags",
@@ -23,7 +22,6 @@ export const conf = Object.seal({
 
 export const mem = Object.seal({
   salt: null,
-  nonce: null,
   mono: null,
   zoom: null,
   recentTags: null,
@@ -37,6 +35,7 @@ export const mem = Object.seal({
   oldPages: null, // for `createOp`
   screens: {},
   fileHandles: {},
+  nonce: "",
   searchQuery: "",
   isSecret: false,
 });
@@ -100,7 +99,6 @@ export const load = async (passphrase) => await new Promise(async (doneLoading) 
     passphrase = "";  // forget asap!
 
     await Promise.all([
-      loadConf(conf.nonce, () => ""),
       loadConf(conf.mono, () => false),
       loadConf(conf.zoom, () => 100),
       loadConf(conf.recentTags, () => []),
