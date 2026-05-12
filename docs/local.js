@@ -42,9 +42,9 @@ export const onLocalData = async () => {
   const dangerZone = [
     o(".hr"),
     o("b", "DANGER ZONE"),
-    "If you uninstall web app from home screen, you can still access your data from web browser.",
+    "If you remove this web app from the home screen, your local data may be deleted or kept. This depends on your web browser and OS.",
     o("",
-      "If you use the button below, there is no way back, unless you have a backup file or another device with this data.",
+      "If you use the button below, there is no way back, unless you have a backup file, or a recent sync, or another device with this data.",
       o(".centered", deleteButton),
     ),
   ];
