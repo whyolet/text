@@ -51,7 +51,7 @@ export const setDbKey = async (passphrase, salt) => {
   );
 };
 
-/// setExportKey1
+/// setExportKey1, getExportKey2
 
 export const setExportKey1 = async (passphrase) => {
   const exportSalt1 = Bytes.fromText("whyolet-text-const-export-salt-1");
@@ -71,28 +71,6 @@ export const setExportKey1 = async (passphrase) => {
   );
 };
 
-/// getKeyBytes
-
-const getKeyBytes = async (passphrase, salt) => {
-  if (!passphrase) {
-    // Instant UX for default non-secret database.
-    const buffer = await crypto.subtle.digest("SHA-256", salt);
-    return new Bytes(buffer);
-  }
-
-  return await argon2id({
-    password: passphrase || defaultPassphrase,
-    salt,
-    parallelism: 1,  // for browser
-    iterations: 4,  // 1 second or so
-    memorySize: 65536,  // 64 MB
-    hashLength: 32,  // 256 bits
-    outputType: "binary",
-  });
-};
-
-/// getExportKey2
-
 const getExportKey2 = async (exportSalt2) => {
   return await crypto.subtle.deriveKey(
     {
@@ -109,6 +87,26 @@ const getExportKey2 = async (exportSalt2) => {
     false,
     ["encrypt", "decrypt"],
   );
+};
+
+/// getKeyBytes
+
+const getKeyBytes = async (passphrase, salt) => {
+  if (!passphrase) {
+    // Instant UX for default non-secret database.
+    const buffer = await crypto.subtle.digest("SHA-256", salt);
+    return new Bytes(buffer);
+  }
+
+  return await argon2id({
+    password: passphrase,
+    salt,
+    parallelism: 1,  // for browser
+    iterations: 4,  // 1 second or so
+    memorySize: 65536,  // 64 MB
+    hashLength: 32,  // 256 bits
+    outputType: "binary",
+  });
 };
 
 /// getDbName, getDbNameSalt
