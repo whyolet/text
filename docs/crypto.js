@@ -1,3 +1,4 @@
+import {argon2id} from "./vendors/hash-wasm/argon2.esm.min.js";
 import {o, getRestartButton, showBanner} from "./ui.js";
 
 /// Bytes
@@ -36,74 +37,61 @@ export const getId = () => getRandomBytes(32).toHex();
 
 let dbKey = null, exportKey1 = null;
 
-/// setDbKey, setExportKey1
+/// setDbKey
 
 export const setDbKey = async (passphrase, salt) => {
-  dbKey = await getKey(passphrase, salt);
+  const bytes = await getKeyBytes(passphrase, salt);
+
+  dbKey = await crypto.subtle.importKey(
+    "raw",
+    bytes,
+    "AES-GCM",
+    false,
+    ["encrypt", "decrypt"],
+  );
 };
 
-export const setExportKey1 = async (passphrase) => {
-  const keyMaterial = await getKeyMaterial(passphrase);
+/// setExportKey1
 
+export const setExportKey1 = async (passphrase) => {
   const exportSalt1 = Bytes.fromText("whyolet-text-const-export-salt-1");
   // Why `exportSalt1` is not random:
   // `exportKey2` will be derived from `exportKey1` and random `exportSalt2`
   // to avoid re-entering passphrase on each export, import, sync,
   // and to avoid keeping passphrase in memory as plaintext, or encoded in a reversible way, or using not strong enough hash.
 
-  const exportKey1Buffer = await crypto.subtle.deriveBits(
-    getPassBasedAlg(exportSalt1),
-    keyMaterial,
-    256,
-  );
+  const bytes = await getKeyBytes(passphrase, exportSalt1);
 
   exportKey1 = await crypto.subtle.importKey(
     "raw",
-    exportKey1Buffer,
+    bytes,
     "HKDF",
     false,
     ["deriveKey"],
   );
 };
 
-/// getKey...
+/// getKeyBytes
 
-const getKey = async (passphrase, salt, props) => {
-  const {isExtractable} = props ?? {};
-  const keyMaterial = await getKeyMaterial(passphrase);
+const getKeyBytes = async (passphrase, salt) => {
+  if (!passphrase) {
+    // Instant UX for default non-secret database.
+    const buffer = await crypto.subtle.digest("SHA-256", salt);
+    return new Bytes(buffer);
+  }
 
-  const key = await crypto.subtle.deriveKey(
-    getPassBasedAlg(salt),
-    keyMaterial,
-    encryptionAlg,
-    isExtractable ?? false,
-    ["encrypt", "decrypt"],
-  );
-
-  return key;
+  return await argon2id({
+    password: passphrase || defaultPassphrase,
+    salt,
+    parallelism: 1,  // for browser
+    iterations: 4,  // 1 second or so
+    memorySize: 65536,  // 64 MB
+    hashLength: 32,  // 256 bits
+    outputType: "binary",
+  });
 };
 
-const getKeyMaterial = async (passphrase) => {
-  return await crypto.subtle.importKey(
-    "raw",
-    Bytes.fromText(passphrase),
-    "PBKDF2",
-    false,
-    ["deriveBits", "deriveKey"],
-  );
-};
-
-const getPassBasedAlg = (salt) => ({
-  name: "PBKDF2",
-  hash: "SHA-256",
-  salt,
-  iterations: 1000000,
-});
-
-const encryptionAlg = {
-  name: "AES-GCM",
-  length: 256,
-};
+/// getExportKey2
 
 const getExportKey2 = async (exportSalt2) => {
   return await crypto.subtle.deriveKey(
@@ -114,13 +102,22 @@ const getExportKey2 = async (exportSalt2) => {
       info: Bytes.fromText("whyolet-text-export-key-2"),
     },
     exportKey1,
-    encryptionAlg,
+    {
+      name: "AES-GCM",
+      length: 256,
+    },
     false,
     ["encrypt", "decrypt"],
   );
 };
 
 /// getDbName, getDbNameSalt
+
+export const getDbName = async (passphrase) => {
+  const dbNameSalt = getDbNameSalt();
+  const bytes = await getKeyBytes(passphrase, dbNameSalt);
+  return bytes.toHex();
+};
 
 const getDbNameSalt = () => {
   const saltName = "dbNameSalt";
@@ -130,18 +127,6 @@ const getDbNameSalt = () => {
   const salt = getSalt();
   localStorage.setItem(saltName, salt.toHex());
   return salt;
-};
-
-export const getDbName = async (passphrase) => {
-  // Non-secret dbNameKey != secret dbKey.
-  const dbNameKey = await getKey(
-    passphrase,
-    getDbNameSalt(),
-    {isExtractable: true},
-  );
-  const buffer = await crypto.subtle.exportKey("raw", dbNameKey);
-  const bytes = new Bytes(buffer);
-  return bytes.toHex();
 };
 
 /// encrypt

@@ -38,6 +38,7 @@
     "/fonts/SourceCodePro-VariableFont_wght.ttf",
     "/fonts/Ubuntu-Bold.ttf",
     "/fonts/Ubuntu-Light.ttf",
+    "/vendors/hash-wasm/argon2.esm.min.js",
   ];
 
   const moreStatic = ["png", "ttf"];
