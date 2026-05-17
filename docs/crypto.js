@@ -185,6 +185,17 @@ const tryCompress = async (bytes) => {
 
 export const decrypt = async (bytes, props) => {
   const {isImport} = props ?? {};
+
+  const minLength = (isImport ? saltSize : 0) + ivSize;
+  if (bytes.byteLength < minLength) {
+    showBanner({},
+      "Too small!",
+      "Maybe you've selected wrong file?",
+      getRestartButton(),
+    );
+    return null;
+  }
+
   const buffer = bytes.buffer;
   let i = bytes.byteOffset;
 
