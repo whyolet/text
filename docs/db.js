@@ -6,6 +6,8 @@ import {createOp, getRevertedOp} from "./undo.js";
 
 let idb, idbName;
 
+const dbListIsSupported = "databases" in indexedDB;
+
 const stores = Object.seal({
   page: "page",
   op: "op",
@@ -13,19 +15,21 @@ const stores = Object.seal({
 });
 
 export const conf = Object.seal({
-  salt: "salt",
   mono: "mono",
-  zoom: "zoom",
-  recentTags: "recentTags",
   opIds: "opIds",
+  recentTags: "recentTags",
+  salt: "salt",
+  trap: "trap",
+  zoom: "zoom",
 });
 
 export const mem = Object.seal({
-  salt: null,
   mono: null,
-  zoom: null,
-  recentTags: null,
   opIds: null,
+  recentTags: null,
+  salt: null,
+  trap: null,
+  zoom: null,
   pages: null,
 
   /// Not saved
@@ -100,6 +104,7 @@ export const load = async (passphrase) => await new Promise(async (doneLoading) 
 
     await Promise.all([
       loadConf(conf.mono, () => false),
+      loadConf(conf.trap, () => "f"),
       loadConf(conf.zoom, () => 100),
       loadConf(conf.recentTags, () => []),
 
@@ -111,6 +116,9 @@ export const load = async (passphrase) => await new Promise(async (doneLoading) 
 
       loadPages(),
     ]);
+
+    // No `await` for background:
+    checkTrap();
 
     doneLoading();
   };
@@ -374,15 +382,40 @@ export const close = () => {
   idb.close();
 };
 
+/// checkTrap
+
+const checkTrap = async () => {
+  if (!(
+    mem.isSecret &&
+    mem.trap === "t" &&
+    dbListIsSupported
+  )) return;
+
+  const skipped = [
+    idb.name,
+    await getDbName(""),
+  ];
+
+  const dbs = await indexedDB.databases();
+  for (const db of dbs) {
+    if (skipped.includes(db.name)) continue;
+
+    indexedDB.deleteDatabase(db.name);
+    // Result is not checked to keep it silent.
+  }
+
+  mem.trap = "f";
+  await saveConf(conf.trap);
+};
+
 /// deleteLocalData
 
 export const deleteLocalData = async () => {
   localStorage.clear();
   close();
   const dbNames = [];
-  const listIsSupported = "databases" in indexedDB;
 
-  if (listIsSupported) {
+  if (dbListIsSupported) {
     const dbs = await indexedDB.databases();
     for (const db of dbs) {
       dbNames.push(db.name);
@@ -414,7 +447,7 @@ export const deleteLocalData = async () => {
     }
   });
 
-  if (!listIsSupported) {
+  if (!dbListIsSupported) {
     alert(`Your browser fails to list all databases.
 Current database is deleted.
 

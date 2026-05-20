@@ -1,4 +1,5 @@
 import * as db from "./db.js";
+import {mem} from "./db.js";
 import {openInfoScreen} from "./info.js";
 import {showMenuForm} from "./menu.js";
 import {getRestartButton, o, onClick, showBanner} from "./ui.js";
@@ -39,13 +40,24 @@ export const onLocalData = async () => {
   );
   onClick(deleteButton, onDeleteLocalData);
 
+  const trapButton = mem.isSecret ? o(".rounded button",
+    o(".icon", "bomb"),
+    " Set the trap",
+  ) : null;
+  if (trapButton) onClick(trapButton, onSetTrap);
+
   const dangerZone = [
     o(".hr"),
-    o("b", "DANGER ZONE"),
+    o("", o("b", "DANGER ZONE")),
     "If you remove this web app from the home screen, your local data may be deleted or kept. This depends on your web browser and OS.",
     o("",
       "If you use the button below, there is no way back, unless you have a backup file, or a recent sync, or another device with this data.",
-      o(".centered", deleteButton),
+      o(".centered",
+        o("",
+          deleteButton,
+          trapButton,
+        ),
+      ),
     ),
   ];
 
@@ -157,4 +169,21 @@ Your data is still here.`);
     ),
     getRestartButton(),
   );
+};
+
+/// onSetTrap
+
+const onSetTrap = async () => {
+  const answer = prompt('Do you want to delete all other secret worlds in this app on this device when this secret world is opened again? Type "yes" to confirm.');
+
+  const yes = answer?.trim().toLowerCase() === "yes";
+
+  mem.trap = yes ? "t" : "f";
+  // To avoid revealing by the size of encrypted JSON.
+
+  await db.saveConf(db.conf.trap);
+
+  alert("The trap is " + (
+    yes ? "enabled" : "disabled"
+  ));
 };
