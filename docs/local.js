@@ -174,7 +174,7 @@ Your data is still here.`);
 /// onSetTrap
 
 const onSetTrap = async () => {
-  const answer = prompt('Do you want to delete all other secret worlds in this app on this device when this secret world is opened again? Type "yes" to confirm.');
+  const answer = prompt('Do you want to silently delete all other secret worlds in this app on this device when this secret world is opened again? Type "yes" to confirm.');
 
   const yes = answer?.trim().toLowerCase() === "yes";
 
