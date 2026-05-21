@@ -187,19 +187,13 @@ export const openPageByTag = async (tag) => {
 };
 
 export const openPage = async (page) => {
-  const tagChanged = (mem.page?.tag !== page.tag);
-
   mem.page = page;
   mem.pages[page.tag] = page;
   mem.textLength = page.text.length;
 
   const header = getHeader(page);
   toast(header, {isPinned: true});
-
-  if (tagChanged) {
-    // Flash changed tag, unless a not shy toast is shown, e.g. "Synced OK".
-    toast(header, {isShy: true});
-  }
+  toast(header, {isShy: true});
 
   ui.ta.value = page.text;
   ui.ta.focus();

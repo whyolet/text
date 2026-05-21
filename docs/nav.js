@@ -182,6 +182,8 @@ export const onOpenDate = () => {
 };
 
 const onOpenDateInput = async (date) => {
+  if (date === mem.page.tag) return;
+
   await openScreen(screenTypes.page, {tag: date});
 };
 

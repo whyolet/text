@@ -125,7 +125,9 @@ const addHeader = (items, icon, text) => {
 
 const add = (items, tag, query) => {
   const el = o(".item button", tag);
-  onClick(el, () => {
+  if (tag === mem.page.tag) {
+    onClick(el, () => history.back());
+  } else onClick(el, () => {
     openScreen(screenTypes.page, {
       replace: true,
       tag,
