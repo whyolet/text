@@ -230,14 +230,15 @@ export const onBack = () => {
 
 /// onOpenHome
 
+const home = "Home";
+
 export const onOpenHome = async () => {
-  const today = getToday();
-  if (mem.page.tag === today) {
-    toast("It's today already!");
+  if (mem.page.tag === home) {
+    toast("You are home already!");
     return;
   }
 
-  await openScreen(screenTypes.page, {tag: today});
+  await openScreen(screenTypes.page, {tag: home});
 };
 
 /// showOrHideOverdue, onMoveOverdue
