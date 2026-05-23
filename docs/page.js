@@ -187,13 +187,17 @@ export const openPageByTag = async (tag) => {
 };
 
 export const openPage = async (page) => {
+  const tagChanged = (mem.page?.tag !== page.tag);
+
   mem.page = page;
   mem.pages[page.tag] = page;
   mem.textLength = page.text.length;
 
   const header = getHeader(page);
   toast(header, {isPinned: true});
-  toast(header, {isShy: true});
+  if (tagChanged) {
+    toast(header, {isShy: true});
+  }
 
   ui.ta.value = page.text;
   ui.ta.focus();

@@ -1,5 +1,5 @@
 import {onBackupExportDB, onBackupExportCSV, onBackupImport, onPageExport, onPageImport, onSetExportPassphrase} from "./file.js";
-import {onFontForm} from "./font.js";
+import {onColors, onFontForm} from "./font.js";
 import {onLineForm} from "./line.js";
 import {getPersisted, onLocalData} from "./local.js";
 import {hideAtticForms} from "./nav.js";
@@ -13,6 +13,7 @@ export const initMenuUI = () => {
 
   ui.menuForm = o(".menu-form hidden",
     o(".main",
+      ib("palette", "", onColors),
       ib("help", "", "https://whyolet.com/text/"),
       ui.localDataButton,
       ib("file_save", "", onPageExport),

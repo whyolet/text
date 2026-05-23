@@ -1,4 +1,5 @@
 import {decrypt, encrypt, getDbName, getSalt, setDbKey, setExportKey1} from "./crypto.js";
+import {defaultColors} from "./font.js";
 import {o, showBanner} from "./ui.js";
 import {createOp, getRevertedOp} from "./undo.js";
 
@@ -15,6 +16,7 @@ const stores = Object.seal({
 });
 
 export const conf = Object.seal({
+  colors: "colors",
   mono: "mono",
   opIds: "opIds",
   recentTags: "recentTags",
@@ -24,6 +26,7 @@ export const conf = Object.seal({
 });
 
 export const mem = Object.seal({
+  colors: null,
   mono: null,
   opIds: null,
   recentTags: null,
@@ -103,6 +106,7 @@ export const load = async (passphrase) => await new Promise(async (doneLoading) 
     passphrase = "";  // forget asap!
 
     await Promise.all([
+      loadConf(conf.colors, () => defaultColors),
       loadConf(conf.mono, () => false),
       loadConf(conf.trap, () => "f"),
       loadConf(conf.zoom, () => 100),
