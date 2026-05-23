@@ -203,7 +203,7 @@ export const onOpenTag = async () => {
   let tag = folderAndTag.replaceAll(folder, "");
 
   if (!tag) {
-    tag = prompt(folder);
+    tag = prompt("Enter new tag:");
     tag = tag?.trim();
     if (!tag) return;
 
