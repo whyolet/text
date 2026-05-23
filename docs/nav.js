@@ -199,12 +199,19 @@ export const onOpenTag = async () => {
   const end = cursor + tail.match(/[^─\s]*/)[0].length;
 
   const folderAndTag = text.slice(start, end);
-  const tag = folderAndTag.replaceAll(folder, "");
+  let insert = folderAndTag.codePointAt(0) === folderCodePoint ? "" : folder;
+  let tag = folderAndTag.replaceAll(folder, "");
 
-  if (!tag) return toast("Click a word first!");
+  if (!tag) {
+    tag = prompt(folder);
+    tag = tag?.trim();
+    if (!tag) return;
 
-  if (folderAndTag.codePointAt(0) !== folderCodePoint) {
-    ui.ta.setRangeText(folder, start, start);
+    insert += tag;
+  }
+
+  if (insert) {
+    ui.ta.setRangeText(insert, start, start);
     await save();
   }
 
