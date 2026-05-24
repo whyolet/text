@@ -25,6 +25,12 @@ export const initPageUI = () => {
   ui.saveFile = ib("file_save", "s", onSaveFile);
   hide(ui.saveFile);
 
+  ui.zenModeIcons = new Map([
+    [false, "fullscreen"],
+    [true, "visibility"],
+  ]);
+  ui.zenMode = ib(ui.zenModeIcons.get(false), "q", onZen);
+
   ui.header = o(".header");
   onClick(ui.header, onHeader);
 
@@ -44,7 +50,7 @@ export const initPageUI = () => {
     ib("menu", "m", onMenuForm),
     ui.saveFile,
     ui.moveOverdue,
-    ib("visibility", "q", onZen),
+    ui.zenMode,
     
     ui.header,
 
@@ -241,6 +247,8 @@ const onZen = () => {
 
   anim(() => {
     const isZen = ui.frame.classList.toggle(zenMode);
+    ui.zenMode.textContent = ui.zenModeIcons.get(isZen);
+
     toast(
       isZen ? "" : getHeader(mem.page),
       {isPinned: true},
