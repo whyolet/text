@@ -13,7 +13,7 @@ import {onMenuForm} from "./menu.js";
 import {getNow, getToday, hideAtticForms, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onSelLine, onStrike, strikes} from "./sel.js";
-import {debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
+import {anim, debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
 /// initPageUI
@@ -42,8 +42,9 @@ export const initPageUI = () => {
     /// top
 
     ib("menu", "m", onMenuForm),
-    ui.moveOverdue,
     ui.saveFile,
+    ui.moveOverdue,
+    ib("visibility", "q", onZen),
     
     ui.header,
 
@@ -228,15 +229,24 @@ const getHeader = (page) => {
 
 /// onHeader
 
+const onHeader = () => {
+};
+
+/// onZen
+
 const zenMode = "zen-mode";
 
-const onHeader = () => {
+const onZen = () => {
   hideAtticForms();
-  const isZen = ui.frame.classList.toggle(zenMode);
-  const header = isZen ? "visibility"
-    : getHeader(mem.page);
-  toast(header, {isPinned: true, isIcon: isZen});
-}
+
+  anim(() => {
+    const isZen = ui.frame.classList.toggle(zenMode);
+    toast(
+      isZen ? "" : getHeader(mem.page),
+      {isPinned: true},
+    );
+  });
+};
 
 /// onInput
 

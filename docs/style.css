@@ -22,6 +22,10 @@
   /* `@font-face.font-weight` did not support var() */
 }
 
+::view-transition-group(*) {
+  animation-duration: var(--anim);
+}
+
 /** fonts **/
 
 @font-face {
@@ -263,9 +267,9 @@ b {
 
   grid-template-areas:
     /* Areas/shortcuts */
-    "m s q q q q q q q g F"
-    "p t t t t t t t t t f"
-    ". t t t t t t t t t j"
+    "m q y y y y y y y g F"
+    "s t t t t t t t t t f"
+    "p t t t t t t t t t j"
     ". t t t t t t t t t ."
     "o t t t t t t t t t u"
     "b t t t t t t t t t n"
@@ -279,7 +283,7 @@ b {
 }
 
 .frame > .header {
-  grid-area: q;
+  grid-area: y;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
@@ -290,15 +294,17 @@ b {
   color: var(--tool);
 }
 
-.frame > .icon {
-  transition:
-    opacity var(--anim),
-    visibility var(--anim);
-}
-
-.frame.zen-mode > .icon {
+.frame.zen-mode > .icon:not(.shortcut-q) {
   opacity: 0;
   visibility: hidden;
+}
+
+.frame.zen-mode > .shortcut-q {
+  grid-area: m !important;
+}
+
+.frame > .shortcut-q {
+  view-transition-name: zen-mode;
 }
 
 textarea {

@@ -90,6 +90,14 @@ export const collapse = (el) => el.classList.add(collapsed);
 
 export const expand = (el) => el.classList.remove(collapsed);
 
+/// anim
+
+export const anim = (action) => {
+  if (document.startViewTransition) {
+    document.startViewTransition(action);
+  } else action();
+};
+
 /// Icon Button.
 
 export const ib = (
@@ -102,7 +110,11 @@ export const ib = (
     focused,  // If valid for input fields too, not just for the main textarea.
   } = props ?? {};
 
-  const el = o(".icon button",
+  const el = o(
+    ".icon button" + (shortcut ?
+      ` shortcut-${shortcut}`
+      : ""
+    ),
     {
       "style": shortcut ?
         `grid-area: ${shortcut}`
