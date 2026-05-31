@@ -191,15 +191,10 @@ const onOpenDateInput = async (date) => {
 
 export const onOpenTag = async () => {
   const {text, selStart: cursor} = mem.page;
-
-  const head = text.slice(0, cursor);
-  const tail = text.slice(cursor);
-
-  const start = head.search(/[^─\s]*$/);
-  const end = cursor + tail.match(/[^─\s]*/)[0].length;
+  const {start, end, withFolder} = detectTag(text, cursor);
 
   const folderAndTag = text.slice(start, end);
-  let insert = folderAndTag.codePointAt(0) === folderCodePoint ? "" : folder;
+  let insert = withFolder ? "" : folder;
   let tag = folderAndTag.replaceAll(folder, "");
 
   if (!tag) {
@@ -222,6 +217,24 @@ export const onOpenTag = async () => {
 
   await openScreen(screenTypes.page, {tag});
 };
+
+/// detectTag
+
+export const detectTag = (text, cursor) => {
+  const head = text.slice(0, cursor);
+  const tail = text.slice(cursor);
+
+  const start = head.search(/[^─\s]*$/);
+  const end = cursor + tail.match(/[^─\s]*/)[0].length;
+
+  const withFolder = text.codePointAt(start) === folderCodePoint;
+
+  return {
+    start,
+    end,
+    withFolder,
+  };
+}
 
 /// onBack
 

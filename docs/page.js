@@ -10,7 +10,7 @@ import {detectGestures} from "./gesture.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
-import {folder, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
+import {detectTag, folder, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onSelLine, onStrike, strikes} from "./sel.js";
 import {anim, debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
@@ -36,6 +36,7 @@ export const initPageUI = () => {
 
   ui.ta = o("textarea");
   on(ui.ta, "input", onInput);
+  on(document, "selectionchange", onSelChange);
   applyFont();
 
   detectGestures(ui.ta, {
@@ -346,6 +347,30 @@ const onZen = () => {
       {isPinned: true},
     );
   });
+};
+
+/// onSelChange
+
+const onSelChange = () => {
+  if (document.activeElement !== ui.ta) return;
+
+  selectTag();
+  updateLineFormOnSelChange();
+};
+
+/// selectTag
+
+const selectTag = () => {
+  // Protect a tag from accidental partial change by auto-selecting whole tag.
+  // See comment in `autoindent` re `mem.page` and `save`.
+
+  const cursor = ui.ta.selectionStart;
+  if (cursor !== ui.ta.selectionEnd) return;
+
+  const {start, end, withFolder} = detectTag(ui.ta.value, cursor);
+  if (!withFolder) return;
+
+  ui.ta.setSelectionRange(start, end);
 };
 
 /// onInput
