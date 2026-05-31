@@ -372,14 +372,14 @@ const onZen = () => {
 const onSelChange = () => {
   if (document.activeElement !== ui.ta) return;
 
-  selectTag();
+  protectTag();
   updateLineFormOnSelChange();
 };
 
-/// selectTag
+/// protectTag
 
-const selectTag = () => {
-  // Protect a tag from accidental partial change by auto-selecting whole tag.
+const protectTag = () => {
+  // Protect a tag from accidental partial change.
   // See comment in `autoindent` re `mem.page` and `save`.
 
   const cursor = ui.ta.selectionStart;
@@ -388,7 +388,8 @@ const selectTag = () => {
   const {start, end, withFolder} = detectTag(ui.ta.value, cursor);
   if (!withFolder) return;
 
-  ui.ta.setSelectionRange(start, end);
+  // TODO: Find a better way to protect tags which does not break the "insert" UX.
+  // ui.ta.setSelectionRange(start, end);
 };
 
 /// onInput
