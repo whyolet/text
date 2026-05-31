@@ -3,7 +3,7 @@ import {getCSV, getPagesFromCSV} from "./csv.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getNow, showOrHideOverdue, switchDb} from "./nav.js";
-import {getPage, openPage, save} from "./page.js";
+import {getPage, openPage, save, savePages} from "./page.js";
 import {hide, o, on, show, toast, ui} from "./ui.js";
 
 /// onPageExport
@@ -256,20 +256,11 @@ made after this backup?`);
     if (localPage === mem.page) needReopenPage = true;
   }
 
-  const maxIndex = unsavedPages.length - 1;
-  for (const [i, unsavedPage] of unsavedPages.entries()) {
-    await db.savePage(unsavedPage, {
-      hasPrev: i > 0,
-      hasNext: i < maxIndex,
-    });
-  }
-
+  await savePages(unsavedPages);
   if (needReopenPage) {
     await openPage(mem.page);
   }
-
   showOrHideOverdue();
-
   if (isSync) return true;
 
   alert(
@@ -285,7 +276,7 @@ Skipped unchanged pages: ${unchanged}`,
 
 /// getUploaded
 
-const getUploaded = async (props) => {
+const getUploaded = async () => {
   return await new Promise(done => {
     const input = o("input.hidden", {"type": "file"});
 

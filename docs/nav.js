@@ -14,7 +14,7 @@ import {openSearch} from "./search.js";
 import {getSel, strikes} from "./sel.js";
 import {getDateInput, debounce, hide, o, on, getRestartButton, show, showBanner, showDateInput, toast, ui} from "./ui.js";
 
-const folder = "📂";
+export const folder = "📂";
 const folderCodePoint = folder.codePointAt(0);
 
 /// getNow in UTC
@@ -237,15 +237,15 @@ export const onBack = () => {
 
 /// onOpenHome
 
-const home = "Home";
+export const homeTag = "Home";
 
 export const onOpenHome = async () => {
-  if (mem.page.tag === home) {
+  if (mem.page.tag === homeTag) {
     toast("You are home already!");
     return;
   }
 
-  await openScreen(screenTypes.page, {tag: home});
+  await openScreen(screenTypes.page, {tag: homeTag});
 };
 
 /// showOrHideOverdue, onMoveOverdue

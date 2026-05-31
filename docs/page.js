@@ -10,7 +10,7 @@ import {detectGestures} from "./gesture.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
-import {getNow, getToday, hideAtticForms, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
+import {folder, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onSelLine, onStrike, strikes} from "./sel.js";
 import {anim, debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
@@ -235,7 +235,99 @@ const getHeader = (page) => {
 
 /// onHeader
 
-const onHeader = () => {
+const onHeader = async () => {
+  // Header is not an `ib` having auto-save.
+  await save();
+
+  const oldTag = mem.page.tag;
+  if (
+    oldTag === homeTag ||
+    isDateTag(oldTag)
+  ) {
+    toast("It can't be renamed!");
+    return;
+  }
+
+  const answer = prompt("Rename to:", oldTag);
+  if (answer === null) return;
+
+  const newTag = answer.replaceAll(/[─\s📂]/gu, "");
+  if (!newTag) {
+    toast("It's empty!");
+    return;
+  }
+
+  if (newTag === oldTag) {
+    toast("It's the same!");
+    return;
+  }
+
+  const newPage = getPage(newTag);
+  if (newPage.text) {
+    toast("It exists!");
+    return;
+  }
+
+  const query = folder + oldTag;
+  const replacement = folder + newTag;
+  const unsavedPages = [];
+  const now = getNow();
+
+  for (const page of Object.values(mem.pages)) {
+    if (!page.text.includes(query)) continue;
+
+    const parts = [];
+    let start = 0, processed = 0;
+    while (true) {
+      start = page.text.indexOf(query, start);
+      if (start === -1) {
+        const part = page.text.slice(processed);
+        parts.push(part);
+        break;
+      }
+
+      if (
+        start > 0 &&
+        !/[─\s]/.test(page.text.charAt(start - 1))
+      ) {
+        start++;
+        continue;
+      }
+
+      const stop = start + query.length;
+      if (
+        stop < page.text.length &&
+        !/[─\s]/.test(page.text.charAt(stop))
+      ) {
+        start++;
+        continue;
+      }
+
+      const part = page.text.slice(processed, start);
+      parts.push(part + replacement);
+      start = processed = stop;
+    }
+    if (parts.length === 1) continue;
+
+    page.text = parts.join("");
+    page.edited = now;
+    unsavedPages.push(page);
+  }
+
+  newPage.text = mem.page.text;
+  newPage.edited = now;
+  newPage.done = getDone(newPage);
+  unsavedPages.push(newPage);
+
+  mem.page.text = "";
+  mem.page.edited = now;
+  mem.page.done = true;
+  if (!unsavedPages.includes(mem.page)) {
+    unsavedPages.push(mem.page);
+  }
+
+  await savePages(unsavedPages);
+  await openPage(newPage);
 };
 
 /// onZen
@@ -306,4 +398,16 @@ export const save = async (props) => {
 
   await db.savePage(page, props);
   showOrHideSaveFile();
+};
+
+/// savePages
+
+export const savePages = async (pages) => {
+  const maxIndex = pages.length - 1;
+  for (const [i, page] of pages.entries()) {
+    await db.savePage(page, {
+      hasPrev: i > 0,
+      hasNext: i < maxIndex,
+    });
+  }
 };
