@@ -68,7 +68,9 @@ export const onColors = async () => {
 Customize...,
 Dark Whyolet,${defaultColors}
 Light Whyolet,fff-ccf-98b-547-639
-Light Green,fff-cdffcd-4a4-333-000
+Darcula,2b2b2b-323232-606366-a9b7c6-ffc66d
+Dracula,282a36-44475a-bd93f9-f8f8f2-ffb86c
+Green Tody,fff-cdffcd-4a4-333-000
 `
     .trim()
     .split("\n")
