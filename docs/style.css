@@ -357,10 +357,12 @@ textarea.mono {
 }
 
 .font-form {
-  grid-template-areas: "a m x";
+  grid-template-areas: "a c m . x";
   grid-template-columns:
     var(--icon)
+    var(--icon)
     1fr
+    var(--icon)
     var(--icon);
 }
 

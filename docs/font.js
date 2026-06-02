@@ -36,6 +36,7 @@ export const initFontUI = () => {
 
   ui.fontForm = o(".font-form hidden",
     ib("format_letter_spacing_wider", "a", onMono),
+    ib("palette", "", onColors),
     o(".main",
       ib("remove", "", () => saveZoom({add: -10})),
       ui.zoomInput,
