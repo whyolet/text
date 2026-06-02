@@ -224,6 +224,7 @@ export const onOpenTag = async () => {
   }
 
   if (insert) {
+    mem.protectedLength += insert.length;
     ui.ta.setRangeText(insert, start, start);
     await save();
   }
@@ -258,8 +259,7 @@ export const detectTag = (text, cursor) => {
 
 export const onBack = () => {
   // In case `back()` does nothing, hint to click "open" first.
-  toast("folder_open", {
-    isIcon: true,
+  toast("No way back!", {
     isShy: true,
   });
 

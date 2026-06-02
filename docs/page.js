@@ -217,7 +217,7 @@ export const openPage = async (page) => {
 
   mem.page = page;
   mem.pages[page.tag] = page;
-  mem.textLength = page.text.length;
+  mem.protectedLength = mem.textLength = page.text.length;
 
   const header = getHeader(page);
   toast(header, {isPinned: true});
@@ -374,24 +374,68 @@ const onZen = () => {
 const onSelChange = () => {
   if (document.activeElement !== ui.ta) return;
 
-  protectTag();
+  checkProtectedTag();
   updateLineFormOnSelChange();
 };
 
-/// protectTag
+/// checkProtectedTag, protectTag
+//
+// Protect a tag from accidental partial change.
 
-const protectTag = () => {
-  // Protect a tag from accidental partial change.
+const checkProtectedTag = () => {
   // See comment in `autoindent` re `mem.page` and `save`.
 
+  const text = ui.ta.value;
+  const withInput = text.length !== mem.protectedLength;
+  mem.protectedLength = text.length;
+
   const cursor = ui.ta.selectionStart;
-  if (cursor !== ui.ta.selectionEnd) return;
+  if (cursor !== ui.ta.selectionEnd) {
+    mem.protectedTag = "";
+    return;
+  }
 
-  const {start, end, withFolder} = detectTag(ui.ta.value, cursor);
-  if (!withFolder) return;
+  const cursorIsSpace = (
+    cursor === text.length ||
+    /\s/.test(text.charAt(cursor))
+  );
 
-  // TODO: Find a better way to protect tags which does not break the "insert" UX.
-  // ui.ta.setSelectionRange(start, end);
+  const {start, end, withFolder} = detectTag(text, cursor);
+  if (!withFolder) {
+    if (
+      mem.protectedTag &&
+      withInput &&
+      !cursorIsSpace
+    ) protectTag();
+
+    mem.protectedTag = "";
+    return;
+  }
+
+  const newTag = text.slice(start, end);
+  if (!mem.protectedTag) {
+    if (
+      withInput &&
+      !cursorIsSpace
+    ) protectTag();
+
+    mem.protectedTag = newTag;
+    return;
+  }
+
+  if (mem.protectedTag === newTag) {
+    return;
+  }
+
+  if (withInput) protectTag();
+
+  mem.protectedTag = newTag;
+};
+
+const protectTag = () => {
+  toast("Tag changed! Undo?", {
+    warn: true,
+  });
 };
 
 /// onInput

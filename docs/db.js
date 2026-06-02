@@ -47,22 +47,24 @@ export const mem = Object.seal({
   colors: null,
   mono: null,
   opIds: null,
+  pages: null,
   recentTags: null,
   salt: null,
   trap: null,
   zoom: null,
-  pages: null,
 
   /// Not saved
 
-  page: null,
-  textLength: 0,  // for `autoindent`
-  oldPages: null, // for `createOp`
-  screens: {},
+  isSecret: false,
   fileHandles: {},
   nonce: "",
+  oldPages: null, // for `createOp`
+  page: null,
+  protectedLength: 0,
+  protectedTag: "",
+  screens: {},
   searchQuery: "",
-  isSecret: false,
+  textLength: 0,  // for `autoindent`
 });
 
 /// onDbError, updateAppVersion

@@ -252,15 +252,12 @@ export const debug = (data) => {
 let toastTimerId = 0;
 let toastTimerIsShy = false;
 let pinnedMessage = "";
-let pinnedIsIcon = false;
 const pinned = "pinned";
 
 export const toast = (message, props) => {
-  const {isIcon, isPinned, isShy} = props ?? {};
-  if (isPinned) {
-    pinnedMessage = message;
-    pinnedIsIcon = isIcon;
-  }
+  const {isPinned, isShy, warn} = props ?? {};
+  if (warn) message = `⚠️ ${message}`;
+  if (isPinned) pinnedMessage = message;
 
   if (toastTimerId) {
     if (
@@ -276,7 +273,7 @@ export const toast = (message, props) => {
     toastTimerIsShy = false;
   }
 
-  setHeader(message, {isIcon});
+  setHeader(message);
 
   const cls = ui.header.classList;
   if (isPinned) {
@@ -289,20 +286,16 @@ export const toast = (message, props) => {
     toastTimerId = 0;
     toastTimerIsShy = false;
 
-    setHeader(pinnedMessage, {isIcon: pinnedIsIcon});
+    setHeader(pinnedMessage);
     cls.add(pinned);
-  }, 1000);
+  }, warn ? 2000 : 1000);
   toastTimerIsShy = isShy;
 };
 
 /// setHeader
 
-const setHeader = (message, props) => {
-  const {isIcon} = props ?? {};
-  if (isIcon) {
-    ui.header.textContent = "";
-    ui.header.appendChild(o(".icon", message));
-  } else ui.header.textContent = message;
+const setHeader = (message) => {
+  ui.header.textContent = message;
 };
 
 /// getInt
