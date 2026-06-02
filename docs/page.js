@@ -364,6 +364,8 @@ const onZen = () => {
       isZen ? "" : getHeader(mem.page),
       {isPinned: true},
     );
+
+    if (isZen) ui.ta.blur();
   });
 };
 
