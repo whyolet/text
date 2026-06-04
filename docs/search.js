@@ -55,14 +55,15 @@ export const initSearchUI = () => {
 /// onSearch
 
 export const onSearch = async () => {
-  const query = getQueryFromSel() || mem.searchQuery;
-  await openScreen(screenTypes.search, {query});
+  const query = getQueryFromSel();
+  if (query) mem.searchQuery = query;
+  await openScreen(screenTypes.search);
 };
 
 /// openSearch
 
-export const openSearch = (query) => {
-  ui.searchInput.value = query;
+export const openSearch = () => {
+  ui.searchInput.value = mem.searchQuery;
   ui.searchInput.focus();
   onSearchInput();
 };
@@ -92,7 +93,7 @@ const onSearchInput = () => {
     } else addHeader(items, "search_off", "Not found!");
 
     tags.sort();
-    for (const tag of tags) add(items, tag, query);
+    for (const tag of tags) add(items, tag);
 
   } else {
     items.push(o(".item header",
@@ -100,7 +101,7 @@ const onSearchInput = () => {
       o("span", "Recent"),
     ));
 
-    for (const tag of mem.recentTags) add(items, tag, query);
+    for (const tag of mem.recentTags) add(items, tag);
 
     const tags = [], dates = [];
     for (const page of Object.values(mem.pages)) {
@@ -114,13 +115,13 @@ const onSearchInput = () => {
     if (tags.length) {
       addHeader(items, "sort_by_alpha", "Tags");
       tags.sort();
-      for (const tag of tags) add(items, tag, query);
+      for (const tag of tags) add(items, tag);
     }
 
     if (dates.length) {
       addHeader(items, "calendar_month", "Dates");
       dates.sort();
-      for (const tag of dates) add(items, tag, query);
+      for (const tag of dates) add(items, tag);
     }
   }
 
@@ -141,15 +142,18 @@ const addHeader = (items, icon, text) => {
 
 /// add
 
-const add = (items, tag, query) => {
+const add = (items, tag) => {
   const el = o(".item button", tag);
   if (tag === mem.page.tag) {
-    onClick(el, () => history.back());
+    onClick(el, () => {
+      mem.fromSearch = true;
+      history.back();
+    });
   } else onClick(el, () => {
+    mem.fromSearch = true;
     openScreen(screenTypes.page, {
       replace: true,
       tag,
-      query,
     });
   });
   items.push(el);

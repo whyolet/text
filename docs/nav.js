@@ -148,21 +148,23 @@ const onSetState = async (event) => {
   info.closed = true;
 
   if (screen.type === screenTypes.page) {
-    const {tag, query} = screen.props;
+    const {tag} = screen.props;
     await openPageByTag(tag);
 
-    if (query) {
-      // Find only once: when page is opened from Search, not when it is opened later on Back.
-      screen.props.query = "";
-
-      showFindForm({withoutChanges: true});
-      ui.findInput.value = query;
-      Object.assign(mem.page, zeroCursor);
-      await onFindNext();
+    if (mem.fromSearch) {
+      mem.fromSearch = false;
+      if (mem.searchQuery) {
+        showFindForm({
+          withoutChanges: true,
+        });
+        ui.findInput.value = mem.searchQuery;
+        Object.assign(mem.page, zeroCursor);
+        await onFindNext();
+      }
     }
 
   } else if (screen.type === screenTypes.search) {
-    openSearch(screen.props.query);
+    openSearch();
 
   } else if (screen.type === screenTypes.info) {
     const {header, items, props} = screen.props;

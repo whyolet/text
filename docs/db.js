@@ -57,6 +57,7 @@ export const mem = Object.seal({
 
   isSecret: false,
   fileHandles: {},
+  fromSearch: false,
   nonce: "",
   oldPages: null, // for `createOp`
   page: null,
