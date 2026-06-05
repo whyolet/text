@@ -17,7 +17,7 @@
  */
 
 import {mem} from "./db.js";
-import {getSel} from "./sel.js";
+import {getSel, setSel} from "./sel.js";
 import {save} from "./page.js";
 import {ui} from "./ui.js";
 
@@ -104,7 +104,7 @@ export const onIndent = async () => {
 
   ui.ta.setRangeText(result, wholeStart, wholeEnd);
 
-  ui.ta.setSelectionRange(
+  setSel(
     start + firstAdd.length,
     end + (result.length - part.length),
   );
@@ -143,7 +143,7 @@ export const onDedent = async () => {
 
   ui.ta.setRangeText(result, wholeStart, wholeEnd);
 
-  ui.ta.setSelectionRange(
+  setSel(
     Math.max(wholeStart, start - firstDel.length),
     Math.max(wholeStart, end - (part.length - result.length)),
   );

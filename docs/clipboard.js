@@ -17,7 +17,7 @@
  */
 
 import {mem} from "./db.js";
-import {getSel} from "./sel.js";
+import {getSel, setSel} from "./sel.js";
 import {save} from "./page.js";
 import {ui} from "./ui.js";
 
@@ -44,7 +44,7 @@ export const onCopy = async () => {
   });
 
   await navigator.clipboard.writeText(part);
-  input.setSelectionRange(start, end);
+  setSel(start, end, {input});
 };
 
 /// onPaste

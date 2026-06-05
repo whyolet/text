@@ -17,6 +17,7 @@
  */
 
 import {hideAtticForms} from "./nav.js";
+import {setSel} from "./sel.js";
 import {getInt, ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, ui} from "./ui.js";
 
 let recentLineNumber = null;
@@ -112,7 +113,7 @@ export const hideLineForm = () => {
   if (lineNumber === null) return;
 
   const lineEnd = getLineEnd(lineNumber);
-  ui.ta.setSelectionRange(lineEnd, lineEnd);
+  setSel(lineEnd);
 };
 
 /// getLineEnd

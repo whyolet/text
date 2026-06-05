@@ -19,8 +19,8 @@
 import {mem} from "./db.js";
 import {hideAtticForms} from "./nav.js";
 import {getLineEnd, getLineNumbers} from "./line.js";
-import {getQueryFromSel} from "./sel.js";
 import {save} from "./page.js";
+import {getQueryFromSel, setSel} from "./sel.js";
 import {ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, toast, ui} from "./ui.js";
 
 /// initFindUI
@@ -159,7 +159,7 @@ const onFindForward = async (forward) => {
     return false;
   }
 
-  ui.ta.setSelectionRange(found, found + lowerQuery.length);
+  setSel(found, found + lowerQuery.length);
   await save();
   return true;
 };
@@ -196,8 +196,7 @@ const onReplaceAll = async () => {
   const {lineNumber} = getLineNumbers();
   ui.ta.value = newText;
   const lineEnd = getLineEnd(lineNumber);
-  ui.ta.focus();
-  ui.ta.setSelectionRange(lineEnd, lineEnd);
+  setSel(lineEnd);
 
   await save();
   toast("Replaced all");

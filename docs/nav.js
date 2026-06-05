@@ -29,7 +29,7 @@ import {getPersisted, tryPersist} from "./local.js";
 import {hideMenuForm} from "./menu.js";
 import {getDone, getPage, openPage, openPageByTag, save, splitDoneText, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
-import {getSel, strikes} from "./sel.js";
+import {getSel, setSel, strikes} from "./sel.js";
 import {getDateInput, debounce, hide, o, on, getRestartButton, show, showBanner, showDateInput, toast, ui} from "./ui.js";
 
 export const folder = "📂";
@@ -371,7 +371,7 @@ will not be moved.`
 
 export const onMoveToDate = () => {
   const {start, end} = getSel({wholeLines: true});
-  ui.ta.setSelectionRange(start, end);
+  setSel(start, end);
   showDateInput(ui.moveToDateInput);
 };
 

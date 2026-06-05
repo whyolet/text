@@ -22,6 +22,7 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getNow, showOrHideOverdue, switchDb} from "./nav.js";
 import {getPage, openPage, save, savePages} from "./page.js";
+import {setSel} from "./sel.js";
 import {hide, o, on, show, toast, ui} from "./ui.js";
 
 /// onPageExport
@@ -195,7 +196,7 @@ export const onPageImport = async () => {
   if (file === null) return;
 
   ui.ta.value = await file.text();
-  ui.ta.setSelectionRange(0, 0);
+  setSel(0);
   ui.ta.scrollTop = 0;
   await save();
   toast("Loaded " + file.name);

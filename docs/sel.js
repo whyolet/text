@@ -21,6 +21,19 @@ import {mem} from "./db.js";
 import {save} from "./page.js";
 import {toast, ui} from "./ui.js";
 
+/// setSel
+
+export const setSel = (start, end, props) => {
+  let {input} = props ?? {};
+  input ??= ui.ta;
+
+  input.setSelectionRange(start, end ?? start);
+
+  // Workaround for some browsers to always scroll to selection:
+  input.blur();
+  input.focus();
+};
+
 /// getSel
 
 export const getSel = (props) => {
@@ -123,7 +136,7 @@ export const onErase = async () => {
 export const onDuplicate = async () => {
   const {start, end, part} = getSel({wholeLines: true});
   ui.ta.setRangeText("\n" + part, end, end);
-  ui.ta.setSelectionRange(
+  setSel(
     end + 1,
     end + 1 + part.length,
   );
@@ -135,7 +148,7 @@ export const onDuplicate = async () => {
 export const onMoveUp = async () => {
   const {start, end, part} = getSel({wholeLines: true});
   if (!start) {
-    ui.ta.setSelectionRange(0, end);
+    setSel(0, end);
     return toast("Start of text reached!");
   }
 
@@ -154,7 +167,7 @@ export const onMoveUp = async () => {
 
   ui.ta.setRangeText(result, prevStart, end);
 
-  ui.ta.setSelectionRange(
+  setSel(
     prevStart,
     prevStart + (end - start),
   );
@@ -167,7 +180,7 @@ export const onMoveDown = async () => {
   const {start, end, part} = getSel({wholeLines: true});
 
   if (end === text.length) {
-    ui.ta.setSelectionRange(start, end);
+    setSel(start, end);
     return toast("End of text reached!");
   }
 
@@ -187,7 +200,7 @@ export const onMoveDown = async () => {
 
   const added = nextPart.length + newline.length;
   ui.ta.setRangeText(result, start, end + added);
-  ui.ta.setSelectionRange(start + added, end + added);
+  setSel(start + added, end + added);
   await save();
 };
 
@@ -195,7 +208,7 @@ export const onMoveDown = async () => {
 
 export const onSelAll = async () => {
   const input = ui.focusedInput || ui.ta;
-  input.setSelectionRange(0, input.value.length);
+  setSel(0, input.value.length, {input});
   await save();
 }
 
@@ -216,7 +229,7 @@ export const onSelLine = async () => {
       withNewline: true,
     });
 
-    input.setSelectionRange(start, end);
+    setSel(start, end, {input});
   }
 
   // No `else` here, just a scoped block to use simple var names.
@@ -228,7 +241,7 @@ export const onSelLine = async () => {
       wholeLines: true,
     });
 
-    input.setSelectionRange(start, end);
+    setSel(start, end, {input});
     if (isTa) await save();
   }
 };
