@@ -57,7 +57,7 @@ export const autoindent = () => {
   .slice(0, i)
   .match(/([^\r\n]*)([\r\n]*)$/);
 
-  const indents = templateLine.match(/^[\t ]*/)[0];
+  const indents = templateLine.match(/^[\t ]*(?:● )?/)[0];
 
   if (templateLine === indents) {
     // Move indents from template line to current line, to keep blank lines clean.

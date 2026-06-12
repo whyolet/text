@@ -30,7 +30,7 @@ import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
 import {detectTag, folder, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
-import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onSelLine, onStrike, setSel, strikes} from "./sel.js";
+import {onDuplicate, onErase, onList, onMoveDown, onMoveUp, onSelAll, onSelLine, onStrike, setSel, strikes} from "./sel.js";
 import {anim, debounce, enter, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
@@ -42,12 +42,6 @@ export const initPageUI = () => {
 
   ui.saveFile = ib("file_save", "s", onSaveFile);
   hide(ui.saveFile);
-
-  ui.zenModeIcons = new Map([
-    [false, "fullscreen"],
-    [true, "visibility"],
-  ]);
-  ui.zenMode = ib(ui.zenModeIcons.get(false), "q", onZen);
 
   ui.header = o(".header");
   onClick(ui.header, onHeader);
@@ -69,7 +63,7 @@ export const initPageUI = () => {
     ib("menu", "m", onMenuForm),
     ui.saveFile,
     ui.moveOverdue,
-    ui.zenMode,
+    ib("fullscreen", "q", onZen),
     
     ui.header,
 
@@ -93,12 +87,14 @@ export const initPageUI = () => {
     /// bottom
 
     ib("backspace", "e", onErase, {focused: true}),
+    ib("format_strikethrough", "k", onStrike, {focused: true}),  // striKe through
     ib("variables", "l", onSelLine, {focused: true}),
-    ib("remove", "k", onStrike, {focused: true}),  // striKe through
-    ib("add", "w", onDuplicate),
+    ib("exposure_plus_1", "w", onDuplicate),
 
     ib("format_indent_decrease", "I", onDedent),  // Ctrl+Shift+I
     ib("format_indent_increase", "i", onIndent),  // Ctrl+I
+
+    ib("list", "L", onList),  // Ctrl+Shift+L
 
     ib("undo", "z", onUndo),  // Ctrl+Z
     ib("redo", "Z", onRedo),  // Ctrl+Shift+Z
@@ -352,7 +348,6 @@ const onZen = () => {
 
   anim(() => {
     const isZen = ui.frame.classList.toggle(zenMode);
-    ui.zenMode.textContent = ui.zenModeIcons.get(isZen);
 
     toast(
       isZen ? "" : getHeader(mem.page),

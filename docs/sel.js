@@ -91,28 +91,44 @@ export const getQueryFromSel = () => {
   return part;
 };
 
-/// strike
+/// onList, onStrike
 
+const bullet = "●";
 const strike = "─";
-// NOTE: This char is also used in few precompiled /.../ regexes directly.
+// NOTE: These chars are also used in few precompiled /.../ regexes directly.
 
+const bulletSpace = bullet + " ";
 export const strikes = strike + strike;
-const newline_striker = strikes + "$&" + strikes;
 
-/// onStrike
+export const onList = async () => await toggleMarkers(
+  bullet,
+  bulletSpace,
+  `$1${bullet} $2`,
+);
 
-export const onStrike = async () => {
+export const onStrike = async () => await toggleMarkers(
+  strike,
+  strikes,
+  `$1${strikes}$2${strikes}`,
+);
+
+const toggleMarkers = async (
+  marker,
+  markers,
+  replacement,
+) => {
   const {start, end, part, input, isTa} = getSel({
     focused: true,
     withoutIndent: true,
   });
 
-  const result = part.includes(strike) ?
-    part.replaceAll(strike, "")
-    : (
-      strikes +
-      part.replaceAll(/[\r\n]+/g, newline_striker) +
-      strikes
+  const result = part.includes(marker) ?
+    part
+      .replaceAll(markers, "")
+      .replaceAll(marker, "")
+    : part.replaceAll(
+      /([\t ]*)([^\r\n]+)/g,
+      replacement,
     );
 
   input.setRangeText(result, start, end, "select");
