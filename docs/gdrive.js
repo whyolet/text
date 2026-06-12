@@ -21,7 +21,7 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getExportedBytes, importBackup} from "./file.js";
 import {info, openInfoScreen} from "./info.js";
-import {o, toast, ui} from "./ui.js";
+import {o, toast, ui, warn} from "./ui.js";
 
 const scope = "https://www.googleapis.com/auth/drive.file";
 const syncedFileName = "whyolet-text.db";
@@ -30,7 +30,8 @@ const syncedFileName = "whyolet-text.db";
 
 export const onGDriveSync = async () => {
   if (mem.isSecret) {
-    alert(`Syncing this secret world
+    await warn(`
+Syncing this secret world
 with the "${syncedFileName}" file
 at your Google Drive
 would break the privacy!
@@ -38,7 +39,8 @@ would break the privacy!
 Please ⬇️Export the encrypted DB file,
 move it privately to another device,
 ⬆️Import it there to the same secret world,
-rename and delete the file.`);
+rename and delete the file.
+    `);
     return;
   }
 
@@ -62,7 +64,7 @@ rename and delete the file.`);
   const popup = open(url, "_blank", `popup,left=${left},top=${top},width=${width},height=${height}`);
 
   if (!popup) {
-    alert("Please allow popup!");
+    await warn("Please allow popup!");
     mem.nonce = "";
     return;
   }
@@ -103,7 +105,7 @@ export const onRedirect = async (hash) => {
   const {files} = await response.json();
   if (info.closed) return;
 
-  if (files.length > 1) return syncFailed(
+  if (files.length > 1) return await syncFailed(
 `there are multiple files
 named "${syncedFileName}"
 in your Google Drive.`,
@@ -129,7 +131,7 @@ in your Google Drive.`,
 export const getAccessToken = async (hash) => {
   const params = Object.fromEntries(new URLSearchParams(hash.slice(1)));
 
-  if (params.error) return syncFailed(params.error);
+  if (params.error) return await syncFailed(params.error);
 
   if (params.scope !== scope) return;
   // No error: not GDrive sync.
@@ -137,7 +139,7 @@ export const getAccessToken = async (hash) => {
   if (
     params.state !== mem.nonce ||
     !mem.nonce
-  ) return syncFailed("outdated or incorrect link.");
+  ) return await syncFailed("outdated or incorrect link.");
 
   mem.nonce = "";
   return params.access_token;
@@ -145,16 +147,16 @@ export const getAccessToken = async (hash) => {
 
 /// syncFailed
 
-const syncFailed = (reason, solution) => {
+const syncFailed = async (reason, solution) => {
   if (solution) solution += `
 and `;
 
-  if (reason && !info.closed) alert(
-`Sync failed:
+  if (reason && !info.closed) await warn(`
+Sync failed:
 ${reason}
 
-Please ${solution || ""}try again.`,
-  );
+Please ${solution || ""}try again.
+  `);
 
   if (!info.closed) history.back();
   return false;

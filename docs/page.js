@@ -31,7 +31,7 @@ import {onMenuForm} from "./menu.js";
 import {detectTag, folder, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {onDuplicate, onErase, onMoveDown, onMoveUp, onSelAll, onSelLine, onStrike, setSel, strikes} from "./sel.js";
-import {anim, debounce, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
+import {anim, debounce, enter, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
 /// initPageUI
@@ -261,7 +261,7 @@ const onHeader = async () => {
     return;
   }
 
-  const answer = prompt("Rename to:", oldTag);
+  const answer = await enter("Rename to:", oldTag);
   if (answer === null) return;
 
   const newTag = answer.replaceAll(/[─\s📂]/gu, "");

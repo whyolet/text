@@ -21,7 +21,7 @@ import {mem} from "./db.js";
 import {hideAtticForms} from "./nav.js";
 import {save} from "./page.js";
 import {getSel} from "./sel.js";
-import {getInt, ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, toast, ui} from "./ui.js";
+import {choose, enter, getInt, ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, toast, ui} from "./ui.js";
 
 /// initFontUI
 
@@ -84,46 +84,24 @@ export const defaultColors = "325-547-769-bad-dcf";
 
 export const onColors = async () => {
   const options = `
-Customize...,
 Dark Whyolet,${defaultColors}
 Light Whyolet,fff-ccf-98b-547-639
 Darcula,2b2b2b-323232-606366-a9b7c6-ffc66d
 Dracula,282a36-44475a-bd93f9-f8f8f2-ffb86c
 Green Tody,fff-cdffcd-4a4-333-000
+Customize...,
 `
     .trim()
     .split("\n")
     .map((line) => {
-      const [name, value] = line.split(",");
-      return {name, value};
+      const [text, value] = line.split(",");
+      return {text, value};
     });
 
-  const lines = options.map(
-    (option, index) =>
-    `${index}. ${option.name}`
-  );
-  lines.push(lines.shift());
-
-  const answer = prompt(`
-Colors:
-${lines.join("\n")}
-
-Enter the number:
-`.trim());
-
+  const answer = await choose("Colors", ...options);
   if (answer === null) return;
 
-  const index = parseInt(answer, 10);
-  const valid = Array.from(options.keys());
-  if (!valid.includes(index)) {
-    toast(`From 0 to ${options.length - 1}!`);
-    return;
-  }
-
-  const colors = index ?
-    options[index].value
-    : inputColors();
-
+  const colors = answer || await inputColors();
   if (!colors) return;
 
   mem.colors = colors;
@@ -133,7 +111,7 @@ Enter the number:
 
 /// inputColors
 
-const inputColors = () => {
+const inputColors = async () => {
   const state = {
     answer: mem.colors,
     error: "",
@@ -141,13 +119,13 @@ const inputColors = () => {
   };
 
   while (!state.stop) {
-    validateColors(state);
+    await validateColors(state);
   }
 
   return state.answer;
 };
 
-const validateColors = (state) => {
+const validateColors = async (state) => {
   const error = state.error ?
     "Error: " + state.error
     : "";
@@ -166,9 +144,9 @@ Mix Red+Green+Blue: RGB or RRGGBB
 Brightest Red: f00 or ff0000
 Teal (middle Green+Blue): 008080
 Darkest Black: 000 or 000000
-`.trim();
+`;
 
-  state.answer = prompt(help, state.answer);
+  state.answer = await enter(help, state.answer);
 
   if (state.answer === null) {
     state.stop = true;
@@ -211,8 +189,8 @@ but it has ${color.length} digit${s}.`;
       if (!hexDigits.includes(digit)) {
         state.error = `
 We need color "${color}"
-to have hex digits only:
-${hexDigits}
+to have hex digits only
+(${hexDigits})
 but it has digit "${digit}".`;
         return;
       }

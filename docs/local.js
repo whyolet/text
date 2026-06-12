@@ -20,7 +20,7 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {openInfoScreen} from "./info.js";
 import {showMenuForm} from "./menu.js";
-import {getRestartButton, o, onClick, showBanner} from "./ui.js";
+import {getRestartButton, enter, o, onClick, say, showBanner, warn} from "./ui.js";
 
 /// isPersistSupported
 
@@ -120,44 +120,44 @@ export const onLocalData = async () => {
 
 const onRequestPerm = async () => {
   if (await tryPersist()) {
-    onSuccess();
+    await onSuccess();
     return;
   }
 
   if (!isPersistSupported) {
-    alert("Persistence is not supported, get a new browser!");
+    await warn("Persistence is not supported, get a new browser!");
     return;
   }
 
   if (!("Notification" in window)) {
-    alert("Notification is not supported, get a new browser!");
+    await warn("Notification is not supported, get a new browser!");
     return;
   }
 
   if (Notification.permission === "granted") {
-    alert("Notification was allowed already, but it does not help. Try another browser.");
+    await warn("Notification was allowed already, but it does not help. Try another browser.");
     return;
   }
 
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
-    alert("Notification is NOT allowed! Please try again.");
+    await warn("Notification is NOT allowed! Please try again.");
     return;
   }
 
   if (!await tryPersist()) {
-    alert("Notification is allowed, but it does not help. Try another browser.");
+    await warn("Notification is allowed, but it does not help. Try another browser.");
     return;
   }
 
-  onSuccess();
+  await onSuccess();
 };
 
 /// onSuccess
 
-const onSuccess = () => {
+const onSuccess = async () => {
   showMenuForm();  // Update icon.
-  alert("Success!");
+  await say("Success!");
   history.back();
   setTimeout(onLocalData, 200);
 };
@@ -165,11 +165,13 @@ const onSuccess = () => {
 /// onDeleteLocalData
 
 const onDeleteLocalData = async () => {
-  const answer = prompt('Do you want to delete all your data from this app on this device? Type "yes" to confirm.');
+  const answer = await enter('Do you want to delete all your data from this app on this device? Type "yes" to confirm.');
 
   if (!answer || answer.trim().toLowerCase() !== "yes") {
-    alert(`Deletion was canceled.
-Your data is still here.`);
+    await say(`
+Deletion was canceled.
+Your data is still here.
+    `);
     return;
   }
 
@@ -177,14 +179,12 @@ Your data is still here.`);
 
   showBanner({},
     "Your data is deleted",
-    o("",
-      "You've successfully deleted your data",
-      o("br"),
-      "from this app on this device.",
-      o("br"),
-      o("br"),
-      "You can start from scratch now.",
-    ),
+    o("", `
+You've successfully deleted your data
+from this app on this device.
+
+You can start from scratch now.
+    `),
     getRestartButton(),
   );
 };
@@ -192,7 +192,7 @@ Your data is still here.`);
 /// onSetTrap
 
 const onSetTrap = async () => {
-  const answer = prompt('Do you want to silently delete all other secret worlds in this app on this device when this secret world is opened again? Type "yes" to confirm.');
+  const answer = await enter('Do you want to silently delete all other secret worlds in this app on this device when this secret world is opened again? Type "yes" to confirm.');
 
   const yes = answer?.trim().toLowerCase() === "yes";
 
@@ -201,7 +201,7 @@ const onSetTrap = async () => {
 
   await db.saveConf(db.conf.trap);
 
-  alert("The trap is " + (
+  await say("The trap is " + (
     yes ? "enabled" : "disabled"
   ));
 };

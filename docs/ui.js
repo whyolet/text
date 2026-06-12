@@ -20,6 +20,7 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {unidle} from "./nav.js";
 import {save} from "./page.js";
+import {setSel} from "./sel.js";
 
 /// o
 
@@ -29,7 +30,7 @@ import {save} from "./page.js";
  *   o("tag", {attr: value}, "text"),
  *   o(".class"),
  *   o("", {attr: cond ? val : null},
- *     cond ? o("br") : null,
+ *     cond ? o("input") : null,
  *   ),
  * )
  *
@@ -37,6 +38,7 @@ import {save} from "./page.js";
  * Array of kids is flattened - for reusable sub-arrays.
  * Non-`Node` objects become attrs.
  * Primitives like `string` become text nodes.
+ * Multiline strings are trimmed with inner newlines preserved, and wrapped to scrollable `div`.
  * Default `o()` has `div` tag, no class, no attrs, no kids.
  */
 
@@ -63,6 +65,15 @@ export const o = (tag_cls, ...kids) => {
       continue;
     }
 
+    if (
+      typeof kid === "string" &&
+      kid.includes("\n")
+    ) {
+      const span = o("div.br");
+      span.appendChild(document.createTextNode(kid.trim()));
+      el.appendChild(span);
+      continue;
+    }
     el.appendChild(document.createTextNode(kid));
   }
 
@@ -79,6 +90,8 @@ export const ui = {
 };
 
 ui.supportHref = `mailto:${ui.supportEmail}?subject=Whyolet%20Text`;
+
+const addWarn = (message) => `⚠️ ${message.trim()}`;
 
 /// on, onClick
 
@@ -241,12 +254,6 @@ export const debounce = (timerName, millis, action) => {
   timerIds[timerName] = setTimeout(action, millis);
 };
 
-/// debug
-
-export const debug = (data) => {
-  alert(JSON.stringify(data));
-};
-
 /// toast
 
 let toastTimerId = 0;
@@ -256,7 +263,7 @@ const pinned = "pinned";
 
 export const toast = (message, props) => {
   const {isPinned, isShy, warn} = props ?? {};
-  if (warn) message = `⚠️ ${message}`;
+  if (warn) message = addWarn(message);
   if (isPinned) pinnedMessage = message;
 
   if (toastTimerId) {
@@ -297,6 +304,150 @@ export const toast = (message, props) => {
 const setHeader = (message) => {
   ui.header.textContent = message;
 };
+
+/// showOverlay, hideOverlay
+
+export const showOverlay = (...items) => {
+  ui.overlay = o(".overlay", ...items);
+  ui.body.appendChild(ui.overlay);
+};
+
+export const hideOverlay = () => {
+  if (!ui.overlay) return;
+
+  ui.body.removeChild(ui.overlay);
+  ui.overlay = null;
+};
+
+/// dialog, input, btns
+
+let reply;
+
+export const dialog = async (...items) => {
+  const result = await new Promise(done => {
+    reply = done;
+    showOverlay(o(".dialog", ...items));
+
+    if (!ui.dialogInput) {
+      ui.focusedInput?.blur();
+      return;
+    }
+
+    setSel(
+      ui.dialogInput.value.length,
+      null,
+      {input: ui.dialogInput},
+    );
+  });
+
+  reply = ui.dialogInput = null;
+  hideOverlay();
+  return result;
+};
+
+export const input = (defaultValue, props) => {
+  const {secret} = props ?? {};
+
+  ui.dialogInput = o("input", {
+    type: secret ? "password" : "text",
+    value: defaultValue ?? "",
+  });
+
+  on(ui.dialogInput, "keydown", (e) => {
+    if (e.key === "Enter") {
+      reply(ui.dialogInput.value);
+    } else if (e.key === "Escape") {
+      reply(null);
+    }
+  });
+
+  if (!secret) return ui.dialogInput;
+
+  let visible = false;
+
+  const toggle = ib("visibility", "", () => {
+    visible = !visible;
+    const {selectionStart, selectionEnd} = ui.dialogInput;
+    ui.dialogInput.type = visible ? "text" : "password";
+    setSel(
+      selectionStart,
+      selectionEnd,
+      {input: ui.dialogInput},
+    );
+    toggle.textContent = visible ? "visibility_off" : "visibility";
+  }, {focused: true});
+
+  return o(".secret",
+    ui.dialogInput,
+    toggle,
+  );
+};
+
+on(ui.body, "keydown", (e) => {
+  if (reply && e.key === "Escape") {
+    reply(null);
+  }
+});
+
+export const btn = (text, getResult) => {
+  const el = o(".rounded button", text);
+  onClick(el, () => reply(getResult()));
+  return el;
+};
+
+export const okBtn = () => btn("OK", () => ui.dialogInput?.value ?? true);
+
+export const cancelBtn = () => btn("Cancel", () => null);
+
+export const btns = (...buttons) => o(".buttons", ...buttons);
+
+export const ok = () => btns(
+  okBtn(),
+);
+
+export const okCancel = () => btns(
+  cancelBtn(),
+  okBtn(),
+);
+
+/// say, warn, debug
+
+export const say = async (...items) => await dialog(...items, ok());
+
+export const warn = async (message) => await say(addWarn(message));
+
+export const debug = async (data) => await say(JSON.stringify(data));
+
+/// ask, choose
+
+export const ask = async (...items) => !!await dialog(...items, okCancel());
+
+export const choose = async (header, ...options) => {
+  const items = [];
+  for (const option of options) {
+    const item = o(".item button", option.text);
+    const value = option.value;
+    onClick(item, () => reply(value));
+    items.push(item);
+  }
+
+  return await dialog(
+    o(".header",
+      header || "Make a choice:",
+    ),
+    o(".choose",
+      o(".items", ...items),
+    ),
+  );
+};
+
+/// enter
+
+export const enter = async (message, defaultValue, props) => await dialog(
+  message || null,
+  input(defaultValue || "", props),
+  okCancel(),
+);
 
 /// getInt
 

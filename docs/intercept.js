@@ -24,6 +24,7 @@ if (location.hash.includes("state")) {
     });
   } else {
     location.hash = "";
+    // Don't replace `alert` with `warn` here as this module should not import others.
     alert(`Please don't
 "Open in browser":
 it breaks the sync!`);

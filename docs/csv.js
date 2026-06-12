@@ -19,6 +19,7 @@
 import {mem} from "./db.js";
 import {getNow} from "./nav.js";
 import {getDone, zeroCursor} from "./page.js";
+import {warn} from "./ui.js";
 
 /// keys
 
@@ -61,7 +62,7 @@ export const getCSV = () => {
 
 /// getPagesFromCSV
 
-export const getPagesFromCSV = (data) => {
+export const getPagesFromCSV = async (data) => {
   const text = (
     data.startsWith('\uFEFF')
     ? data.slice(1)
@@ -106,15 +107,14 @@ export const getPagesFromCSV = (data) => {
   if (row.length) rows.push(row);
 
   if (!rows.length) {
-    alert("File is empty!");
+    await warn("File is empty!");
     return null;
   }
 
   const importedKeys = rows.shift();
   for (const key of requiredKeys) {
     if (!importedKeys.includes(key)) {
-      alert(`"${key}" column
-is not found!`);
+      await warn(`"${key}" column is not found!`);
       return null;
     }
   }
@@ -127,7 +127,7 @@ is not found!`);
   const pages = [];
   for (const row of rows) {
     if (row.length !== importedKeys.length) {
-      alert(`Failed to match ${importedKeys.length} columns
+      await warn(`Failed to match ${importedKeys.length} columns
 ${JSON.stringify(importedKeys)}
 and a row with ${row.length} cells
 ${JSON.stringify(row)}`);

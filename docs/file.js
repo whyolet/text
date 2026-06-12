@@ -23,7 +23,7 @@ import {mem} from "./db.js";
 import {getNow, showOrHideOverdue, switchDb} from "./nav.js";
 import {getPage, openPage, save, savePages} from "./page.js";
 import {setSel} from "./sel.js";
-import {hide, o, on, show, toast, ui} from "./ui.js";
+import {choose, enter, hide, o, on, say, show, toast, ui} from "./ui.js";
 
 /// onPageExport
 
@@ -224,7 +224,7 @@ export const importBackup = async (data, props) => {
 
   const importedPages = (
     isCSV
-    ? getPagesFromCSV(data)
+    ? await getPagesFromCSV(data)
     : await decrypt(
       new Bytes(data),
       {isImport: true},
@@ -232,9 +232,20 @@ export const importBackup = async (data, props) => {
   );
   if (importedPages === null) return false;
 
-  const safe = isSync ? true
-    : confirm(`Do you want to keep changes
-made after this backup?`);
+  let keepChanges;
+  if (isSync) {
+    keepChanges = true;
+  } else {
+    const answer = await choose(
+      `Importing ${importedPages.length} page${importedPages.length === 1 ? "" : "s"}, choose:`,
+      {value: true, text: "Sync (keep recent changes)"},
+      {value: false, text: "Restore (overwrite recent changes)"},
+      {value: null, text: `Cancel (do nothing)`},
+    );
+    if (answer === null) return false;
+
+    keepChanges = answer;
+  }
 
   const unsavedPages = [];
   let needReopenPage = false;
@@ -259,7 +270,7 @@ made after this backup?`);
         importedPage.edited
       ) {
         outdated++;
-        if (safe) continue;
+        if (keepChanges) continue;
       }
 
       updated++;
@@ -282,13 +293,13 @@ made after this backup?`);
   showOrHideOverdue();
   if (isSync) return true;
 
-  alert(
-`Created pages: ${created}
+  await say(`
+Created pages: ${created}
 Updated pages: ${updated}
-${safe ? "\nSkipped" : "…including"} pages changed after backup: ${outdated
-}${safe ? "" : "\n"}
-Skipped unchanged pages: ${unchanged}`,
-  );
+${keepChanges ? "\nSkipped" : "…including"} pages changed after backup: ${outdated
+}${keepChanges ? "" : "\n"}
+Skipped unchanged pages: ${unchanged}
+  `);
 
   return true;
 };
@@ -314,19 +325,32 @@ const getUploaded = async () => {
 
 /// onSetExportPassphrase
 
-export const onSetExportPassphrase = () => {
-  const newValue = prompt(`A passphrase (few words)
-for backup and sync files:`);
+export const onSetExportPassphrase = async () => {
+  const newValue = await enter(`
+A passphrase (few words)
+for backup and sync files:
+  `, "", {secret: true});
   if (newValue === null) return;
 
-  if (newValue.startsWith(".")) {
-    switchDb(newValue.slice(1));
-    // It calls `setExportKey1` too.
-  } else setExportKey1(newValue);
+  const hasDot = newValue.startsWith(".");
 
-  alert(`Backup and sync files
+    await say(`
+Backup and sync files
 will be encrypted and decrypted
 using this passphrase
 until you set a new one
-or close this app.`);
+or close this app.
+` + (hasDot ? `
+The first dot in this passphrase
+opens the door...
+` : "")
+  );
+
+  if (hasDot) {
+    await switchDb(newValue.slice(1));
+    // It calls `setExportKey1` too.
+    return;
+  }
+
+  await setExportKey1(newValue);
 };

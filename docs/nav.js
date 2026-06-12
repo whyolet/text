@@ -30,7 +30,7 @@ import {hideMenuForm} from "./menu.js";
 import {getDone, getPage, openPage, openPageByTag, save, splitDoneText, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
 import {getSel, setSel, strikes} from "./sel.js";
-import {getDateInput, debounce, hide, o, on, getRestartButton, show, showBanner, showDateInput, toast, ui} from "./ui.js";
+import {ask, enter, getDateInput, debounce, hide, hideOverlay, o, on, getRestartButton, say, show, showBanner, showDateInput, showOverlay, toast, ui} from "./ui.js";
 
 export const folder = "📂";
 const folderCodePoint = folder.codePointAt(0);
@@ -70,12 +70,12 @@ export const getAppLock = async () => {
 
   showBanner({},
     "Paused!",
-    o("",
-      "You've opened " + ui.appName, o("br"),
-      "in another tab.", o("br"),
-      o("br"),
-      "Please close it here or:"
-    ),
+    o("", `
+You've opened ${ui.appName}
+in another tab.
+
+Please close it here or:
+    `),
     getRestartButton(),
   );
 };
@@ -218,9 +218,14 @@ export const onOpenTag = async () => {
   let tag = folderAndTag.replaceAll(folder, "");
 
   if (!tag) {
-    tag = prompt("Enter new tag:");
+    tag = await enter("Enter new tag:");
+    if (tag === null) return;
+
     tag = tag?.trim();
-    if (!tag) return;
+    if (!tag) {
+      toast("It's empty!", {warn: true});
+      return;
+    }
 
     insert += tag;
   }
@@ -311,12 +316,12 @@ export const onMoveOverdue = async () => {
   if (mem.page.tag !== today) {
     // Midnight happened.
     await openScreen(screenTypes.page, {tag: today});
-    alert("Welcome to a new day!");
+    await say("Welcome to a new day!");
     await onMoveOverdue();
     return;
   }
 
-  if (!confirm(
+  if (!await ask(
 `Move overdue to today?
 
 ${strikes}Done lines${strikes}
@@ -410,6 +415,7 @@ const onFocus = (event) => {
   const el = event.target;
   if ([
     ui.ta,
+    ui.dialogInput,
     ui.findInput,
     ui.replaceInput,
   ].includes(el)) ui.focusedInput = el;
@@ -419,19 +425,23 @@ const onFocus = (event) => {
 /// switchDb
 
 export const switchDb = async (passphrase) => {
-  await openInfoScreen("Multiverse", [
-    "The dot opens the door to another world.",
-    "Please wait...",
-  ], {withoutClose: true});
+  showOverlay(`
+Opening the door
+to another world
+in the Multiverse...
+  `);
 
-  hideAtticForms();
   db.close();
+  hideAtticForms();
 
+  // Give time for attic animation
+  // and to read the message.
   setTimeout(async () => {
     await db.load(passphrase);
     applyFont();
     await openScreen(screenTypes.page, {tag: getToday()});
-  }, 2000);
+    hideOverlay();
+  }, 1500);
 };
 
 /// idle

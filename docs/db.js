@@ -18,7 +18,7 @@
 
 import {decrypt, encrypt, getDbName, getSalt, setDbKey, setExportKey1} from "./crypto.js";
 import {defaultColors} from "./font.js";
-import {o, showBanner} from "./ui.js";
+import {o, showBanner, warn} from "./ui.js";
 import {createOp, getRevertedOp} from "./undo.js";
 
 /// idb, stores, conf, mem
@@ -473,7 +473,7 @@ export const deleteLocalData = async () => {
   });
 
   if (!dbListIsSupported) {
-    alert(`Your browser fails to list all databases.
+    await warn(`Your browser fails to list all databases.
 Current database is deleted.
 
 For full cleanup please:
