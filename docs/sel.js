@@ -91,47 +91,36 @@ export const getQueryFromSel = () => {
   return part;
 };
 
-/// onList, onStrike
+/// onCheck, onList
 
-const bullet = "●";
-const strike = "─";
+export const check = "✓";
+export const bullet = "●";
 // NOTE: These chars are also used in few precompiled /.../ regexes directly.
+// Regexps with global/sticky flags have state, so they are used inline without const.
 
-const bulletSpace = bullet + " ";
-export const strikes = strike + strike;
+export const doneTester = /^[\t ]*✓ /;
 
-export const onList = async () => await toggleMarkers(
-  bullet,
-  bulletSpace,
-  `$1${bullet} $2`,
-);
+export const onCheck = async () => await toggleMarkers(check);
 
-export const onStrike = async () => await toggleMarkers(
-  strike,
-  strikes,
-  `$1${strikes}$2${strikes}`,
-);
+export const onList = async () => await toggleMarkers(bullet);
 
-const toggleMarkers = async (
-  marker,
-  markers,
-  replacement,
-) => {
+const toggleMarkers = async (marker) => {
   const {start, end, part, input, isTa} = getSel({
     focused: true,
     withoutIndent: true,
   });
 
-  const result = part.includes(marker) ?
-    part
-      .replaceAll(markers, "")
-      .replaceAll(marker, "")
-    : part.replaceAll(
-      /([\t ]*)([^\r\n]+)/g,
-      replacement,
-    );
+  let result = part.replaceAll(/[✓●] ?/g, "");
+  if (!part.includes(marker)) {
+    result = /[^\t ]/.test(result) ?
+      result.replaceAll(
+        /([\t ]*)([^\r\n]+)/g,
+        `$1${marker} $2`,
+      )
+      : `${result}${marker} `;
+  }
 
-  input.setRangeText(result, start, end, "select");
+  input.setRangeText(result, start, end, "end");
   if (isTa) await save();
 };
 

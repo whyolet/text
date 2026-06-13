@@ -17,7 +17,7 @@
  */
 
 import {mem} from "./db.js";
-import {getSel, setSel} from "./sel.js";
+import {bullet, check, getSel, setSel} from "./sel.js";
 import {save} from "./page.js";
 import {ui} from "./ui.js";
 
@@ -57,19 +57,20 @@ export const autoindent = () => {
   .slice(0, i)
   .match(/([^\r\n]*)([\r\n]*)$/);
 
-  const indents = templateLine.match(/^[\t ]*(?:● )?/)[0];
+  const oldIndents = templateLine.match(/^[\t ]*(?:[✓●] )?/)[0];
+  const newIndents = oldIndents.replaceAll(check, bullet);
 
-  if (templateLine === indents) {
+  if (templateLine === oldIndents) {
     // Move indents from template line to current line, to keep blank lines clean.
     ui.ta.setRangeText(
-      emptyLines + indents,
+      emptyLines + newIndents,
       i - matchedLines.length,
       i,
       "end",
      );
   } else {
     // Copy indents from template line to current line.
-    ui.ta.setRangeText(indents, i, i, "end");
+    ui.ta.setRangeText(newIndents, i, i, "end");
   }
 
   mem.textLength = ui.ta.value.length;

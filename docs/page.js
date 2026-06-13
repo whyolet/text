@@ -30,7 +30,7 @@ import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
 import {detectTag, folder, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
-import {onDuplicate, onErase, onList, onMoveDown, onMoveUp, onSelAll, onSelLine, onStrike, setSel, strikes} from "./sel.js";
+import {doneTester, onCheck, onDuplicate, onErase, onList, onMoveDown, onMoveUp, onSelAll, onSelLine, setSel} from "./sel.js";
 import {anim, debounce, enter, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
@@ -87,14 +87,14 @@ export const initPageUI = () => {
     /// bottom
 
     ib("backspace", "e", onErase, {focused: true}),
-    ib("format_strikethrough", "k", onStrike, {focused: true}),  // striKe through
     ib("variables", "l", onSelLine, {focused: true}),
     ib("exposure_plus_1", "w", onDuplicate),
 
     ib("format_indent_decrease", "I", onDedent),  // Ctrl+Shift+I
     ib("format_indent_increase", "i", onIndent),  // Ctrl+I
 
-    ib("list", "L", onList),  // Ctrl+Shift+L
+    ib("check", "k", onCheck),
+    ib("format_list_bulleted", "L", onList),  // Ctrl+Shift+L
 
     ib("undo", "z", onUndo),  // Ctrl+Z
     ib("redo", "Z", onRedo),  // Ctrl+Shift+Z
@@ -171,7 +171,7 @@ export const splitDoneText = (page) => {
   const doneLines = [];
 
   for (const line of lines) {
-    if (line.includes(strikes)) {
+    if (doneTester.test(line)) {
       doneLines.push(line);
     } else notDoneLines.push(line);
   }
@@ -260,7 +260,7 @@ const onHeader = async () => {
   const answer = await enter("Rename to:", oldTag);
   if (answer === null) return;
 
-  const newTag = answer.replaceAll(/[─\s📂]/gu, "");
+  const newTag = answer.replaceAll(/[\s📂]/gu, "");
   if (!newTag) {
     toast("It's empty!");
     return;
@@ -297,7 +297,7 @@ const onHeader = async () => {
 
       if (
         start > 0 &&
-        !/[─\s]/.test(page.text.charAt(start - 1))
+        !/\s/.test(page.text.charAt(start - 1))
       ) {
         start++;
         continue;
@@ -306,7 +306,7 @@ const onHeader = async () => {
       const stop = start + query.length;
       if (
         stop < page.text.length &&
-        !/[─\s]/.test(page.text.charAt(stop))
+        !/\s/.test(page.text.charAt(stop))
       ) {
         start++;
         continue;

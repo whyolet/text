@@ -29,7 +29,7 @@ import {getPersisted, tryPersist} from "./local.js";
 import {hideMenuForm} from "./menu.js";
 import {getDone, getPage, openPage, openPageByTag, save, splitDoneText, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
-import {getSel, setSel, strikes} from "./sel.js";
+import {check, getSel, setSel} from "./sel.js";
 import {ask, enter, getDateInput, debounce, hide, hideOverlay, o, on, getRestartButton, say, show, showBanner, showDateInput, showOverlay, toast, ui} from "./ui.js";
 
 export const folder = "📂";
@@ -250,8 +250,8 @@ export const detectTag = (text, cursor) => {
   const head = text.slice(0, cursor);
   const tail = text.slice(cursor);
 
-  const start = head.search(/[^─\s]*$/);
-  const end = cursor + tail.match(/[^─\s]*/)[0].length;
+  const start = head.search(/\S*$/);
+  const end = cursor + tail.match(/\S*/)[0].length;
 
   const withFolder = text.codePointAt(start) === folderCodePoint;
 
@@ -324,7 +324,7 @@ export const onMoveOverdue = async () => {
   if (!await ask(
 `Move overdue to today?
 
-${strikes}Done lines${strikes}
+${check} Done lines
 and text after ${anchor}
 will not be moved.`
   )) return;

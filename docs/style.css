@@ -278,7 +278,7 @@ b {
     1fr
     repeat(2, var(--icon))
     1fr
-    var(--icon)
+    repeat(2, var(--icon))
     1fr
     repeat(2, var(--icon))
     1fr
@@ -293,17 +293,17 @@ b {
 
   grid-template-areas:
     /* Areas/shortcuts */
-    "m q y y y y y y y y y g F"
-    "s t t t t t t t t t t t f"
-    "p t t t t t t t t t t t j"
-    ". t t t t t t t t t t t ."
-    "o t t t t t t t t t t t u"
-    "b t t t t t t t t t t t n"
-    "h t t t t t t t t t t t d"
-    ". t t t t t t t t t t t ."
-    "e t t t t t t t t t t t x"
-    "k t t t t t t t t t t t c"
-    "l w . I i . L . z Z . v a";
+    "m q y y y y y y y y y y g F"
+    "s t t t t t t t t t t t t f"
+    "p t t t t t t t t t t t t j"
+    ". t t t t t t t t t t t t ."
+    "o t t t t t t t t t t t t u"
+    "b t t t t t t t t t t t t n"
+    "h t t t t t t t t t t t t d"
+    ". t t t t t t t t t t t t ."
+    ". t t t t t t t t t t t t x"
+    "e t t t t t t t t t t t t c"
+    "l w . I i . k L . z Z . v a";
 
   place-items: center;
 }
