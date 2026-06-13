@@ -107,7 +107,7 @@ export const onList = async () => await toggleMarkers(bullet);
 const toggleMarkers = async (marker) => {
   const {start, end, part, input, isTa} = getSel({
     focused: true,
-    withoutIndent: true,
+    wholeLines: true,
   });
 
   let result = part.replaceAll(/[✓●] ?/g, "");
