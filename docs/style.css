@@ -341,9 +341,6 @@ textarea {
   scrollbar-color: var(--hint) var(--back);
   resize: none;
   touch-action: pan-y;
-}
-
-textarea.mono {
   font-family: "SourceCodePro", monospace;
   font-weight: 400;
 }
@@ -365,12 +362,10 @@ textarea.mono {
 }
 
 .font-form {
-  grid-template-areas: "a c m . x";
+  grid-template-areas: "c m x";
   grid-template-columns:
     var(--icon)
-    var(--icon)
     1fr
-    var(--icon)
     var(--icon);
 }
 

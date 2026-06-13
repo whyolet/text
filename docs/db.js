@@ -35,7 +35,6 @@ const stores = Object.seal({
 
 export const conf = Object.seal({
   colors: "colors",
-  mono: "mono",
   opIds: "opIds",
   recentTags: "recentTags",
   salt: "salt",
@@ -45,7 +44,6 @@ export const conf = Object.seal({
 
 export const mem = Object.seal({
   colors: null,
-  mono: null,
   opIds: null,
   pages: null,
   recentTags: null,
@@ -128,7 +126,6 @@ export const load = async (passphrase) => await new Promise(async (doneLoading) 
 
     await Promise.all([
       loadConf(conf.colors, () => defaultColors),
-      loadConf(conf.mono, () => false),
       loadConf(conf.trap, () => "f"),
       loadConf(conf.zoom, () => 100),
       loadConf(conf.recentTags, () => []),

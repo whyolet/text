@@ -35,7 +35,6 @@ export const initFontUI = () => {
   on(ui.zoomInput, "change", saveZoom);
 
   ui.fontForm = o(".font-form hidden",
-    ib("format_letter_spacing_wider", "a", onMono),
     ib("palette", "", onColors),
     o(".main",
       ib("remove", "", () => saveZoom({add: -10})),
@@ -216,19 +215,6 @@ const setColors = () => {
   }
 };
 
-/// onMono
-
-const onMono = async () => {
-  mem.mono = !mem.mono;
-  await db.saveConf(db.conf.mono);
-  applyFont();
-
-  toast(mem.mono ?
-    "fixed-width"
-    : "variable-width"
-  );
-};
-
 /// saveZoom
 
 const saveZoom = async (props) => {
@@ -254,11 +240,5 @@ const saveZoom = async (props) => {
 
 export const applyFont = () => {
   ui.ta.style.fontSize = `${mem.zoom}%`;
-
-  const classes = ui.ta.classList;
-  if (mem.mono) {
-    classes.add("mono");
-  } else classes.remove("mono");
-
   setColors();
 };
