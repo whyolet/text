@@ -82,6 +82,8 @@ export const defaultColors = "325-547-769-bad-dcf";
 /// onColors
 
 export const onColors = async () => {
+  let found = false;
+
   const options = `
 Dark,Whyolet,${defaultColors}
 Light,Whyolet,fff-ccf-98b-547-639
@@ -94,9 +96,12 @@ Customize...,,
     .split("\n")
     .map((line) => {
       const [head, tail, value] = line.split(",");
+      const isCurrent = (value === mem.colors) || !found && !value;
+      if (isCurrent) found = true;
+
       return {
         item: o(".item button",
-          o(".icon", value === mem.colors ? "radio_button_checked" : "radio_button_unchecked"),
+          o(".icon", isCurrent ? "radio_button_checked" : "radio_button_unchecked"),
           " ",
           head,
           " ",
