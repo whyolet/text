@@ -100,18 +100,22 @@ export const bullet = "●";
 
 export const doneTester = /^[\t ]*✓ /;
 
-export const onCheck = async () => await toggleMarkers(check);
+export const onCheck = async () => await toggleMarkers(check, bullet);
 
-export const onList = async () => await toggleMarkers(bullet);
+export const onList = async () => await toggleMarkers(bullet, check);
 
-const toggleMarkers = async (marker) => {
+const toggleMarkers = async (marker, other) => {
   const {start, end, part, input, isTa} = getSel({
     focused: true,
     wholeLines: true,
   });
 
   let result = part.replaceAll(/[✓●] ?/g, "");
-  if (!part.includes(marker)) {
+
+  if (
+    part.includes(other) ||
+    !part.includes(marker)
+  ) {
     result = /[^\t ]/.test(result) ?
       result.replaceAll(
         /([\t ]*)([^\r\n]+)/g,
