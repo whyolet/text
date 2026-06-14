@@ -402,6 +402,7 @@ export const saveUndoneOps = async () => {
 export const close = () => {
   if (!idb) return;
   idb.close();
+  mem.page = null;
 };
 
 /// checkTrap

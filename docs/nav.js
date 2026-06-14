@@ -439,7 +439,10 @@ in the Multiverse...
   setTimeout(async () => {
     await db.load(passphrase);
     applyFont();
-    await openScreen(screenTypes.page, {tag: getToday()});
+    await openScreen(screenTypes.page, {
+      tag: getToday(),
+      withoutSave: true,
+    });
     hideOverlay();
   }, 1500);
 };
