@@ -19,12 +19,12 @@
 /** variables **/
 
 :root {
-  --high: #DDCCFF;
-  --text: #BBAADD;
-  --none: #9988BB;
-  --tool: #776699;
-  --hint: #554477;
-  --back: #332255;
+  --notice:     #DDCCFF;
+  --text:       #BBAADD;
+  --unused:     #9988BB;
+  --button:     #776699;
+  --selection:  #554477;
+  --background: #332255;
 
   --icon: 2rem;
   --header: 1.2rem;
@@ -32,7 +32,7 @@
   --gap: 0.5rem;
   --small-gap: 0.2rem;
 
-  --thin: 0.5px solid var(--hint);
+  --thin: 0.5px solid var(--selection);
 
   --anim: 0.5s;
   --quick: 0.25s;
@@ -98,7 +98,7 @@
   scrollbar-width: none;
 
   color: var(--text);
-  background-color: var(--back);
+  background-color: var(--background);
   -webkit-tap-highlight-color: transparent;
 
   font-family: "Ubuntu", sans-serif;
@@ -145,7 +145,7 @@ input {
 }
 
 input::placeholder {
-  color: var(--hint);
+  color: var(--selection);
 }
 
 /** list **/
@@ -156,7 +156,7 @@ ul {
 }
 
 li::marker {
-  color: var(--hint);
+  color: var(--selection);
 }
 
 /** clickable **/
@@ -168,7 +168,7 @@ a {
 
 a,
 .icon {
-  color: var(--tool);
+  color: var(--button);
 }
 
 .button {
@@ -185,13 +185,14 @@ a,
   padding: var(--gap);
 }
 
+.active,
 a:active,
 a:active > .icon,
 .button:active,
 .button:active > .icon,
 ::selection {
-  color: var(--high);
-  background-color: var(--hint);
+  color: var(--notice);
+  background-color: var(--selection);
 }
 
 /** decoration **/
@@ -217,7 +218,7 @@ b {
 .header > span {
   font-size: var(--header);
   font-weight: 700;
-  color: var(--tool);
+  color: var(--button);
   text-align: center;
 }
 
@@ -313,11 +314,11 @@ b {
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
-  color: var(--high);
+  color: var(--notice);
 }
 
 .frame > .header.pinned {
-  color: var(--tool);
+  color: var(--button);
 }
 
 .frame.zen-mode > .icon:not(.shortcut-q) {
@@ -338,7 +339,7 @@ textarea {
   width: 100%;
   height: 100%;
   display: block;  /* Avoid parent scrollbar and visible background */
-  scrollbar-color: var(--hint) var(--back);
+  scrollbar-color: var(--selection) var(--background);
   resize: none;
   touch-action: pan-y;
   font-family: "SourceCodePro", monospace;

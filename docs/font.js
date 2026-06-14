@@ -83,18 +83,28 @@ export const defaultColors = "325-547-769-bad-dcf";
 
 export const onColors = async () => {
   const options = `
-Dark Whyolet,${defaultColors}
-Light Whyolet,fff-ccf-98b-547-639
-Darcula,2b2b2b-323232-606366-a9b7c6-ffc66d
-Dracula,282a36-44475a-bd93f9-f8f8f2-ffb86c
-Green Tody,fff-cdffcd-4a4-333-000
-Customize...,
+Dark,Whyolet,${defaultColors}
+Light,Whyolet,fff-ccf-98b-547-639
+Dark,Darcula,2b2b2b-323232-606366-a9b7c6-ffc66d
+Dark,Dracula,282a36-44475a-bd93f9-f8f8f2-ffb86c
+Light,Tody,fff-cdffcd-4a4-333-000
+Customize...,,
 `
     .trim()
     .split("\n")
     .map((line) => {
-      const [text, value] = line.split(",");
-      return {text, value};
+      const [head, tail, value] = line.split(",");
+      return {
+        item: o(".item button",
+          o(".icon", value === mem.colors ? "radio_button_checked" : "radio_button_unchecked"),
+          " ",
+          head,
+          " ",
+          o("span.active", tail),
+        ),
+        value,
+        colors: value,
+      };
     });
 
   const answer = await choose("Colors", ...options);
@@ -124,6 +134,11 @@ const inputColors = async () => {
   return state.answer;
 };
 
+const colorNamesString = "Background-Selection-Button-Text-Notice";
+const colorNames = colorNamesString
+  .toLowerCase()
+  .split("-");
+
 const validateColors = async (state) => {
   const error = state.error ?
     "Error: " + state.error
@@ -132,7 +147,7 @@ const validateColors = async (state) => {
   const help = `${error}
 
 Please enter 5 hex colors:
-Background-Hint-Button-Text-Notice
+${colorNamesString}
 
 Example:
 325-547-769-bad-dcf
@@ -143,6 +158,11 @@ Mix Red+Green+Blue: RGB or RRGGBB
 Brightest Red: f00 or ff0000
 Teal (middle Green+Blue): 008080
 Darkest Black: 000 or 000000
+
+A or AA in RGBA/RRGGBBAA means:
+0 or 00: fully transparent
+80: middle of transparent/opaque
+f or ff: fully opaque
 `;
 
   state.answer = await enter(help, state.answer);
@@ -162,7 +182,7 @@ Darkest Black: 000 or 000000
     .map((color) => color.trim());
 
   const colorsExpected = 5;
-  const digitsExpected = [3, 6];
+  const digitsExpected = [3, 4, 6, 8];
   const hexDigits = "0123456789abcdef";
 
   if (colors.length !== colorsExpected) {
@@ -178,8 +198,8 @@ but we have ${colors.length} color${s} "${state.answer}".`;
       const s = color.length === 1 ? "" : "s";
       state.error = `
 We need color "${color}"
-to have either 3 (RGB)
-or 6 (RRGGBB) digits
+to have 3, 4, 6, or 8 digits
+(RGB, RGBA, RRGGBB, RRGGBBAA)
 but it has ${color.length} digit${s}.`;
       return;
     }
@@ -202,15 +222,14 @@ but it has digit "${digit}".`;
 
 /// setColors
 
-const setColors = () => {
-  const colors = mem.colors.split("-");
-  const names = "back hint tool text high".split(" ");
-  const root = document.documentElement;
-
-  for (let i = 0; i < names.length; i++) {
-    root.style.setProperty(
-      "--" + names[i],
-      "#" + colors[i],
+export const setColors = (el, colors) => {
+  el ??= document.documentElement;
+  colors ??= mem.colors;
+  const colorValues = colors.split("-");
+  for (let i = 0; i < colorNames.length; i++) {
+    el.style.setProperty(
+      "--" + colorNames[i],
+      "#" + colorValues[i],
     );
   }
 };
