@@ -47,6 +47,7 @@ export const initPageUI = () => {
   onClick(ui.header, onHeader);
 
   ui.ta = o("textarea");
+  on(ui.ta, "beforeinput", onBeforeInput);
   on(ui.ta, "input", onInput);
   on(document, "selectionchange", onSelChange);
   applyFont();
@@ -211,6 +212,7 @@ export const openPageByTag = async (tag) => {
 export const openPage = async (page) => {
   const tagChanged = (mem.page?.tag !== page.tag);
 
+  mem.pageBeforeInput = null;
   mem.page = page;
   mem.pages[page.tag] = page;
   mem.protectedLength = mem.textLength = page.text.length;
@@ -427,13 +429,37 @@ const protectTag = () => {
   });
 };
 
-/// onInput
+/// onBeforeInput, onInput
+
+const onBeforeInput = () => {
+  if (mem.pageBeforeInput) return;
+
+  mem.pageBeforeInput = getPageSnapshot();
+}
 
 const onInput = () => {
   if (!ui.isActive) return;
 
   autoindent();
   debounce("save", 1000, save);
+};
+
+/// getPageSnapshot
+
+const getPageSnapshot = () => {
+  if (!mem.page) return null;
+
+  const snapshot = {
+    id: mem.page.id,
+    tag: mem.page.tag,
+    text: ui.ta.value,
+    selStart: ui.ta.selectionStart,
+    selEnd: ui.ta.selectionEnd,
+    scroll: ui.ta.scrollTop,
+  };
+
+  snapshot.done = getDone(snapshot);
+  return snapshot;
 };
 
 /// save
@@ -445,15 +471,7 @@ export const save = async (props) => {
   const page = mem.page;
   if (!page) return;
 
-  const next = {
-    tag: page.tag,  // for `getDone`
-    text: ui.ta.value,
-    selStart: ui.ta.selectionStart,
-    selEnd: ui.ta.selectionEnd,
-    scroll: ui.ta.scrollTop,
-  };
-
-  next.done = getDone(next);
+  const next = getPageSnapshot();
 
   let needSave = mem.opIds.undo ? false : (
     page.selStart !== next.selStart ||
@@ -469,10 +487,21 @@ export const save = async (props) => {
 
   Object.assign(page, next);
   mem.textLength = page.text.length;
-  if (!needSave) return;
+
+  if (!needSave) {
+    mem.pageBeforeInput = null;
+    return;
+  }
 
   if (mem.opIds.undo) {
     await db.saveUndoneOps();
+  }
+
+  if (mem.pageBeforeInput) {
+    if (mem.pageBeforeInput.tag === page.tag) {
+      await db.savePage(mem.pageBeforeInput, props);
+    }
+    mem.pageBeforeInput = null;
   }
 
   await db.savePage(page, props);

@@ -59,6 +59,7 @@ export const mem = Object.seal({
   nonce: "",
   oldPages: null, // for `createOp`
   page: null,
+  pageBeforeInput: null,
   protectedLength: 0,
   protectedTag: "",
   screens: {},
@@ -401,8 +402,10 @@ export const saveUndoneOps = async () => {
 
 export const close = () => {
   if (!idb) return;
+
   idb.close();
   mem.page = null;
+  mem.pageBeforeInput = null;
 };
 
 /// checkTrap
