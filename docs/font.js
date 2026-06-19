@@ -99,17 +99,15 @@ Customize...,,
       const isCurrent = (value === mem.colors) || !found && !value;
       if (isCurrent) found = true;
 
-      return {
-        item: o(".item button",
-          o(".icon", isCurrent ? "radio_button_checked" : "radio_button_unchecked"),
-          " ",
-          head,
-          " ",
-          o("span.active", tail),
-        ),
-        value,
-        colors: value,
-      };
+      const item = o(".item button",
+        o(".icon", isCurrent ? "radio_button_checked" : "radio_button_unchecked"),
+        head,
+        " ",
+        o("span.active", tail),
+      );
+      if (value) setColors(item, value);
+
+      return {item, value};
     });
 
   const answer = await choose("Colors", ...options);

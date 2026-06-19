@@ -18,7 +18,6 @@
 
 import * as db from "./db.js";
 import {mem} from "./db.js";
-import {setColors} from "./font.js";
 import {unidle} from "./nav.js";
 import {save} from "./page.js";
 import {setSel} from "./sel.js";
@@ -426,11 +425,13 @@ export const ask = async (...items) => !!await dialog(...items, okCancel());
 export const choose = async (header, ...options) => {
   const items = [];
   for (const option of options) {
-    const item = option.item ?? o(".item button", option.text);
+    const item = option.item ?? o(".item button",
+      option.icon ?
+        o(".icon", option.icon)
+        : null,
+      option.text,
+    );
     const value = option.value;
-    if (option.colors) {
-      setColors(item, option.colors);
-    }
     onClick(item, () => reply(value));
     items.push(item);
   }

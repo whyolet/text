@@ -214,16 +214,11 @@ b {
 
 /** header **/
 
-.header,
-.header > span {
+.header {
   font-size: var(--header);
   font-weight: 700;
   color: var(--button);
   text-align: center;
-}
-
-.header > span {
-  padding-left: var(--gap);
 }
 
 /** centered **/
@@ -464,6 +459,10 @@ textarea {
 .search > .items > *,
 .choose > .items > * {
   border-bottom: var(--thin);
+}
+
+.item > .icon {
+  padding-right: var(--gap);
 }
 
 /** dialog **/

@@ -98,7 +98,7 @@ const onSearchInput = () => {
   } else {
     items.push(o(".item header",
       o(".icon", "history"),
-      o("span", "Recent"),
+      "Recent",
     ));
 
     for (const tag of mem.recentTags) add(items, tag);
@@ -136,7 +136,7 @@ const onSearchInput = () => {
 const addHeader = (items, icon, text) => {
   items.push(o(".item header",
     o(".icon", icon),
-    o("span", text),
+    text,
   ));
 };
 

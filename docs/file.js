@@ -238,9 +238,21 @@ export const importBackup = async (data, props) => {
   } else {
     const answer = await choose(
       `Importing ${importedPages.length} page${importedPages.length === 1 ? "" : "s"}, choose:`,
-      {value: true, text: "Sync (keep recent changes)"},
-      {value: false, text: "Restore (overwrite recent changes)"},
-      {value: null, text: `Cancel (do nothing)`},
+      {
+        value: true,
+        icon: "sync",
+        text: "Sync (keep recent changes)",
+      },
+      {
+        value: false,
+        icon: "history",
+        text: "Restore (overwrite recent changes)",
+      },
+      {
+        value: null,
+        icon: "close",
+        text: `Cancel (do nothing)`,
+      },
     );
     if (answer === null) return false;
 
