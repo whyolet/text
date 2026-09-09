@@ -28,7 +28,7 @@ import {detectGestures} from "./gesture.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
-import {detectTag, folder, getNextDate, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
+import {detectTag, folder, getNextDate, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onMoveToNext, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {doneTester, onCheck, onDuplicate, onErase, onList, onMoveDown, onMoveUp, onSelAll, onSelLine, setSel} from "./sel.js";
 import {anim, debounce, enter, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
