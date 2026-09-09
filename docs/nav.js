@@ -49,6 +49,21 @@ export const getToday = () => {
   return `${year}-${month}-${day}`;
 };
 
+/// getNextDate
+
+export const getNextDate = (props) => {
+  const {forward = true} = props ?? {};
+  const {tag} = mem.page;
+  if (!isDateTag(tag)) return;
+
+  const date = new Date(tag);
+  date.setUTCDate(
+    date.getUTCDate() +
+    (forward ? 1 : -1)
+  );
+  return date.toISOString().split("T")[0];
+};
+
 /// isDateTag
 
 export const isDateTag = (tag) => /^\d+-\d{2}-\d{2}$/.test(tag);
@@ -372,7 +387,15 @@ will not be moved.`
   await openPage(mem.page);
 };
 
-/// onMoveToDate, onMoveToDateInput
+/// onMoveToNext, onMoveToDate, onMoveToDateInput
+
+export const onMoveToNext = async () => {
+  const {tag} = mem.page;
+  const nextDate = getNextDate({
+    forward: true,
+  }) ?? getToday();
+  onMoveToDateInput(nextDate);
+};
 
 export const onMoveToDate = () => {
   const {start, end} = getSel({wholeLines: true});

@@ -129,16 +129,17 @@ export const anim = (action) => {
   } else action();
 };
 
-/// Icon Button.
+/// ib (icon button)
 
 export const ib = (
   icon,  // Web icon name from https://fonts.google.com/icons
   shortcut,  // CSS `grid-area` for now. TODO: `Ctrl+...` keyboard shortcut.
-  handler,  // Function to call or URL to open on click.
+  handler,
   props,
  ) => {
   const {
     focused,  // If valid for input fields too, not just for the main textarea.
+    onLong,
   } = props ?? {};
 
   const el = o(
@@ -154,7 +155,7 @@ export const ib = (
     icon,
   );
 
-  onClick(el, async () => {
+  const smart = async (handler) => {
     if (!ui.isActive) return;
     unidle();
 
@@ -163,13 +164,40 @@ export const ib = (
     if (input === ui.ta) await save();
     if (!handler) return;
 
-    if (typeof handler === "string") {
-      open(handler, "_blank");
-      return;
-    };
-
     handler();
-  });
+  };
+
+  if (!onLong) {
+    onClick(el, async () => await smart(handler));
+    return el;
+  }
+
+  let timerId, isLong = false;
+
+  const startClick = () => {
+    isLong = false;
+    timerId = setTimeout(async () => {
+      isLong = true;
+      await smart(onLong);
+    }, 500);
+  };
+
+  const endClick = async () => {
+    clearTimeout(timerId);
+    if (isLong) return;
+
+    await smart(handler);
+  };
+
+  const cancelClick = () => {
+    clearTimeout(timerId);
+  };
+
+  on(el, "pointerdown", startClick);
+  on(el, "pointerup", endClick);
+  on(el, "pointerleave", cancelClick);
+  on(el, "pointercancel", cancelClick);
+  on(el, "contextmenu", (event) => event.preventDefault());
 
   return el;
 };

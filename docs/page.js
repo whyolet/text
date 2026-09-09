@@ -28,7 +28,7 @@ import {detectGestures} from "./gesture.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
 import {onMenuForm} from "./menu.js";
-import {detectTag, folder, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
+import {detectTag, folder, getNextDate, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {doneTester, onCheck, onDuplicate, onErase, onList, onMoveDown, onMoveUp, onSelAll, onSelLine, setSel} from "./sel.js";
 import {anim, debounce, enter, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
@@ -82,7 +82,9 @@ export const initPageUI = () => {
     ui.ta,
 
     ib("north", "u", onMoveUp),
-    ib("send", "n", onMoveToDate),  // Next
+    ib("send", "n", onMoveToNext, {
+      onLong: onMoveToDate,
+    }),  // Next
     ib("south", "d", onMoveDown),
 
     /// bottom
@@ -188,18 +190,10 @@ export const splitDoneText = (page) => {
 /// openNextDate
 
 const openNextDate = async (props) => {
-  const {forward = true} = props ?? {};
-  const {tag} = mem.page;
+  const nextDate = getNextDate(props);
+  if (!nextDate) return;
 
-  if (!isDateTag(tag)) {
-    return;
-  }
-
-  const date = new Date(tag);
-  date.setUTCDate(date.getUTCDate() + (forward ? 1 : -1));
-  const nextTag = date.toISOString().split("T")[0];
-
-  await openScreen(screenTypes.page, {tag: nextTag});
+  await openScreen(screenTypes.page, {tag: nextDate});
 };
 
 /// openPage/ByTag
