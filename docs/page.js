@@ -231,11 +231,17 @@ export const openPage = async (page) => {
 /// getHeader
 
 const getHeader = (page) => {
-  const today = getToday();
-  return (page.tag === today ?
-    `Today ${today}`
-    : page.tag
-  );
+  const {tag} = page;
+  if (!isDateTag(tag)) return tag;
+
+  const weekday = new Intl.DateTimeFormat(
+    undefined,
+    {weekday: "short"},
+  ).format(new Date(tag + "T00:00:00"));
+
+  return `${tag === getToday() ?
+    "Today " : ""
+  }${weekday} ${tag}`;
 };
 
 /// onHeader
