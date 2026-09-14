@@ -69,17 +69,19 @@ export const setDbKey = async (passphrase, salt) => {
   );
 };
 
-/// setExportKey1, getExportKey2
+/// setExportKey1, getExportKey-s
 
-export const setExportKey1 = async (passphrase) => {
+export const getExportKey1Bytes = async (passphrase) => {
   const exportSalt1 = Bytes.fromText("whyolet-text-const-export-salt-1");
   // Why `exportSalt1` is not random:
   // `exportKey2` will be derived from `exportKey1` and random `exportSalt2`
   // to avoid re-entering passphrase on each export, import, sync,
   // and to avoid keeping passphrase in memory as plaintext, or encoded in a reversible way, or using not strong enough hash.
 
-  const bytes = await getKeyBytes(passphrase, exportSalt1);
+  return await getKeyBytes(passphrase, exportSalt1);
+};
 
+export const setExportKey1 = async (bytes) => {
   exportKey1 = await crypto.subtle.importKey(
     "raw",
     bytes,

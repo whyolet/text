@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {Bytes, decrypt, encrypt, setExportKey1} from "./crypto.js";
+import {Bytes, decrypt, encrypt, getExportKey1Bytes, setExportKey1} from "./crypto.js";
 import {getCSV, getPagesFromCSV} from "./csv.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getNow, showOrHideOverdue, switchDb} from "./nav.js";
 import {getPage, openPage, save, savePages} from "./page.js";
 import {setSel} from "./sel.js";
-import {choose, enter, hide, o, on, say, show, toast, ui} from "./ui.js";
+import {choose, enter, hide, mi, o, on, say, show, toast, ui} from "./ui.js";
 
 /// onPageExport
 
@@ -82,11 +82,26 @@ export const onSaveFile = async () => {
   showOrHideSaveFile();
 };
 
+/// onBackupMenu
+
+export const onBackupMenu = async () => {
+  const action = await choose(
+    "Backup",
+    mi("key", "Encryption passphrase", onSetExportPassphrase),
+    mi("archive", "Export encrypted database", onBackupExportDB),
+    mi("csv", "Export CSV spreadsheet", onBackupExportCSV),
+    mi("unarchive", "Import database or CSV", onBackupImport),
+  );
+  if (!action) return;
+
+  await action();
+};
+
 /// onBackupExport
 
-export const onBackupExportDB = async () => await onBackupExport("db");
+const onBackupExportDB = async () => await onBackupExport("db");
 
-export const onBackupExportCSV = async () => await onBackupExport("csv");
+const onBackupExportCSV = async () => await onBackupExport("csv");
 
 const onBackupExport = async (format) => {
   const now = getNow()
@@ -204,7 +219,7 @@ export const onPageImport = async () => {
 
 /// onBackupImport
 
-export const onBackupImport = async () => {
+const onBackupImport = async () => {
   const file = await getUploaded();
   if (file === null) return;
 
@@ -238,21 +253,8 @@ export const importBackup = async (data, props) => {
   } else {
     const answer = await choose(
       `Importing ${importedPages.length} page${importedPages.length === 1 ? "" : "s"}, choose:`,
-      {
-        value: true,
-        icon: "sync",
-        text: "Sync (keep recent changes)",
-      },
-      {
-        value: false,
-        icon: "history",
-        text: "Restore (overwrite recent changes)",
-      },
-      {
-        value: null,
-        icon: "close",
-        text: `Cancel (do nothing)`,
-      },
+      mi("sync", "Sync (keep recent changes)", true),
+      mi("history", "Restore (overwrite recent changes)", false),
     );
     if (answer === null) return false;
 
@@ -338,31 +340,38 @@ const getUploaded = async () => {
 /// onSetExportPassphrase
 
 export const onSetExportPassphrase = async () => {
-  const newValue = await enter(`
+  const passphrase = await enter(`
 A passphrase (few words)
 for backup and sync files:
   `, "", {secret: true});
-  if (newValue === null) return;
+  if (passphrase === null) return;
 
-  const hasDot = newValue.startsWith(".");
-
+  if (passphrase.startsWith(".")) {
     await say(`
-Backup and sync files
-will be encrypted and decrypted
-using this passphrase
-until you set a new one
-or close this app.
-` + (hasDot ? `
 The first dot in this passphrase
 opens the door...
-` : "")
-  );
+    `);
 
-  if (hasDot) {
-    await switchDb(newValue.slice(1));
+    await switchDb(passphrase.slice(1));
     // It calls `setExportKey1` too.
     return;
   }
 
-  await setExportKey1(newValue);
+  await say(`
+Backup ${mem.isSecret ?
+  "" : "and sync "
+}files
+will be encrypted and decrypted
+using this passphrase
+until you set a new one` + (mem.isSecret ? `
+or exit.`
+: ".")
+  );
+
+  const bytes = await getExportKey1Bytes(passphrase);
+  await setExportKey1(bytes);
+  if (mem.isSecret) return;
+
+  mem.exportKey1Bytes = bytes.toHex();
+  await db.saveConf(db.conf.exportKey1Bytes);
 };

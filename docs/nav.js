@@ -22,15 +22,14 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
 import {applyFont, hideFontForm} from "./font.js";
-import {onRedirect} from "./gdrive.js";
+import {onRedirect, sync} from "./gdrive.js";
 import {info, openInfo, openInfoScreen} from "./info.js";
 import {hideLineForm} from "./line.js";
 import {getPersisted, tryPersist} from "./local.js";
-import {hideMenuForm} from "./menu.js";
 import {getDone, getPage, openPage, openPageByTag, save, splitDoneText, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
 import {check, getSel, setSel} from "./sel.js";
-import {ask, enter, getDateInput, debounce, hide, hideOverlay, o, on, getRestartButton, say, show, showBanner, showDateInput, showOverlay, toast, ui} from "./ui.js";
+import {ask, enter, getDateInput, debounce, hide, hideOverlay, o, on, getRestartButton, say, show, showBanner, showDateInput, showOverlay, toast, ui, warn} from "./ui.js";
 
 export const folder = "📂";
 const folderCodePoint = folder.codePointAt(0);
@@ -108,7 +107,25 @@ const onMessage = (event) => {
 /// openFirstScreen
 
 export const openFirstScreen = async () => {
-  await openScreen(screenTypes.page, {tag: getToday()});
+  applyFont();
+
+  await openScreen(screenTypes.page, {
+    tag: getToday(),
+    withoutSave: true,
+  });
+
+  if (mem.isSecret) {
+    hide(ui.sync);
+  } else {
+    show(ui.sync);
+    if (mem.syncSeconds) {
+      // On open with data,
+      // sync not waiting for syncSeconds,
+      // but still give time for overlay to hide.
+      const seconds = mem.pagesUpdated ? 2 : mem.syncSeconds;
+      setTimeout(sync, seconds * 1000);
+    }
+  }
 
   const persisted = await getPersisted();
   if (!persisted) await tryPersist();
@@ -204,7 +221,6 @@ export const initNavUI = () => {
 /// hideAtticForms
 
 export const hideAtticForms = () => {
-  hideMenuForm();
   hideFontForm();
   hideLineForm();
   hideFindForm();
@@ -448,26 +464,41 @@ const onFocus = (event) => {
 /// switchDb
 
 export const switchDb = async (passphrase) => {
+  if (mem.isSyncing) {
+    await askRetrySwitchDb();
+    return;
+  }
+
   showOverlay(`
 Opening the door
 to another world
 in the Multiverse...
   `);
 
+  clearTimeout(mem.syncTimerId);
   db.close();
   hideAtticForms();
 
   // Give time for attic animation
   // and to read the message.
   setTimeout(async () => {
+    if (mem.isSyncing) {
+      await askRetrySwitchDb();
+      return;
+    }
+
     await db.load(passphrase);
-    applyFont();
-    await openScreen(screenTypes.page, {
-      tag: getToday(),
-      withoutSave: true,
-    });
+    await openFirstScreen();
     hideOverlay();
   }, 1500);
+};
+
+const askRetrySwitchDb = async () => {
+  await warn(`
+Sync is in progress…
+
+Please try again later!
+  `);
 };
 
 /// idle

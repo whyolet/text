@@ -19,7 +19,6 @@
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {openInfoScreen} from "./info.js";
-import {showMenuForm} from "./menu.js";
 import {getRestartButton, enter, o, onClick, say, showBanner, warn} from "./ui.js";
 
 /// isPersistSupported
@@ -50,11 +49,11 @@ export const tryPersist = async () => {
 /// onLocalData
 
 export const onLocalData = async () => {
-  const header = "Your data";
+  const header = "Local data";
 
   const deleteButton = o(".rounded button",
     o(".icon", "delete_forever"),
-    " Delete your data",
+    " Delete your local data",
   );
   onClick(deleteButton, onDeleteLocalData);
 
@@ -84,7 +83,7 @@ export const onLocalData = async () => {
 
   if (persisted) {
     await openInfoScreen(header, [
-      "Good news: your web browser has agreed not to delete your data.",
+      "Good news: your web browser has agreed not to delete your local data.",
       "However, to be safe, use the menu to backup or sync your data.",
       "", "",
       dangerZone,
@@ -99,7 +98,7 @@ export const onLocalData = async () => {
   onClick(requestPermButton, onRequestPerm);
 
   await openInfoScreen(header, [
-    "Bad news: your web browser plans to delete your data.",
+    "Bad news: your web browser plans to delete your local data.",
     'To avoid this, click "Install app" or "Add to Home Screen" in the browser menu, and open the installed app.',
     o("",
       'If you still see this warning, please request "Notification" permission ',
@@ -156,7 +155,6 @@ const onRequestPerm = async () => {
 /// onSuccess
 
 const onSuccess = async () => {
-  showMenuForm();  // Update icon.
   await say("Success!");
   history.back();
   setTimeout(onLocalData, 200);

@@ -65,6 +65,7 @@ export const onSearch = async () => {
 export const openSearch = () => {
   ui.searchInput.value = mem.searchQuery;
   ui.searchInput.focus();
+
   onSearchInput();
 };
 

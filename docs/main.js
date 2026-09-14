@@ -23,7 +23,6 @@ import {initFindUI} from "./find.js";
 import {initFontUI} from "./font.js";
 import {initInfoUI} from "./info.js";
 import {initLineUI} from "./line.js";
-import {initMenuUI} from "./menu.js";
 import {getAppLock, initNavUI, openFirstScreen, screenTypes} from "./nav.js";
 import {initPageUI} from "./page.js";
 import {initSearchUI} from "./search.js";
@@ -44,7 +43,6 @@ getAppLock();  // No await!
 await db.load("");
 
 initNavUI();
-initMenuUI();
 initFontUI();
 initLineUI();
 initInfoUI();

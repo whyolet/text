@@ -34,8 +34,7 @@ export const initFontUI = () => {
   });
   on(ui.zoomInput, "change", saveZoom);
 
-  ui.fontForm = o(".font-form hidden",
-    ib("palette", "", onColors),
+  ui.fontForm = o(".font-form closable hidden",
     o(".main",
       ib("remove", "", () => saveZoom({add: -10})),
       ui.zoomInput,

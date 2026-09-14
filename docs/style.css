@@ -26,6 +26,7 @@
   --selection:  #554477;
   --background: #332255;
 
+  --inline-input: 4rem;
   --icon: 2rem;
   --header: 1.2rem;
   --char: 1rem;
@@ -34,6 +35,7 @@
 
   --thin: 0.5px solid var(--selection);
 
+  --slow: 2s;
   --anim: 0.5s;
   --quick: 0.25s;
 
@@ -125,6 +127,19 @@
   white-space: nowrap;
   direction: ltr;
   text-rendering: optimizeLegibility;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(1turn);
+  }
+  100% {
+    transform: rotate(0turn);
+  }
+}
+
+.spin {
+  animation: infinite linear var(--slow) spin;
 }
 
 /** html, body **/
@@ -290,7 +305,7 @@ b {
 
   grid-template-areas:
     /* Areas/shortcuts */
-    "m q y y y y y y y y y y g F"
+    "m y H H H H H H H H H H g F"
     "s t t t t t t t t t t t t f"
     "p t t t t t t t t t t t t j"
     ". t t t t t t t t t t t t ."
@@ -298,15 +313,15 @@ b {
     "b t t t t t t t t t t t t n"
     "h t t t t t t t t t t t t d"
     ". t t t t t t t t t t t t ."
-    ". t t t t t t t t t t t t x"
-    "e t t t t t t t t t t t t c"
-    "l w . I i . k L . z Z . v a";
+    "e t t t t t t t t t t t t x"
+    "w t t t t t t t t t t t t c"
+    "l q . I i . k L . z Z . v a";
 
   place-items: center;
 }
 
 .frame > .header {
-  grid-area: y;
+  grid-area: H;
   width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
@@ -323,11 +338,11 @@ b {
 }
 
 .frame.zen-mode > .shortcut-q {
-  grid-area: m !important;
+  grid-area: l !important;
 }
 
 .frame > .shortcut-q {
-  view-transition-name: zen-mode;
+  view-transition-name: zen-icon;
 }
 
 textarea {
@@ -342,28 +357,33 @@ textarea {
   font-weight: 400;
 }
 
-/** attic forms: menu, font, line **/
+/** closable **/
 
-.menu-form,
-.font-form,
-.line-form {
+.closable {
+  width: 100%;
+
   display: grid;
-  grid-template-rows: var(--icon);
-  place-items: center;
-}
-
-.menu-form,
-.line-form {
-  grid-template-areas: "m x";
-  grid-template-columns: 1fr var(--icon);
-}
-
-.font-form {
-  grid-template-areas: "c m x";
+  grid-template-areas: ". m x";
   grid-template-columns:
     var(--icon)
     1fr
     var(--icon);
+  grid-template-rows: var(--icon);
+  place-items: center;
+}
+
+.closable > .main {
+  grid-area: m;
+}
+
+/** attic forms: menu, font, line **/
+
+.menu-form {
+  display: grid;
+  grid-template-areas: "m x";
+  grid-template-columns: 1fr var(--icon);
+  grid-template-rows: var(--icon);
+  place-items: center;
 }
 
 .menu-form > .main {
@@ -380,7 +400,7 @@ textarea {
 .font-form > .main > input,
 .line-form > .main > input {
   border: var(--thin);
-  width: 4rem;
+  width: var(--inline-input);
   padding: var(--small-gap) var(--gap);
   text-align: center;
 }
@@ -483,8 +503,9 @@ textarea {
 }
 
 .dialog {
-  width: 90%;
-  max-width: 24rem;
+  width: fit-content;
+  min-width: 14em;
+  max-width: 90%;
   max-height: 90%;
 
   border-radius: var(--char);
@@ -494,6 +515,10 @@ textarea {
   flex-direction: column;
   gap: var(--char);
   align-items: center;
+}
+
+.dialog > .closable {
+  padding: 0 var(--gap);
 }
 
 .dialog > .choose {
@@ -506,14 +531,18 @@ textarea {
   padding-right: 0;
 }
 
-.dialog > .secret {
+.dialog > .enter {
   display: flex;
-  gap: var(--small-gap);
+  gap: var(--gap);
 }
 
 .dialog > input,
-.dialog > .secret > input {
+.dialog > .enter > input {
   border-bottom: var(--thin);
+}
+
+.dialog > .inline > input {
+  width: var(--inline-input);
 }
 
 .dialog > .buttons {

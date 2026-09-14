@@ -33,7 +33,7 @@ export const initLineUI = () => {
 
   ui.maxLineNumber = o("span");
 
-  ui.lineForm = o(".line-form hidden",
+  ui.lineForm = o(".line-form closable hidden",
     o(".main",
       "Line ",
       ui.lineNumber,

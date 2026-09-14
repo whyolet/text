@@ -23,11 +23,11 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {onSaveFile, showOrHideSaveFile} from "./file.js";
 import {onFindForm} from "./find.js";
-import {applyFont} from "./font.js";
+import {onSync} from "./gdrive.js";
 import {detectGestures} from "./gesture.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
-import {onMenuForm} from "./menu.js";
+import {onMenu} from "./menu.js";
 import {detectTag, folder, getNextDate, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onMoveToNext, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
 import {doneTester, onCheck, onDuplicate, onErase, onList, onMoveDown, onMoveUp, onSelAll, onSelLine, setSel} from "./sel.js";
@@ -43,6 +43,8 @@ export const initPageUI = () => {
   ui.saveFile = ib("file_save", "s", onSaveFile);
   hide(ui.saveFile);
 
+  ui.sync = ib("sync", "y", onSync);
+
   ui.header = o(".header");
   onClick(ui.header, onHeader);
 
@@ -50,7 +52,6 @@ export const initPageUI = () => {
   on(ui.ta, "beforeinput", onBeforeInput);
   on(ui.ta, "input", onInput);
   on(document, "selectionchange", onSelChange);
-  applyFont();
 
   detectGestures(ui.ta, {
     onSwipeLeft: () => openNextDate({forward: true}),
@@ -61,10 +62,10 @@ export const initPageUI = () => {
 
     /// top
 
-    ib("menu", "m", onMenuForm),
+    ib("menu", "m", onMenu),
     ui.saveFile,
     ui.moveOverdue,
-    ib("fullscreen", "q", onZen),
+    ui.sync,
     
     ui.header,
 
@@ -90,8 +91,9 @@ export const initPageUI = () => {
     /// bottom
 
     ib("backspace", "e", onErase, {focused: true}),
-    ib("variables", "l", onSelLine, {focused: true}),
     ib("exposure_plus_1", "w", onDuplicate),
+    ib("variables", "l", onSelLine, {focused: true}),
+    ib("fullscreen", "q", onZen, {withoutFocus: true}),
 
     ib("format_indent_decrease", "I", onDedent),  // Ctrl+Shift+I
     ib("format_indent_increase", "i", onIndent),  // Ctrl+I
@@ -347,6 +349,7 @@ const zenMode = "zen-mode";
 
 const onZen = () => {
   hideAtticForms();
+  ui.ta.blur();
 
   anim(() => {
     const isZen = ui.frame.classList.toggle(zenMode);
@@ -356,8 +359,10 @@ const onZen = () => {
       {isPinned: true},
     );
 
-    if (isZen) ui.ta.blur();
-  });
+    if (!isZen) setTimeout(() => {
+      ui.ta.focus();
+    }, 100);
+  }, {delay: 100});
 };
 
 /// onSelChange

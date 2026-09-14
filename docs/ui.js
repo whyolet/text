@@ -123,10 +123,15 @@ export const expand = (el) => el.classList.remove(collapsed);
 
 /// anim
 
-export const anim = (action) => {
+export const anim = (action, props) => {
+  const {delay} = props ?? {};
   if (document.startViewTransition) {
-    document.startViewTransition(action);
-  } else action();
+    setTimeout(() => {
+      document.startViewTransition(
+        action,
+      );
+    }, delay);
+  } else setTimeout(action, delay);
 };
 
 /// ib (icon button)
@@ -139,6 +144,7 @@ export const ib = (
  ) => {
   const {
     focused,  // If valid for input fields too, not just for the main textarea.
+    withoutFocus,
     onLong,
   } = props ?? {};
 
@@ -160,7 +166,7 @@ export const ib = (
     unidle();
 
     const input = focused && ui.focusedInput || ui.ta;
-    input.focus();
+    if (!withoutFocus) input.focus();
     if (input === ui.ta) await save();
     if (!handler) return;
 
@@ -374,7 +380,7 @@ export const dialog = async (...items) => {
 };
 
 export const input = (defaultValue, props) => {
-  const {secret} = props ?? {};
+  const {inline, prefix, secret, suffix} = props ?? {};
 
   ui.dialogInput = o("input", {
     type: secret ? "password" : "text",
@@ -388,6 +394,12 @@ export const input = (defaultValue, props) => {
       reply(null);
     }
   });
+
+  if (prefix || suffix) return o(".enter" + (inline ? " inline" : ""),
+    prefix || null,
+    ui.dialogInput,
+    suffix || null,
+  );
 
   if (!secret) return ui.dialogInput;
 
@@ -405,7 +417,7 @@ export const input = (defaultValue, props) => {
     toggle.textContent = visible ? "visibility_off" : "visibility";
   }, {focused: true});
 
-  return o(".secret",
+  return o(".enter",
     ui.dialogInput,
     toggle,
   );
@@ -446,33 +458,44 @@ export const warn = async (message) => await say(addWarn(message));
 
 export const debug = async (data) => await say(JSON.stringify(data));
 
-/// ask, choose
+/// ask
 
 export const ask = async (...items) => !!await dialog(...items, okCancel());
+
+/// choose
 
 export const choose = async (header, ...options) => {
   const items = [];
   for (const option of options) {
+    if (option === null) continue;
+
     const item = option.item ?? o(".item button",
       option.icon ?
         o(".icon", option.icon)
         : null,
       option.text,
     );
-    const value = option.value;
-    onClick(item, () => reply(value));
+
+    onClick(item, () => reply(option.value));
     items.push(item);
   }
 
   return await dialog(
-    o(".header",
-      header || "Make a choice:",
+    o(".closable",
+      o(".main header",
+        header || "Make a choice:",
+      ),
+      ib("close", "x", () => reply(null)),
     ),
     o(".choose",
       o(".items", ...items),
     ),
   );
 };
+
+/// mi (menu item)
+
+export const mi = (icon, text, value) => ({icon, text, value});
 
 /// enter
 
@@ -489,10 +512,16 @@ export const getInt = (props) => {
   if (newValue === null) return null;
 
   let result = parseInt(newValue, 10);
-  if (Number.isNaN(result)) return null;
+  if (Number.isNaN(result)) {
+    toast(`From ${min} to ${max}`);
+    return null;
+  }
 
   if (add) result += add;
-  if (result === oldValue) return null;
+
+  if (result === oldValue) {
+    return null;
+  }
 
   if (
     result < min ||

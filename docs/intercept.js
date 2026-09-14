@@ -22,6 +22,7 @@ if (location.hash.includes("state")) {
       "type": "oauth-redirect",
       "hash": location.hash,
     });
+
   } else {
     location.hash = "";
     // Don't replace `alert` with `warn` here as this module should not import others.

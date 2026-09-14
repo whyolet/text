@@ -16,8 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {decrypt, encrypt, getDbName, getSalt, setDbKey, setExportKey1} from "./crypto.js";
+import {Bytes, decrypt, encrypt, getDbName, getExportKey1Bytes, getSalt, setDbKey, setExportKey1} from "./crypto.js";
 import {defaultColors} from "./font.js";
+import {defaultSyncSeconds} from "./gdrive.js";
+import {getNow} from "./nav.js";
 import {o, showBanner, warn} from "./ui.js";
 import {createOp, getRevertedOp} from "./undo.js";
 
@@ -35,25 +37,42 @@ const stores = Object.seal({
 
 export const conf = Object.seal({
   colors: "colors",
+  exportKey1Bytes: "exportKey1Bytes",
+  gdriveDownloaded: "gdriveDownloaded",
+  gdriveEmail: "gdriveEmail",
+  gdriveToken: "gdriveToken",
+  gdriveUploaded: "gdriveUploaded",
   opIds: "opIds",
+  pagesUpdated: "pagesUpdated",
   recentTags: "recentTags",
   salt: "salt",
+  syncMode: "syncMode",
+  syncSeconds: "syncSeconds",
   trap: "trap",
   zoom: "zoom",
 });
 
 export const mem = Object.seal({
   colors: null,
+  exportKey1Bytes: null,  // not saved if mem.isSecret
+  gdriveDownloaded: null,
+  gdriveEmail: null,
+  gdriveToken: null,
+  gdriveUploaded: null,
   opIds: null,
   pages: null,
+  pagesUpdated: null,
   recentTags: null,
   salt: null,
+  syncMode: null,
+  syncSeconds: null,
   trap: null,
   zoom: null,
 
   /// Not saved
 
   isSecret: false,
+  isSyncing: false,
   fileHandles: {},
   fromSearch: false,
   nonce: "",
@@ -64,6 +83,7 @@ export const mem = Object.seal({
   protectedTag: "",
   screens: {},
   searchQuery: "",
+  syncTimerId: 0,
   textLength: 0,  // for `autoindent`
 });
 
@@ -119,14 +139,27 @@ export const load = async (passphrase) => await new Promise(async (doneLoading) 
     idb.onerror = onDbError;
     idb.onversionchange = updateAppVersion;
 
+    mem.isSecret = !!passphrase;
     await loadOrCreateSalt();
     await setDbKey(passphrase, mem.salt);
-    await setExportKey1(passphrase);
-    mem.isSecret = !!passphrase;
+    const bytes = await getExportKey1Bytes(passphrase);
+    if (mem.isSecret) {
+      await setExportKey1(bytes);
+    } else {
+      await loadConf(conf.exportKey1Bytes, () => bytes.toHex());
+      await setExportKey1(Bytes.fromHex(mem.exportKey1Bytes));
+    }
     passphrase = "";  // forget asap!
 
     await Promise.all([
       loadConf(conf.colors, () => defaultColors),
+      loadConf(conf.gdriveDownloaded, () => ""),
+      loadConf(conf.gdriveEmail, () => ""),
+      loadConf(conf.gdriveToken, () => ""),
+      loadConf(conf.gdriveUploaded, () => ""),
+      loadConf(conf.pagesUpdated, () => ""),
+      loadConf(conf.syncMode, () => "selAcc"),
+      loadConf(conf.syncSeconds, () => defaultSyncSeconds),
       loadConf(conf.trap, () => "f"),
       loadConf(conf.zoom, () => 100),
       loadConf(conf.recentTags, () => []),
@@ -252,18 +285,29 @@ export const savePage = async (page, props) => {
 
   const encryptedPage = await encrypt(page);
 
+  mem.pagesUpdated = getNow();
+  const encryptedPagesUpdated = await encrypt(mem.pagesUpdated);
+
   const encryptedOp = withoutOp ? null
     : await encrypt(createOp(page, {hasPrev, hasNext}));
 
   await new Promise(done => {
     const txn = idb.transaction(
-      [stores.page, stores.op],
+      [
+        stores.page,
+        stores.conf,
+        stores.op,
+      ],
       "readwrite",
     );
 
     txn
     .objectStore(stores.page)
     .put(encryptedPage, page.id);
+
+    txn
+    .objectStore(stores.conf)
+    .put(encryptedPagesUpdated, conf.pagesUpdated);
 
     if (withoutOp) {
       txn.oncomplete = done;
