@@ -401,15 +401,25 @@ const exportAndUpload = async (file) => {
 /// authFetch
 
 const authFetch = async (url, options) => {
-  options ??= {};
-
-  const response = await fetch(url, {
+  const fetchOptions = {
     cache: "no-store",
+    ...options,
     headers: {
       "Authorization": "Bearer " + mem.gdriveToken,
+      ...options?.headers,
     },
-    ...options
-  });
+  };
+
+  let response;
+  try {
+    response = await fetch(url, fetchOptions);
+  } catch (error) {
+    // E.g. network error "Failed to fetch": toast-inform and retry later after syncSeconds.
+    toast(error.message, {
+      warn: true,
+    });
+    return null;
+  }
 
   if (response.ok) return response;
 
