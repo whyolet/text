@@ -156,10 +156,7 @@ export const onDuplicate = async () => {
 
 export const onMoveUp = async () => {
   const {start, end, part} = getSel({wholeLines: true});
-  if (!start) {
-    setSel(0, end);
-    return toast("Start of text reached!");
-  }
+  if (startReached(start, end)) return;
 
   const prev = mem.page.text
   .slice(0, start)
@@ -185,21 +182,16 @@ export const onMoveUp = async () => {
 };
 
 export const onMoveDown = async () => {
-  const text = mem.page.text;
+  const {text} = mem.page;
   const {start, end, part} = getSel({wholeLines: true});
-
-  if (end === text.length) {
-    setSel(start, end);
-    return toast("End of text reached!");
-  }
+  if (endReached(start, end, text.length)) return;
 
   const [
     ,
     newline,
     nextPart,
-  ] = text
-  .slice(end)
-  .match(/(\r?\n?)([^\r\n]*)/);
+  ] = text.slice(end)
+    .match(/(\r?\n?)([^\r\n]*)/);
 
   const result = [
     nextPart,
@@ -210,6 +202,72 @@ export const onMoveDown = async () => {
   const added = nextPart.length + newline.length;
   ui.ta.setRangeText(result, start, end + added);
   setSel(start + added, end + added);
+  await save();
+};
+
+/// startReached, endReached
+
+const startReached = (start, end) => {
+  if (start) return false;
+
+  setSel(start, end);
+  toast("Start of text reached!");
+  return true;
+};
+
+const endReached = (start, end, textLength) => {
+  if (end < textLength) return false;
+
+  setSel(start, end);
+  toast("End of text reached!");
+  return true;
+};
+
+/// onMoveToTop, onMoveToBottom
+
+export const onMoveToTop = async () => {
+  const {start, end, part} = getSel({wholeLines: true});
+  if (startReached(start, end)) return;
+
+  const [
+    ,
+    prevPart,
+    newline,
+  ] = mem.page.text
+    .slice(0, start)
+    .match(/(.*?)(\r?\n?)$/s);
+
+  const result = [
+    part,
+    newline,
+    prevPart,
+  ].join("");
+
+  ui.ta.setRangeText(result, 0, end);
+  setSel(0, end - start);
+  await save();
+};
+
+export const onMoveToBottom = async () => {
+  const {text} = mem.page;
+  const {start, end, part} = getSel({wholeLines: true});
+  if (endReached(start, end, text.length)) return;
+
+  const [
+    ,
+    newline,
+    nextPart,
+  ] = text.slice(end)
+    .match(/(\r?\n?)(.*)/s);
+
+  const result = [
+    nextPart,
+    newline,
+    part,
+  ].join("");
+
+  ui.ta.setRangeText(result, start, start + result.length);
+  setSel(text.length - part.length, text.length);
   await save();
 };
 

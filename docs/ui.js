@@ -174,25 +174,27 @@ export const ib = (
   };
 
   if (!onLong) {
-    onClick(el, async () => await smart(handler));
+    // No await to keep click.
+    onClick(el, () => smart(handler));
     return el;
   }
 
   let timerId, isLong = false;
 
-  const startClick = () => {
+  const startClick = (event) => {
+    event.preventDefault();  // To keep focus on input after `pointerup`.
     isLong = false;
-    timerId = setTimeout(async () => {
+    timerId = setTimeout(() => {
       isLong = true;
-      await smart(onLong);
+      smart(onLong);
     }, 500);
   };
 
-  const endClick = async () => {
+  const endClick = () => {
     clearTimeout(timerId);
     if (isLong) return;
 
-    await smart(handler);
+    smart(handler);
   };
 
   const cancelClick = () => {

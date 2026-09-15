@@ -238,6 +238,13 @@ const onOpenDateInput = async (date) => {
   await openScreen(screenTypes.page, {tag: date});
 };
 
+export const onOpenDateOrToday = async () => {
+  const today = getToday();
+  if (mem.page.tag === today) {
+    onOpenDate();
+  } else await onOpenDateInput(today);
+};
+
 /// onOpenTag
 
 export const onOpenTag = async () => {
@@ -427,6 +434,7 @@ const onMoveToDateInput = async (date) => {
 
   ui.ta.setRangeText("", start, end, "end");
   await save({hasNext: true});
+  mem.protectedLength = mem.page.text.length;
 
   const page = getPage(date);
 

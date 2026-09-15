@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {anchor, onAnchor} from "./anchor.js";
+import {anchor, onAddAnchor, onAnchor} from "./anchor.js";
 import {onCut, onCopy, onPaste} from "./clipboard.js";
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
@@ -28,9 +28,9 @@ import {detectGestures} from "./gesture.js";
 import {autoindent, onDedent, onIndent} from "./indent.js";
 import {updateLineFormOnSelChange} from "./line.js";
 import {onMenu} from "./menu.js";
-import {detectTag, folder, getNextDate, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onMoveToNext, onOpenDate, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
+import {detectTag, folder, getNextDate, getNow, getToday, hideAtticForms, homeTag, isDateTag, onBack, onMoveOverdue, onMoveToDate, onMoveToNext, onOpenDate, onOpenDateOrToday, onOpenHome, onOpenTag, openScreen, screenTypes, showOrHideOverdue, unidle} from "./nav.js";
 import {addToRecentTags, onSearch} from "./search.js";
-import {doneTester, onCheck, onDuplicate, onErase, onList, onMoveDown, onMoveUp, onSelAll, onSelLine, setSel} from "./sel.js";
+import {doneTester, onCheck, onDuplicate, onErase, onList, onMoveDown, onMoveToBottom, onMoveToTop, onMoveUp, onSelAll, onSelLine, setSel} from "./sel.js";
 import {anim, debounce, enter, hide, ib, o, on, onClick, toast, ui} from "./ui.js";
 import {onRedo, onUndo} from "./undo.js";
 
@@ -69,10 +69,19 @@ export const initPageUI = () => {
     
     ui.header,
 
-    ib("calendar_month", "g", onOpenDate),  // Go to date
-    ib("search", "F", onSearch, {focused: true}),  // Ctrl+Shift+F
+    ib("calendar_month", "g",
+      onOpenDateOrToday,
+      {onLong: onOpenDate},
+    ),  // Go to date
+    ib("search", "F",
+      onSearch,
+      {focused: true},
+    ),  // Ctrl+Shift+F
     ib("find_in_page", "f", onFindForm),  // Ctrl+F
-    ib("anchor", "j", onAnchor),
+    ib("anchor", "j",
+      onAnchor,
+      {onLong: onAddAnchor},
+    ),  // Jump, "j" looks like an anchor
 
     /// center
 
@@ -82,11 +91,18 @@ export const initPageUI = () => {
 
     ui.ta,
 
-    ib("north", "u", onMoveUp),
-    ib("send", "n", onMoveToNext, {
-      onLong: onMoveToDate,
-    }),  // Next
-    ib("south", "d", onMoveDown),
+    ib("north", "u",
+      onMoveUp,
+      {onLong: onMoveToTop},
+    ),
+    ib("send", "n",
+      onMoveToNext,
+      {onLong: onMoveToDate},
+    ),
+    ib("south", "d",
+      onMoveDown,
+      {onLong: onMoveToBottom},
+    ),
 
     /// bottom
 

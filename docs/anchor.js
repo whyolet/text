@@ -29,14 +29,16 @@ export const anchor = "⚓";
 
 export const onAnchor = async () => {
   const {text, selStart} = mem.page;
-
   const i = text.indexOf(anchor);
+
+  /// Add
+
   if (i === -1) {
-    ui.ta.setRangeText(anchor, selStart, selStart);
-    setSel(selStart, selStart + 1);
-    await save();
+    await onAddAnchor();
     return;
   }
+
+  /// Del
 
   if (i === selStart) {
     ui.ta.setRangeText("", selStart, selStart + 1);
@@ -45,6 +47,17 @@ export const onAnchor = async () => {
     return;
   }
 
+  /// Find
+
   setSel(i, i + 1);
+  await save();
+};
+
+/// onAddAnchor
+
+export const onAddAnchor = async () => {
+  const {selStart} = mem.page;
+  ui.ta.setRangeText(anchor, selStart, selStart);
+  setSel(selStart, selStart + 1);
   await save();
 };
