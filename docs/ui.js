@@ -389,15 +389,18 @@ on(ui.body, "keydown", (e) => {
   }
 });
 
-export const btn = (text, getResult) => {
-  const el = o(".rounded button", text);
+export const btn = (icon, text, getResult) => {
+  const el = o(".rounded button",
+    icon ? o(".icon", icon) : null,
+    icon ? ` ${text}` : text,
+  );
   onClick(el, () => reply(getResult()));
   return el;
 };
 
-export const okBtn = () => btn("OK", () => ui.dialogInput?.value ?? true);
+export const okBtn = () => btn(null, "OK", () => ui.dialogInput?.value ?? true);
 
-export const cancelBtn = () => btn("Cancel", () => null);
+export const cancelBtn = () => btn(null, "Cancel", () => null);
 
 export const btns = (...buttons) => o(".buttons", ...buttons);
 
@@ -409,6 +412,13 @@ export const okCancel = () => btns(
   cancelBtn(),
   okBtn(),
 );
+
+export const closable = (header) => {
+  return o(".closable",
+    o(".main header", header),
+    ib("close", "x", () => reply(null)),
+  );
+};
 
 /// say, warn, debug
 
@@ -435,12 +445,7 @@ export const choose = async (header, ...options) => {
   }
 
   return await dialog(
-    o(".closable",
-      o(".main header",
-        header || "Make a choice:",
-      ),
-      ib("close", "x", () => reply(null)),
-    ),
+    closable(header || "Make a choice:"),
     o(".choose",
       o(".items", ...items),
     ),

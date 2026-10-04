@@ -23,7 +23,6 @@ import {mem} from "./db.js";
 import {hideFindForm, onFindNext, showFindForm} from "./find.js";
 import {applyFont, hideFontForm} from "./font.js";
 import {onRedirect, sync} from "./gdrive.js";
-import {info, openInfo, openInfoScreen} from "./info.js";
 import {hideLineForm} from "./line.js";
 import {getPersisted, tryPersist} from "./local.js";
 import {getDone, getPage, openPage, openPageByTag, save, splitDoneText, zeroCursor} from "./page.js";
@@ -131,7 +130,6 @@ export const openFirstScreen = async () => {
 /// openScreen, screenTypes
 
 export const screenTypes = Object.seal({
-  info: "info",
   page: "page",
   search: "search",
 });
@@ -173,9 +171,6 @@ const onSetState = async (event) => {
     } else hide(el);
   }
 
-  // `openInfo` will set `false`.
-  info.closed = true;
-
   if (screen.type === screenTypes.page) {
     const {tag} = screen.props;
     await openPageByTag(tag);
@@ -194,10 +189,6 @@ const onSetState = async (event) => {
 
   } else if (screen.type === screenTypes.search) {
     openSearch();
-
-  } else if (screen.type === screenTypes.info) {
-    const {header, items, props} = screen.props;
-    openInfo(header, items, props);
 
   } else throw Error(screen.type);
 };

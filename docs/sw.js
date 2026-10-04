@@ -35,7 +35,6 @@
     "/gdrive.js",
     "/gesture.js",
     "/indent.js",
-    "/info.js",
     "/line.js",
     "/local.js",
     "/main.js",

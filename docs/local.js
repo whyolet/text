@@ -18,8 +18,7 @@
 
 import * as db from "./db.js";
 import {mem} from "./db.js";
-import {openInfoScreen} from "./info.js";
-import {fatal, enter, o, onClick, say, warn} from "./ui.js";
+import {btn, closable, dialog, fatal, enter, o, onClick, say, warn} from "./ui.js";
 
 /// isPersistSupported
 
@@ -49,70 +48,48 @@ export const tryPersist = async () => {
 /// onLocalData
 
 export const onLocalData = async () => {
-  const header = "Local data";
-
-  const deleteButton = o(".rounded button",
-    o(".icon", "delete_forever"),
-    " Delete your local data",
-  );
-  onClick(deleteButton, onDeleteLocalData);
-
-  const trapButton = mem.isSecret ? o(".rounded button",
-    o(".icon", "bomb"),
-    " Set the trap",
-  ) : null;
-  if (trapButton) onClick(trapButton, onSetTrap);
-
-  const dangerZone = [
-    o(".hr"),
-    o("", o("b", "DANGER ZONE")),
-    "If you remove this web app from the home screen, your local data may be deleted or kept. This depends on your web browser and OS.",
-    o("",
-      "If you use the button below, there is no way back, unless you have a backup file, or a recent sync, or another device with this data.",
-      o(".centered",
-        o("",
-          deleteButton,
-          trapButton,
-        ),
-      ),
-    ),
-  ];
-
   let persisted = await getPersisted();
   if (!persisted) persisted = await tryPersist();
 
-  if (persisted) {
-    await openInfoScreen(header, [
-      "Good news: your web browser has agreed not to delete your local data.",
-      "However, to be safe, use the menu to backup or sync your data.",
-      "", "",
-      dangerZone,
-    ]);
-    return;
-  }
-
-  const requestPermButton = o(".rounded button",
-    o(".icon", "toggle_on"),
-    " Request permission",
-  );
-  onClick(requestPermButton, onRequestPerm);
-
-  await openInfoScreen(header, [
-    "Bad news: your web browser plans to delete your local data.",
-    'To avoid this, click "Install app" or "Add to Home Screen" in the browser menu, and open the installed app.',
-    o("",
-      'If you still see this warning, please request "Notification" permission ',
-      o("a", {
-        href: "https://web.dev/articles/persistent-storage#how_is_permission_granted",
-        target: "_blank",
-      }, "required"),
-      ' for "Persistent storage" permission:',
-      o(".centered",
-        requestPermButton,
+  const action = await dialog(
+    closable("Local data"),
+    persisted ? [
+      o("", "Good news: your web browser has agreed not to delete your local data."),
+      o("", "However, to be safe, use the menu to backup or sync your data."),
+    ] : [
+      o("", "Bad news: your web browser plans to delete your local data."),
+      o("", 'To avoid this, click "Install app" or "Add to Home Screen" in the browser menu, and open the installed app.'),
+      o("",
+        'If you still see this warning, please request "Notification" permission ',
+        o("a", {
+          href: "https://web.dev/articles/persistent-storage#how_is_permission_granted",
+          target: "_blank",
+        }, "required"),
+        ' for "Persistent storage" permission:',
       ),
+      btn(
+        "toggle_on",
+        "Request permission",
+        () => onRequestPerm,
+      ),
+    ],
+    o(".hr"),
+    o("b", "DANGER ZONE"),
+    o("", "If you remove this web app from the home screen, your local data may be deleted or kept. This depends on your web browser and OS."),
+    o("", "If you use the button below, there is no way back, unless you have a backup file, or a recent sync, or another device with this data."),
+    btn(
+      "delete_forever",
+      "Delete your local data",
+      () => onDeleteLocalData,
     ),
-    dangerZone,
-  ]);
+    mem.isSecret ? btn(
+      "bomb",
+      "Set the trap",
+      () => onSetTrap,
+    ) : null,
+  );
+
+  if (action) action();
 };
 
 /// onRequestPerm
@@ -156,7 +133,6 @@ const onRequestPerm = async () => {
 
 const onSuccess = async () => {
   await say("Success!");
-  history.back();
   setTimeout(onLocalData, 200);
 };
 

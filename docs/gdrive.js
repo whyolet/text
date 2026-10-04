@@ -20,7 +20,6 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getExportedBytes, importBackup, onSetExportPassphrase} from "./file.js";
-import {info, openInfoScreen} from "./info.js";
 import {choose, enter, getInt, mi, o, toast, ui, warn} from "./ui.js";
 
 export const defaultSyncSeconds = 60;
