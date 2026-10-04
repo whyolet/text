@@ -95,11 +95,11 @@ const addWarn = (message) => `⚠️ ${message.trim()}`;
 
 /// on, onClick
 
-export const on = (el, eventName, handler, props) => {
-  el.addEventListener(eventName, handler, props);
+export const on = (el, eventName, action, props) => {
+  el.addEventListener(eventName, action, props);
 };
 
-export const onClick = (el, handler) => on(el, "click", handler);
+export const onClick = (el, action) => on(el, "click", action);
 
 /// isHidden, hide, show
 
@@ -139,13 +139,14 @@ export const anim = (action, props) => {
 export const ib = (
   icon,  // Web icon name from https://fonts.google.com/icons
   shortcut,  // CSS `grid-area` for now. TODO: `Ctrl+...` keyboard shortcut.
-  handler,
+  action, // On click or on shortcut.
   props,
  ) => {
   const {
     focused,  // If valid for input fields too, not just for the main textarea.
-    withoutFocus,
-    onLong,
+    withoutFocus, // If focus should not be requested.
+    longAction, // Different action on long click.
+    longStart, // On start of long click.
   } = props ?? {};
 
   const el = o(
@@ -161,40 +162,35 @@ export const ib = (
     icon,
   );
 
-  const smart = async (handler) => {
-    if (!ui.isActive) return;
-    unidle();
-
-    const input = focused && ui.focusedInput || ui.ta;
-    if (!withoutFocus) input.focus();
-    if (input === ui.ta) await save();
-    if (!handler) return;
-
-    handler();
-  };
-
-  if (!onLong) {
-    // No await to keep click.
-    onClick(el, () => smart(handler));
-    return el;
-  }
-
   let timerId, isLong = false;
 
   const startClick = (event) => {
     event.preventDefault();  // To keep focus on input after `pointerup`.
     isLong = false;
-    timerId = setTimeout(() => {
-      isLong = true;
-      smart(onLong);
-    }, 500);
+    clearTimeout(timerId);
+    timerId = setTimeout(onTimer, 500);
   };
 
-  const endClick = () => {
+  const onTimer = async () => {
+    isLong = true;
+    await start();
+    if (longStart) await longStart();
+    await (longAction ?? action)();
+  };
+
+  const start = async () => {
+    unidle();
+    const input = focused && ui.focusedInput || ui.ta;
+    if (!withoutFocus) input.focus();
+    if (input === ui.ta) await save();
+  };
+
+  const endClick = async () => {
     clearTimeout(timerId);
     if (isLong) return;
 
-    smart(handler);
+    await start();
+    await action();
   };
 
   const cancelClick = () => {

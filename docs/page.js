@@ -69,19 +69,16 @@ export const initPageUI = () => {
     
     ui.header,
 
-    ib("calendar_month", "g",
-      onOpenDateOrToday,
-      {onLong: onOpenDate},
-    ),  // Go to date
-    ib("search", "F",
-      onSearch,
-      {focused: true},
-    ),  // Ctrl+Shift+F
+    ib("calendar_month", "g", onOpenDateOrToday, {
+      longAction: onOpenDate,
+    }),  // Go to date
+    ib("search", "F", onSearch, {
+      focused: true,
+    }),  // Ctrl+Shift+F
     ib("find_in_page", "f", onFindForm),  // Ctrl+F
-    ib("anchor", "j",
-      onAnchor,
-      {onLong: onAddAnchor},
-    ),  // Jump, "j" looks like an anchor
+    ib("anchor", "j", onAnchor, {
+      longAction: onAddAnchor,
+    }),  // Jump, "j" looks like an anchor
 
     /// center
 
@@ -91,39 +88,65 @@ export const initPageUI = () => {
 
     ui.ta,
 
-    ib("north", "u",
-      onMoveUp,
-      {onLong: onMoveToTop},
-    ),
-    ib("send", "n",
-      onMoveToNext,
-      {onLong: onMoveToDate},
-    ),
-    ib("south", "d",
-      onMoveDown,
-      {onLong: onMoveToBottom},
-    ),
+    ib("north", "u", onMoveUp, {
+      longAction: onMoveToTop,
+    }),
+    ib("send", "n", onMoveToNext, {
+      longAction: onMoveToDate,
+    }),
+    ib("south", "d", onMoveDown, {
+      longAction: onMoveToBottom,
+    }),
 
     /// bottom
 
-    ib("backspace", "e", onErase, {focused: true}),
-    ib("exposure_plus_1", "w", onDuplicate),
-    ib("variables", "l", onSelLine, {focused: true}),
-    ib("fullscreen", "q", onZen, {withoutFocus: true}),
+    ib("backspace", "e", onErase, {
+      focused: true,
+      longStart: onSelAll,
+    }),
+    ib("exposure_plus_1", "w", onDuplicate, {
+      longStart: onSelAll,
+    }),
+    ib("variables", "l", onSelLine, {
+      focused: true,
+      longAction: onSelAll,
+    }),
+    ib("fullscreen", "q", onZen, {
+      withoutFocus: true,
+    }),
 
-    ib("format_indent_decrease", "I", onDedent),  // Ctrl+Shift+I
-    ib("format_indent_increase", "i", onIndent),  // Ctrl+I
+    ib("format_indent_decrease", "I", onDedent, {
+      longStart: onSelAll,
+    }),  // Ctrl+Shift+I
+    ib("format_indent_increase", "i", onIndent, {
+      longStart: onSelAll,
+    }),  // Ctrl+I
 
-    ib("check", "k", onCheck),
-    ib("format_list_bulleted", "L", onList),  // Ctrl+Shift+L
+    ib("check", "k", onCheck, {
+      longStart: onSelAll,
+    }),
+    ib("format_list_bulleted", "L", onList, {
+      longStart: onSelAll,
+    }),  // Ctrl+Shift+L
 
     ib("undo", "z", onUndo),  // Ctrl+Z
     ib("redo", "Z", onRedo),  // Ctrl+Shift+Z
 
-    ib("content_cut", "x", onCut, {focused: true}),
-    ib("content_copy", "c", onCopy, {focused: true}),
-    ib("content_paste", "v", onPaste, {focused: true}),
-    ib("select_all", "a", onSelAll, {focused: true}),
+    ib("content_cut", "x", onCut, {
+      focused: true,
+      longStart: onSelAll,
+    }),
+    ib("content_copy", "c", onCopy, {
+      focused: true,
+      longStart: onSelAll,
+    }),
+    ib("content_paste", "v", onPaste, {
+      focused: true,
+      longStart: onSelAll,
+    }),
+    ib("select_all", "a", onSelAll, {
+      focused: true,
+    }),
   );
 
   ui.page = o(".page",
@@ -459,8 +482,6 @@ const onBeforeInput = () => {
 }
 
 const onInput = () => {
-  if (!ui.isActive) return;
-
   autoindent();
   debounce("save", 1000, save);
 };

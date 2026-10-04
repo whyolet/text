@@ -161,7 +161,7 @@ export const openScreen = async (type, props) => {
 
 const onSetState = async (event) => {
   const screenId = event.state;
-  if (!screenId || !ui.isActive) return;
+  if (!screenId) return;
 
   const screen = mem.screens[screenId];
   if (!screen) return;
