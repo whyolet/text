@@ -170,7 +170,7 @@ export const getPage = (tag) => {
     tag,
     text: "",
     done: true, // no `notDoneText`
-    edited: getNow(),  // text was updated by user
+    edited: "",  // Less than timestamp, so unsaved local "Today" page is overwritten on sync.
     fileSaved: null,  // when
     ...zeroCursor
   };
