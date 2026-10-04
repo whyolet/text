@@ -89,7 +89,7 @@ export const onLocalData = async () => {
     ) : null,
   );
 
-  if (action) action();
+  if (action) await action();
 };
 
 /// onRequestPerm

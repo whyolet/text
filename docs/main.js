@@ -46,7 +46,8 @@ initPageUI();
 
 ui.body.textContent = "";
 for (const screenType in screenTypes)  {
-  ui.body.appendChild(ui[screenType]);
+  const el = ui[screenType];
+  if (el) ui.body.appendChild(el);
 }
 
 await openFirstScreen();

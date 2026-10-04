@@ -238,25 +238,6 @@ b {
   text-align: center;
 }
 
-/** centered **/
-
-.centered {
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.centered.full {
-  height: 100%;
-  justify-content: center;
-}
-
-.centered > * {
-  margin: var(--char);
-}
-
 /** page screen = attics + frame **/
 
 .page {

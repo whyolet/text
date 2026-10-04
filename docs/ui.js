@@ -84,7 +84,9 @@ export const o = (tag_cls, ...kids) => {
 
 export const ui = {
   appName: "Whyolet Text",
+  bedrock: "bedrock",
   body: document.body,
+  ignoreForward: false,
   isActive: true,
   supportEmail: "support@whyolet.com",
 };
@@ -339,6 +341,16 @@ export const dialog = async (...items) => {
   return result;
 };
 
+export const closeDialog = () => {
+  if (!reply || !ui.overlay) return;
+
+  const closerBtn = ui.overlay.querySelector(".closer");
+
+  if (closerBtn) {
+    closerBtn.click();
+  } else reply(null);
+};
+
 export const input = (defaultValue, props) => {
   const {inline, prefix, secret, suffix} = props ?? {};
 
@@ -350,9 +362,7 @@ export const input = (defaultValue, props) => {
   on(ui.dialogInput, "keydown", (e) => {
     if (e.key === "Enter") {
       reply(ui.dialogInput.value);
-    } else if (e.key === "Escape") {
-      reply(null);
-    }
+    } else if (e.key === "Escape") closeDialog();
   });
 
   if (prefix || suffix) return o(".enter" + (inline ? " inline" : ""),
@@ -384,13 +394,14 @@ export const input = (defaultValue, props) => {
 };
 
 on(ui.body, "keydown", (e) => {
-  if (reply && e.key === "Escape") {
-    reply(null);
-  }
+  if (e.key === "Escape") closeDialog();
 });
 
-export const btn = (icon, text, getResult) => {
-  const el = o(".rounded button",
+export const btn = (icon, text, getResult, closer) => {
+  const el = o(
+    ".rounded button" + (
+      closer ? " closer" : ""
+    ),
     icon ? o(".icon", icon) : null,
     icon ? ` ${text}` : text,
   );
@@ -398,18 +409,18 @@ export const btn = (icon, text, getResult) => {
   return el;
 };
 
-export const okBtn = () => btn(null, "OK", () => ui.dialogInput?.value ?? true);
+export const okBtn = (closer) => btn(null, "OK", () => ui.dialogInput?.value ?? true, closer);
 
-export const cancelBtn = () => btn(null, "Cancel", () => null);
+export const cancelBtn = (closer) => btn(null, "Cancel", () => null, closer);
 
 export const btns = (...buttons) => o(".buttons", ...buttons);
 
 export const ok = () => btns(
-  okBtn(),
+  okBtn(true),
 );
 
 export const okCancel = () => btns(
-  cancelBtn(),
+  cancelBtn(true),
   okBtn(),
 );
 
@@ -454,13 +465,16 @@ export const choose = async (header, ...options) => {
 
 /// mi (menu item)
 
-export const mi = (icon, text, value) => ({icon, text, value});
+export const mi = (icon, text, value, closer) => ({icon, text, value, closer});
 
 /// getItem
 
 const getItem = (option) => {
   return option.item ??
-    o(".item button",
+    o(
+      ".item button" + (
+        option.closer ? " closer" : ""
+      ),
       option.icon ?
         o(".icon", option.icon)
         : null,
@@ -479,7 +493,7 @@ export const fatal = async (header, details, ...options) => {
   options ??= [];
   options.push(mi("refresh", "Restart", () => {
     location.reload();
-  }));
+  }, true));
 
   const items = [];
   for (const option of options) {

@@ -28,7 +28,7 @@ import {getPersisted, tryPersist} from "./local.js";
 import {getDone, getPage, openPage, openPageByTag, save, splitDoneText, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
 import {check, getSel, setSel} from "./sel.js";
-import {ask, enter, fatal, getDateInput, debounce, hide, hideOverlay, o, on, say, show, showDateInput, showOverlay, toast, ui, warn} from "./ui.js";
+import {ask, closeDialog, enter, fatal, getDateInput, debounce, hide, hideOverlay, o, on, say, show, showDateInput, showOverlay, toast, ui, warn} from "./ui.js";
 
 export const folder = "📂";
 const folderCodePoint = folder.codePointAt(0);
@@ -105,7 +105,18 @@ const onMessage = (event) => {
 export const openFirstScreen = async () => {
   applyFont();
 
+  const replace = !!(
+    history.state &&
+    history.state !== ui.bedrock
+  );
+
+  if (!history.state) {
+    history.replaceState(ui.bedrock, "");
+    // `openScreen` will `pushState` so we will have at least two states to always detect "Back" to close a dialog, if any.
+  }
+
   await openScreen(screenTypes.page, {
+    replace,
     tag: getToday(),
     withoutSave: true,
   });
@@ -142,21 +153,51 @@ export const openScreen = async (type, props) => {
   const screenId = getId();
   mem.screens[screenId] = {type, props};
 
-  if (history.state && !replace) {
-    history.pushState(screenId, "");
-  } else {
+  if (replace) {
     history.replaceState(screenId, "");
+  } else {
+    history.pushState(screenId, "");
   }
 
-  // `pushState/replaceState` never trigger `popstate/onSetState`.
+  // `pushState/replaceState` never triggers `popstate/onSetState`, so we do.
   if (!historyOnly) await onSetState({state: screenId});
 };
 
 /// onSetState
 
 const onSetState = async (event) => {
+  const isBackOrForward = event.type === "popstate";
+
+  if (
+    isBackOrForward &&
+    ui.ignoreForward
+  ) {
+    ui.ignoreForward = false;
+    return;
+  }
+
+  if (
+    isBackOrForward &&
+    ui.overlay
+  ) {
+    closeDialog();
+
+    // `forward` below aborted `reload` after `fatal`, prevent it.
+    if (!ui.isActive) return;
+
+    // Restore history after "Back" closed the dialog.
+    ui.ignoreForward = true;
+    history.forward();
+    return;
+  }
+
   const screenId = event.state;
   if (!screenId) return;
+
+  if (screenId === ui.bedrock) {
+    history.back();  // Exit.
+    return;
+  }
 
   const screen = mem.screens[screenId];
   if (!screen) return;
@@ -168,7 +209,7 @@ const onSetState = async (event) => {
     const el = ui[screenType];
     if (screenType === screen.type) {
       show(el);
-    } else hide(el);
+    } else if (el) hide(el);
   }
 
   if (screen.type === screenTypes.page) {
