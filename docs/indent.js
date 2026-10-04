@@ -22,6 +22,7 @@ import {save} from "./page.js";
 import {ui} from "./ui.js";
 
 const indent = "  ";
+export const indentRe = /^[\t ]*(?:[✓●] )?/;
 
 /// autoindent
 
@@ -57,7 +58,7 @@ export const autoindent = () => {
   .slice(0, i)
   .match(/([^\r\n]*)([\r\n]*)$/);
 
-  const oldIndents = templateLine.match(/^[\t ]*(?:[✓●] )?/)[0];
+  const oldIndents = templateLine.match(indentRe)[0];
   const newIndents = oldIndents.replaceAll(check, bullet);
 
   if (templateLine === oldIndents) {

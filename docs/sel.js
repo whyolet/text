@@ -18,6 +18,7 @@
 
 import * as db from "./db.js";
 import {mem} from "./db.js";
+import {indentRe} from "./indent.js";
 import {save} from "./page.js";
 import {toast, ui} from "./ui.js";
 
@@ -65,7 +66,7 @@ export const getSel = (props) => {
     if (withoutIndent) {
       start += text
       .slice(start, end)
-      .match(/\s*/)[0].length;
+      .match(indentRe)[0].length;
     }
   }
 
@@ -279,36 +280,59 @@ export const onSelAll = async () => {
   await save();
 }
 
-/// onSelLine
+/// onSelLine, updateSel
 
 export const onSelLine = async () => {
-  const {start, end} = getSel({
+  const {start, end, part, isTa} = getSel({
     focused: true,
     withoutExpand: true,
   });
 
-  if (start !== end) {
-    /// Keep clicking `onSelLine` to add lines to selection.
+  if (start === end) {
 
-    const {start, end, input} = getSel({
-      focused: true,
-      wholeLines: true,
-      withNewline: true,
+    /// 1. Select one line without indent.
+
+    updateSel({
+      withoutIndent: true,
     });
+  } else {
+    let done = false;
+    if (!/[\r\n]/.test(part)) {
 
-    setSel(start, end, {input});
+      /// 2. Add indent to one line.
+
+      const sel = updateSel({
+        wholeLines: true,
+      });
+      done = (
+        sel.start !== start ||
+        sel.end !== end
+      );
+    }
+    if (!done) {
+
+      /// 3. Keep clicking to add lines to selection.
+
+      updateSel({
+        wholeLines: true,
+        withNewline: true,
+      });
+      updateSel({
+        wholeLines: true,
+      });
+    }
   }
 
-  // No `else` here, just a scoped block to use simple var names.
-  {
-    /// Select whole current lines without newline in the end.
+  if (isTa) await save();
+};
 
-    const {start, end, input, isTa} = getSel({
-      focused: true,
-      wholeLines: true,
-    });
-
-    setSel(start, end, {input});
-    if (isTa) await save();
-  }
+const updateSel = (props) => {
+  const sel = getSel({
+    focused: true,
+    ...props,
+  });
+  setSel(sel.start, sel.end, {
+    input: sel.input,
+  });
+  return sel;
 };
