@@ -206,44 +206,6 @@ export const ib = (
   return el;
 };
 
-/// showBanner
-
-export const showBanner = (props, ...items) => {
-  const {isActive} = props ?? {};
-  if (!ui.isActive) return;
-
-  ui.isActive = isActive;
-  if (!isActive) db.close();
-
-  items = items.map(item =>
-    item instanceof Node
-      ? item
-      : o("", item)
-  );
-
-  items[0]?.classList.add("header");
-
-  ui.body.textContent = "";
-  ui.body.appendChild(
-    o(".full centered", ...items),
-  );
-};
-
-/// getRestartButton
-
-export const getRestartButton = () => {
-  const el = o(".rounded button",
-    o(".icon", "refresh"),
-    " Restart",
-  );
-
-  onClick(el, () => {
-    location.reload();
-  });
-
-  return el;
-};
-
 /// getDateInput, showDateInput
 
 export const getDateInput = (onSet) => {
@@ -467,13 +429,7 @@ export const choose = async (header, ...options) => {
   for (const option of options) {
     if (option === null) continue;
 
-    const item = option.item ?? o(".item button",
-      option.icon ?
-        o(".icon", option.icon)
-        : null,
-      option.text,
-    );
-
+    const item = getItem(option);
     onClick(item, () => reply(option.value));
     items.push(item);
   }
@@ -494,6 +450,53 @@ export const choose = async (header, ...options) => {
 /// mi (menu item)
 
 export const mi = (icon, text, value) => ({icon, text, value});
+
+/// getItem
+
+const getItem = (option) => {
+  return option.item ??
+    o(".item button",
+      option.icon ?
+        o(".icon", option.icon)
+        : null,
+      option.text,
+    );
+};
+
+/// fatal
+
+export const fatal = async (header, details, ...options) => {
+  if (!ui.isActive) return;
+
+  ui.isActive = false;
+  db.close();
+
+  options ??= [];
+  options.push(mi("refresh", "Restart", () => {
+    location.reload();
+  }));
+
+  const items = [];
+  for (const option of options) {
+    if (option === null) continue;
+
+    const item = getItem(option);
+    onClick(item, async () => {
+      await option.value();
+    });
+    items.push(item);
+  }
+
+  await dialog(
+    o(".main header", header),
+    details ?
+      o(".details", details)
+      : null,
+    o(".choose",
+      o(".items", ...items),
+    ),
+  );
+};
 
 /// enter
 

@@ -519,6 +519,15 @@ textarea {
   align-items: center;
 }
 
+.dialog:has(> .choose) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.dialog > .details {
+  padding: 0 var(--char);
+}
+
 .dialog > .closable {
   padding: 0 var(--gap);
 }
@@ -526,11 +535,6 @@ textarea {
 .dialog > .choose {
   align-self: stretch;
   overflow-y: auto;
-}
-
-.dialog:has(> .choose) {
-  padding-left: 0;
-  padding-right: 0;
 }
 
 .dialog > .enter {

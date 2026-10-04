@@ -17,7 +17,7 @@
  */
 
 import {argon2id} from "./vendors/hash-wasm/argon2.esm.min.js";
-import {o, getRestartButton, showBanner} from "./ui.js";
+import {fatal} from "./ui.js";
 
 /// Bytes
 
@@ -208,10 +208,9 @@ export const decrypt = async (bytes, props) => {
 
   const minLength = (isImport ? saltSize : 0) + ivSize;
   if (bytes.byteLength < minLength) {
-    showBanner({},
+    await fatal(
       "Too small!",
       "Maybe you've selected wrong file?",
-      getRestartButton(),
     );
     return null;
   }
@@ -246,10 +245,9 @@ export const decrypt = async (bytes, props) => {
       error.name === "OperationError" ||
       error.name === "InvalidAccessError"
     ) {
-      showBanner({},
+      await fatal(
         "Decryption failed!",
         "Try another passphrase.",
-        getRestartButton(),
       );
       return null;
     }
@@ -276,10 +274,9 @@ const tryDecompress = async (buffer) => {
   ) return buffer;
 
   if (!("DecompressionStream" in window)) {
-    showBanner({},
+    await fatal(
       "Cannot decompress!",
       "Try another browser.",
-      getRestartButton(),
     );
     return null;
   }

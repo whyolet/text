@@ -29,7 +29,7 @@ import {getPersisted, tryPersist} from "./local.js";
 import {getDone, getPage, openPage, openPageByTag, save, splitDoneText, zeroCursor} from "./page.js";
 import {openSearch} from "./search.js";
 import {check, getSel, setSel} from "./sel.js";
-import {ask, enter, getDateInput, debounce, hide, hideOverlay, o, on, getRestartButton, say, show, showBanner, showDateInput, showOverlay, toast, ui, warn} from "./ui.js";
+import {ask, enter, fatal, getDateInput, debounce, hide, hideOverlay, o, on, say, show, showDateInput, showOverlay, toast, ui, warn} from "./ui.js";
 
 export const folder = "📂";
 const folderCodePoint = folder.codePointAt(0);
@@ -82,15 +82,12 @@ export const getAppLock = async () => {
     );
   } catch {}
 
-  showBanner({},
+  await fatal(
     "Paused!",
-    o("", `
+    `
 You've opened ${ui.appName}
 in another tab.
-
-Please close it here or:
-    `),
-    getRestartButton(),
+    `,
   );
 };
 

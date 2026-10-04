@@ -19,7 +19,7 @@
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {openInfoScreen} from "./info.js";
-import {getRestartButton, enter, o, onClick, say, showBanner, warn} from "./ui.js";
+import {fatal, enter, o, onClick, say, warn} from "./ui.js";
 
 /// isPersistSupported
 
@@ -175,15 +175,15 @@ Your data is still here.
 
   await db.deleteLocalData();
 
-  showBanner({},
+  await fatal(
     "Your data is deleted",
-    o("", `
-You've successfully deleted your data
+    `
+You've successfully
+deleted your data
 from this app on this device.
 
 You can start from scratch now.
-    `),
-    getRestartButton(),
+    `,
   );
 };
 

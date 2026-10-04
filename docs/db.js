@@ -20,7 +20,7 @@ import {Bytes, decrypt, encrypt, getDbName, getExportKey1Bytes, getSalt, setDbKe
 import {defaultColors} from "./font.js";
 import {defaultSyncSeconds} from "./gdrive.js";
 import {getNow} from "./nav.js";
-import {o, showBanner, warn} from "./ui.js";
+import {fatal, warn} from "./ui.js";
 import {createOp, getRevertedOp} from "./undo.js";
 
 /// idb, stores, conf, mem
@@ -93,11 +93,11 @@ const onDbError = (event) => {
   throw event.target.error;
 };
 
-const updateAppVersion = () => {
-  showBanner({}, "Updating...");
+const updateAppVersion = async () => {
   setTimeout(() => {
     location.reload();
   }, 1000);
+  await fatal("Updating...");
 };
 
 /// Load from db to mem.
@@ -108,10 +108,10 @@ export const load = async (passphrase) => await new Promise(async (doneLoading) 
 
   /// onerror while opening
 
-  openingDb.onerror = (event) => {
+  openingDb.onerror = async (event) => {
     const error = event.target.error;
     if (error.name === "VersionError") {
-      updateAppVersion();
+      await updateAppVersion();
     } else throw error;
   };
 

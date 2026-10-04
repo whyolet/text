@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {o, onClick, getRestartButton, showBanner, ui} from "./ui.js";
+import {fatal, mi, ui} from "./ui.js";
 
-const onError = (event) => {
+const onError = async (event) => {
 
   /// details
 
@@ -34,46 +34,25 @@ event.reason && event.reason.stack ||
 ""
 }`;
 
-  /// copyButton
+  /// fatal
 
-  const copyButton = o(".rounded button",
-    o(".icon", "content_copy"),
-    " Copy details to clipboard",
-  );
-
-  onClick(copyButton, () => {
-    navigator.clipboard.writeText(details);
-  });
-
-  /// sendButton
-
-  const sendButton = o(".rounded button",
-    o(".icon", "send"),
-    " Send details by email",
-  );
-
-  onClick(sendButton, () => {
-    location.href = (
-      ui.supportHref +
-      "&body=" +
-      encodeURIComponent(details)
-    );
-  });
-
-  /// banner
-
-  showBanner({},
+  await fatal(
     "Error!",
-    o("",
-      "Please help to fix it", o("br"),
-      "by sending details to", o("br"),
-      o("b", ui.supportEmail),
-    ),
-    o("",
-      copyButton,
-      sendButton,
-      getRestartButton(),
-    ),
+    `
+Please help to fix it
+by sending details to
+${ui.supportEmail}
+    `,
+    mi("content_copy", "Copy details to clipboard", () => {
+      navigator.clipboard.writeText(details);
+    }),
+    mi("send", "Send details by email", () => {
+      location.href = (
+        ui.supportHref +
+        "&body=" +
+        encodeURIComponent(details)
+      );
+    }),
   );
 };
 
