@@ -493,7 +493,6 @@ export const fatal = async (header, details, ...options) => {
   ui.isActive = false;
   db.close();
 
-  options ??= [];
   options.push(mi("refresh", "Restart", () => {
     location.reload();
   }, true));

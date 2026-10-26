@@ -315,6 +315,11 @@ export const onOpenTag = async () => {
     insert += tag;
   }
 
+  if (tag && isLink(tag)) {
+    open(tag);
+    return;
+  }
+
   if (insert) {
     mem.protectedLength += insert.length;
     ui.ta.setRangeText(insert, start, start);
@@ -345,7 +350,24 @@ export const detectTag = (text, cursor) => {
     end,
     withFolder,
   };
-}
+};
+
+/// isLink
+
+const isLink = (s) => {
+  if (
+    URL.canParse &&
+    !URL.canParse(s)
+  ) return false;
+
+  try {
+    new URL(s);
+  } catch {
+    return false;
+  }
+
+  return true;
+};
 
 /// onBack
 
