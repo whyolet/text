@@ -430,8 +430,8 @@ const authFetch = async (url, options) => {
   try {
     response = await fetch(url, fetchOptions);
   } catch (error) {
-    // E.g. network error "Failed to fetch": toast-inform and retry later after syncSeconds.
-    toast(error.message, {
+    // E.g. transient network error "Failed to fetch": toast-inform and retry later after syncSeconds.
+    toast(userFriendly[error.message] ?? error.message, {
       warn: true,
     });
     return null;
@@ -446,7 +446,29 @@ const authFetch = async (url, options) => {
     return null;
   }
 
+  if (
+    response.status === 403 ||
+    response.status === 429
+  ) {
+    toast("Too many syncs, later", {
+      warn: true,
+    });
+    return null;
+  }
+
+  if (response.status >= 500) {
+    toast(`GDrive downtime, sync later`, {
+      warn: true,
+    });
+    return null;
+  }
+
+  // Unexpected, report to fix asap.
   throw Error(await response.text());
+};
+
+const userFriendly = {
+  "Failed to fetch": "Offline, sync later",
 };
 
 /// askClick, dontAskClick
