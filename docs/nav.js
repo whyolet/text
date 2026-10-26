@@ -96,7 +96,7 @@ in another tab.
 /// onMessage
 
 const onMessage = (event) => {
-  if (event.origin !== location.origin) return;
+  if (event.origin !== location.origin || !ui.isActive) return;
 
   if (event.data.type === "oauth-redirect") {
     onRedirect(event.data.hash);
@@ -184,7 +184,7 @@ export const openScreen = async (type, props) => {
 /// onSetState
 
 const onSetState = async (event) => {
-  if (!event.state) return;
+  if (!event.state || !ui.isActive) return;
 
   const isBackOrForward = event.type === "popstate";
 
@@ -201,9 +201,6 @@ const onSetState = async (event) => {
     (ui.overlay || event.state.screenId === ui.bedrock)
   ) {
     closeDialog();
-
-    // If `fatal` then prevent `back/forward` below from aborting `reload`.
-    if (!ui.isActive) return;
 
     const isBack = event.state.depth < depth;
 

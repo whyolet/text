@@ -43,7 +43,7 @@ export const detectGestures = (el, handlers) => {
 
 const onPointerDown = (event) => {
   const state = states.get(event.currentTarget);
-  if (!state || !event.isPrimary) return;
+  if (!state || !event.isPrimary || !ui.isActive) return;
 
   state.startX = state.endX = event.clientX;
   state.startY = state.endY = event.clientY;
@@ -54,7 +54,7 @@ const onPointerDown = (event) => {
 
 const onPointerMove = (event) => {
   const state = states.get(event.currentTarget);
-  if (!state || !event.isPrimary) return;
+  if (!state || !event.isPrimary || !ui.isActive) return;
 
   state.endX = event.clientX;
   state.endY = event.clientY;
@@ -64,7 +64,7 @@ const onPointerMove = (event) => {
 
 const onPointerUp = (event) => {
   const state = states.get(event.currentTarget);
-  if (!state || !event.isPrimary) return;
+  if (!state || !event.isPrimary || !ui.isActive) return;
 
   const {handlers, startX, startY, startT, endX, endY} = state;
 

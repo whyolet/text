@@ -407,7 +407,7 @@ const onZen = () => {
 /// onSelChange
 
 const onSelChange = () => {
-  if (document.activeElement !== ui.ta) return;
+  if (document.activeElement !== ui.ta || !ui.isActive) return;
 
   checkProtectedTag();
   updateLineFormOnSelChange();
@@ -482,6 +482,8 @@ const onBeforeInput = () => {
 }
 
 const onInput = () => {
+  if (!ui.isActive) return;
+
   autoindent();
   debounce("save", 1000, save);
 };

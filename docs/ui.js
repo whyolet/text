@@ -174,6 +174,8 @@ export const ib = (
 
   const onTimer = async () => {
     isLong = true;
+    if (!ui.isActive) return;
+
     await start();
     if (longStart) await longStart();
     await (longAction ?? action)();
@@ -188,7 +190,7 @@ export const ib = (
 
   const endClick = async () => {
     clearTimeout(timerId);
-    if (isLong) return;
+    if (isLong || !ui.isActive) return;
 
     await start();
     await action();
@@ -216,7 +218,7 @@ export const getDateInput = (onSet) => {
 
   on(el, "change", () => {
     const date = el.value;
-    if (!date || date === mem.page.tag) return;
+    if (!date || date === mem.page.tag || !ui.isActive) return;
 
     onSet(date);
   });
@@ -359,6 +361,8 @@ export const input = (defaultValue, props) => {
   });
 
   on(ui.dialogInput, "keydown", (e) => {
+    if (!ui.isActive) return;
+
     if (e.key === "Enter") {
       reply(ui.dialogInput.value);
     } else if (e.key === "Escape") closeDialog();

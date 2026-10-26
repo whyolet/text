@@ -72,6 +72,8 @@ export const openSearch = () => {
 /// onSearchInput
 
 const onSearchInput = () => {
+  if (!ui.isActive) return;
+
   const items = [];
   const query = ui.searchInput.value;
   mem.searchQuery = query;

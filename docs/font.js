@@ -240,6 +240,7 @@ export const setColors = (el, colors) => {
 
 const saveZoom = async (props) => {
   const {add = 0} = props ?? {};
+  if (!ui.isActive) return;
 
   const zoom = getInt({
     oldValue: mem.zoom,
