@@ -86,7 +86,6 @@ export const ui = {
   appName: "Whyolet Text",
   bedrock: "bedrock",
   body: document.body,
-  ignoreForward: false,
   isActive: true,
   supportEmail: "support@whyolet.com",
 };

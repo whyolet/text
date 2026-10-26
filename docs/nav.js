@@ -33,6 +33,9 @@ import {ask, closeDialog, enter, fatal, getDateInput, debounce, hide, hideOverla
 export const folder = "📂";
 const folderCodePoint = folder.codePointAt(0);
 
+let depth = 0;
+let ignoreBackOrForward = 0;
+
 /// getNow in UTC
 
 export const getNow = () => (new Date()).toISOString();
@@ -107,12 +110,17 @@ export const openFirstScreen = async () => {
 
   const replace = !!(
     history.state &&
-    history.state !== ui.bedrock
+    history.state.screenId !== ui.bedrock
   );
 
-  if (!history.state) {
-    history.replaceState(ui.bedrock, "");
-    // `openScreen` will `pushState` so we will have at least two states to always detect "Back" to close a dialog, if any.
+  if (history.state) {
+    depth = history.state.depth ?? 0;
+  } else {
+    history.replaceState({
+      depth,
+      screenId: ui.bedrock,
+    }, "");
+    // `openScreen` will `pushState` so we will have at least two states to detect "Back".
   }
 
   await openScreen(screenTypes.page, {
@@ -147,57 +155,70 @@ export const screenTypes = Object.seal({
 
 export const openScreen = async (type, props) => {
   const {replace, historyOnly} = props ?? {};
-  if (replace) delete props.replace;
-  if (historyOnly) delete props.historyOnly;
+  delete props.replace;
+  delete props.historyOnly;
 
   const screenId = getId();
   mem.screens[screenId] = {type, props};
 
   if (replace) {
-    history.replaceState(screenId, "");
+    history.replaceState({
+      depth,
+      screenId,
+    }, "");
   } else {
-    history.pushState(screenId, "");
+    depth++;
+    history.pushState({
+      depth,
+      screenId,
+    }, "");
   }
 
   // `pushState/replaceState` never triggers `popstate/onSetState`, so we do.
-  if (!historyOnly) await onSetState({state: screenId});
+  if (!historyOnly) await onSetState({state: {
+    depth,
+    screenId,
+  }});
 };
 
 /// onSetState
 
 const onSetState = async (event) => {
+  if (!event.state) return;
+
   const isBackOrForward = event.type === "popstate";
 
   if (
     isBackOrForward &&
-    ui.ignoreForward
+    ignoreBackOrForward > 0
   ) {
-    ui.ignoreForward = false;
+    ignoreBackOrForward--;
     return;
   }
 
   if (
     isBackOrForward &&
-    ui.overlay
+    (ui.overlay || event.state.screenId === ui.bedrock)
   ) {
     closeDialog();
 
-    // `forward` below aborted `reload` after `fatal`, prevent it.
+    // If `fatal` then prevent `back/forward` below from aborting `reload`.
     if (!ui.isActive) return;
 
-    // Restore history after "Back" closed the dialog.
-    ui.ignoreForward = true;
-    history.forward();
+    const isBack = event.state.depth < depth;
+
+    // Restore history states to detect "Back".
+    ignoreBackOrForward++;
+    if (isBack) {
+      history.forward();
+    } else history.back();
     return;
   }
 
-  const screenId = event.state;
+  depth = event.state.depth;
+
+  const {screenId} = event.state;
   if (!screenId) return;
-
-  if (screenId === ui.bedrock) {
-    history.back();  // Exit.
-    return;
-  }
 
   const screen = mem.screens[screenId];
   if (!screen) return;
