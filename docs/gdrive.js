@@ -20,6 +20,7 @@ import {getId} from "./crypto.js";
 import * as db from "./db.js";
 import {mem} from "./db.js";
 import {getExportedBytes, importBackup, onSetExportPassphrase} from "./file.js";
+import {getNow} from "./nav.js";
 import {choose, enter, getInt, mi, o, toast, ui, warn} from "./ui.js";
 
 export const defaultSyncSeconds = 60;
@@ -137,8 +138,17 @@ export const sync = (props) => {
   if (mem.isSecret) return;
 
   if (mem.syncMode === "auto") {
-    autoSync();
-    return;
+    if (
+      mem.gdriveExpires &&
+      mem.gdriveExpires < getNow()
+    ) {
+      mem.syncMode = "renew";
+      // No `await` to preserve click.
+      db.saveConf(db.conf.syncMode);
+    } else {
+      autoSync();
+      return;
+    }
   }
 
   if (clicked) {
@@ -207,8 +217,7 @@ to confirm Google Drive`,
     return;
   }
 
-  if (params.scope !== scope) return;
-  // No error: not GDrive sync.
+  if (params.scope !== scope) return;  // Not GDrive sync.
 
   if (
     params.state !== mem.nonce ||
@@ -222,6 +231,14 @@ to confirm Google Drive`,
 
   mem.gdriveToken = params.access_token;
   await db.saveConf(db.conf.gdriveToken);
+
+  mem.gdriveExpires = new Date(
+    Date.now() + 1000 * (
+      Number(params.expires_in) -
+      60
+    )
+  ).toISOString();
+  await db.saveConf(db.conf.gdriveExpires);
 
   mem.syncMode = "auto";
   await db.saveConf(db.conf.syncMode);

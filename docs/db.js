@@ -40,6 +40,7 @@ export const conf = Object.seal({
   exportKey1Bytes: "exportKey1Bytes",
   gdriveDownloaded: "gdriveDownloaded",
   gdriveEmail: "gdriveEmail",
+  gdriveExpires: "gdriveExpires",
   gdriveToken: "gdriveToken",
   gdriveUploaded: "gdriveUploaded",
   opIds: "opIds",
@@ -57,6 +58,7 @@ export const mem = Object.seal({
   exportKey1Bytes: null,  // not saved if mem.isSecret
   gdriveDownloaded: null,
   gdriveEmail: null,
+  gdriveExpires: null,
   gdriveToken: null,
   gdriveUploaded: null,
   opIds: null,
@@ -155,6 +157,7 @@ export const load = async (passphrase) => await new Promise(async (doneLoading) 
       loadConf(conf.colors, () => defaultColors),
       loadConf(conf.gdriveDownloaded, () => ""),
       loadConf(conf.gdriveEmail, () => ""),
+      loadConf(conf.gdriveExpires, () => ""),
       loadConf(conf.gdriveToken, () => ""),
       loadConf(conf.gdriveUploaded, () => ""),
       loadConf(conf.pagesUpdated, () => ""),
