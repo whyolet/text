@@ -283,56 +283,57 @@ export const onSelAll = async () => {
 /// onSelLine, updateSel
 
 export const onSelLine = async () => {
-  const {start, end, part, isTa} = getSel({
+  const sel = getSel({
     focused: true,
     withoutExpand: true,
   });
 
-  if (start === end) {
+  /// 1. Select one line without indent.
 
-    /// 1. Select one line without indent.
-
-    updateSel({
+  if (
+    sel.start === sel.end &&
+    await updateSel(sel, {
       withoutIndent: true,
-    });
-  } else {
-    let done = false;
-    if (!/[\r\n]/.test(part)) {
+    })
+  ) return;
 
-      /// 2. Add indent to one line.
+  /// 2. Add indent to one line.
 
-      const sel = updateSel({
-        wholeLines: true,
-      });
-      done = (
-        sel.start !== start ||
-        sel.end !== end
-      );
-    }
-    if (!done) {
+  if (
+    !/[\r\n]/.test(sel.part) &&
+    await updateSel(sel, {
+      wholeLines: true,
+    })
+  ) return;
 
-      /// 3. Keep clicking to add lines to selection.
+  /// 3. Keep clicking to add lines to selection.
 
-      updateSel({
-        wholeLines: true,
-        withNewline: true,
-      });
-      updateSel({
-        wholeLines: true,
-      });
-    }
-  }
+  await updateSel(null, {
+    wholeLines: true,
+    withNewline: true,
+  });
 
-  if (isTa) await save();
+  await updateSel(sel, {
+    wholeLines: true,
+  });
 };
 
-const updateSel = (props) => {
-  const sel = getSel({
+const updateSel = async (oldSel, newProps) => {
+  const newSel = getSel({
     focused: true,
-    ...props,
+    ...newProps,
   });
-  setSel(sel.start, sel.end, {
-    input: sel.input,
+
+  setSel(newSel.start, newSel.end, {
+    input: newSel.input,
   });
-  return sel;
+
+  if (oldSel && (
+    oldSel.start !== newSel.start ||
+    oldSel.end !== newSel.end
+  )) {
+    if (newSel.isTa) await save();
+    return true;
+  }
+  return false;
 };
