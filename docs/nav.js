@@ -155,8 +155,8 @@ export const screenTypes = Object.seal({
 
 export const openScreen = async (type, props) => {
   const {replace, historyOnly} = props ?? {};
-  delete props.replace;
-  delete props.historyOnly;
+  delete props?.replace;
+  delete props?.historyOnly;
 
   const screenId = getId();
   mem.screens[screenId] = {type, props};
