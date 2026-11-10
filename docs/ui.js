@@ -86,6 +86,7 @@ export const ui = {
   appName: "Whyolet Text",
   bedrock: "bedrock",
   body: document.body,
+  themeColor: document.querySelector('meta[name="theme-color"]'),
   isActive: true,
   supportEmail: "support@whyolet.com",
 };

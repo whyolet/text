@@ -228,11 +228,16 @@ export const setColors = (el, colors) => {
   el ??= document.documentElement;
   colors ??= mem.colors;
   const colorValues = colors.split("-");
+
   for (let i = 0; i < colorNames.length; i++) {
-    el.style.setProperty(
-      "--" + colorNames[i],
-      "#" + colorValues[i],
-    );
+    const name = colorNames[i];
+    const value = "#" + colorValues[i];
+    el.style.setProperty(`--${name}`, value);
+
+    if (
+      name === "background" &&
+      el === document.documentElement
+    ) ui.themeColor.content = value;
   }
 };
 
