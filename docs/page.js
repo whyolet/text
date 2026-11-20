@@ -340,7 +340,7 @@ const onHeader = async () => {
 
       if (
         start > 0 &&
-        !/\s/.test(page.text.charAt(start - 1))
+        !/\s/.test(page.text[start - 1])
       ) {
         start++;
         continue;
@@ -349,7 +349,7 @@ const onHeader = async () => {
       const stop = start + query.length;
       if (
         stop < page.text.length &&
-        !/\s/.test(page.text.charAt(stop))
+        !/\s/.test(page.text[stop])
       ) {
         start++;
         continue;
@@ -432,7 +432,7 @@ const checkProtectedTag = () => {
 
   const cursorIsSpace = (
     cursor === text.length ||
-    /\s/.test(text.charAt(cursor))
+    /\s/.test(text[cursor])
   );
 
   const {start, end, withFolder} = detectTag(text, cursor);

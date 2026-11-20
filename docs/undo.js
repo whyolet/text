@@ -47,14 +47,13 @@ export const createOp = (newPage, props) => {
 
     while (
       head < minLength &&
-      oldText.charAt(head) ==
-      newText.charAt(head)
+      oldText[head] == newText[head]
     ) head++;
 
     while (
       tail < minLength - head &&
-      oldText.charAt(oldText.length - 1 - tail) ==
-      newText.charAt(newText.length - 1 - tail)
+      oldText[oldText.length - 1 - tail] ==
+      newText[newText.length - 1 - tail]
     ) tail++;
 
     at = head;

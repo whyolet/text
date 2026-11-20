@@ -47,7 +47,7 @@ export const autoindent = () => {
   if (
     i !== ui.ta.selectionEnd ||
     i === 0 ||
-    !"\r\n".includes(text.charAt(i - 1))
+    !"\r\n".includes(text[i - 1])
   ) return;
 
   const [
