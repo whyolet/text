@@ -341,7 +341,12 @@ export const detectTag = (text, cursor) => {
   const tail = text.slice(cursor);
 
   const start = head.search(/\S*$/);
-  const end = cursor + tail.match(/\S*/)[0].length;
+  let end = cursor + tail.match(/\S*/)[0].length;
+
+  if (
+    end > start &&
+    text[end - 1] === ':'
+  ) end--;
 
   const withFolder = text.codePointAt(start) === folderCodePoint;
 
