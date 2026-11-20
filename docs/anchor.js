@@ -19,44 +19,51 @@
 import {mem} from "./db.js";
 import {save} from "./page.js";
 import {setSel} from "./sel.js";
-import {ui} from "./ui.js";
+import {toast, ui} from "./ui.js";
 
 /// anchor
 
 export const anchor = "⚓";
+const anchorCodePoint = anchor.codePointAt(0);
 
-/// onAnchor
+/// onFindAnchor
 
-export const onAnchor = async () => {
+export const onFindAnchor = async () => {
   const {text, selStart} = mem.page;
-  const i = text.indexOf(anchor);
-
-  /// Add
+  let i = text.indexOf(anchor, selStart + 1);
 
   if (i === -1) {
-    await onAddAnchor();
-    return;
+    i = text.indexOf(anchor);
+    if (i === -1) {
+      toast("Not found! Hold ⚓", {warn: true});
+      return;
+    }
+    toast(i === selStart ?
+      "Found this ⚓ only"
+      : "Found the first ⚓"
+    );
   }
+
+  setSel(i, i + 1);
+  await save();
+};
+
+/// onToggleAnchor
+
+export const onToggleAnchor = async () => {
+  const {text, selStart} = mem.page;
 
   /// Del
 
-  if (i === selStart) {
+  if (text.codePointAt(selStart) === anchorCodePoint) {
     ui.ta.setRangeText("", selStart, selStart + 1);
     setSel(selStart);
     await save();
     return;
   }
 
-  /// Find
+  /// Add
 
-  setSel(i, i + 1);
-  await save();
-};
-
-/// onAddAnchor
-
-export const onAddAnchor = async () => {
-  const {selStart} = mem.page;
   ui.ta.setRangeText(anchor, selStart, selStart);
   setSel(selStart, selStart + 1);
   await save();

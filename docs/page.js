@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {anchor, onAddAnchor, onAnchor} from "./anchor.js";
+import {anchor, onFindAnchor, onToggleAnchor} from "./anchor.js";
 import {onCut, onCopy, onPaste} from "./clipboard.js";
 import {getId} from "./crypto.js";
 import * as db from "./db.js";
@@ -76,8 +76,8 @@ export const initPageUI = () => {
       focused: true,
     }),  // Ctrl+Shift+F
     ib("find_in_page", "f", onFindForm),  // Ctrl+F
-    ib("anchor", "j", onAnchor, {
-      longAction: onAddAnchor,
+    ib("anchor", "j", onFindAnchor, {
+      longAction: onToggleAnchor,
     }),  // Jump, "j" looks like an anchor
 
     /// center
