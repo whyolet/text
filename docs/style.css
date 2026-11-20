@@ -229,6 +229,14 @@ b {
   height: 1px;
 }
 
+.in {
+  padding-left: var(--icon);
+}
+
+.scrollable {
+  overflow-y: auto;
+}
+
 /** header **/
 
 .header {

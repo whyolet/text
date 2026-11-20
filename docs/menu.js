@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import {onTricks} from "./gesture.js";
 import {onSyncMenu} from "./gdrive.js";
-import {onBackupMenu, onPageExport, onPageImport, onSetExportPassphrase} from "./file.js";
+import {onBackupMenu, onPageExport, onPageImport} from "./file.js";
 import {onColors, onFontForm} from "./font.js";
 import {onLineForm} from "./line.js";
 import {getPersisted, onLocalData} from "./local.js";
@@ -38,6 +39,7 @@ export const onMenu = async () => {
     mi("123", "Line number", onLineForm),
     mi("format_size", "Font size", onFontForm),
     mi("palette", "Colors", onColors),
+    mi("stars", "Tricks", onTricks),
     mi("help", "About", () => open("https://whyolet.com/text/", "_blank")),
   );
   if (!action) return;
