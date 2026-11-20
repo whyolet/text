@@ -487,11 +487,10 @@ will not be moved.`
 /// onMoveToNext, onMoveToDate, onMoveToDateInput
 
 export const onMoveToNext = async () => {
-  const {tag} = mem.page;
   const nextDate = getNextDate({
     forward: true,
   }) ?? getToday();
-  onMoveToDateInput(nextDate);
+  await onMoveToDateInput(nextDate);
 };
 
 export const onMoveToDate = () => {

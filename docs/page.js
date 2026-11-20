@@ -347,9 +347,10 @@ const onHeader = async () => {
       }
 
       const stop = start + query.length;
+      const after = page.text[stop] === ":" ? stop + 1 : stop;
       if (
-        stop < page.text.length &&
-        !/\s/.test(page.text[stop])
+        after < page.text.length &&
+        !/\s/.test(page.text[after])
       ) {
         start++;
         continue;
