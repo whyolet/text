@@ -86,6 +86,7 @@ export const ui = {
   appName: "Whyolet Text",
   bedrock: "bedrock",
   body: document.body,
+  drift: 8,
   themeColor: document.querySelector('meta[name="theme-color"]'),
   isActive: true,
   supportEmail: "support@whyolet.com",
@@ -164,17 +165,54 @@ export const ib = (
     icon,
   );
 
-  let timerId, isLong = false;
+  let timerId, rect, isActive;
 
   const startClick = (event) => {
     event.preventDefault();  // To keep focus on input after `pointerup`.
-    isLong = false;
+    if (event.button || !event.isPrimary) return;
+
+    const r = el.getBoundingClientRect();
+    rect = {
+      left: r.left - ui.drift,
+      top: r.top - ui.drift,
+      right: r.right + ui.drift,
+      bottom: r.bottom + ui.drift,
+    };
+
+    isActive = true;
     clearTimeout(timerId);
     timerId = setTimeout(onTimer, 500);
   };
 
+  const moveClick = (event) => {
+    if (!isActive || !rect || !event.isPrimary) return;
+
+    const {
+      clientX: x,
+      clientY: y,
+    } = event;
+
+    // `pointerleave` is not fired on touch inputs
+    // due to implicit pointer capture, so:
+    if (
+      x < rect.left ||
+      x > rect.right ||
+      y < rect.top ||
+      y > rect.bottom
+    ) cancelClick(event);
+  };
+
+  const cancelClick = (event) => {
+    if (!event.isPrimary) return;
+
+    isActive = false;
+    clearTimeout(timerId);
+  };
+
   const onTimer = async () => {
-    isLong = true;
+    if (!isActive) return;
+
+    isActive = false;
     if (!ui.isActive) return;
 
     await start();
@@ -189,22 +227,22 @@ export const ib = (
     if (input === ui.ta) await save();
   };
 
-  const endClick = async () => {
+  const endClick = async (event) => {
+    if (!isActive || !event.isPrimary) return;
+
+    isActive = false;
     clearTimeout(timerId);
-    if (isLong || !ui.isActive) return;
+    if (!ui.isActive) return;
 
     await start();
     await action();
   };
 
-  const cancelClick = () => {
-    clearTimeout(timerId);
-  };
-
   on(el, "pointerdown", startClick);
-  on(el, "pointerup", endClick);
+  on(el, "pointermove", moveClick);
   on(el, "pointerleave", cancelClick);
   on(el, "pointercancel", cancelClick);
+  on(el, "pointerup", endClick);
   on(el, "contextmenu", (event) => event.preventDefault());
 
   return el;
