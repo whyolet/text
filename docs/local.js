@@ -18,7 +18,7 @@
 
 import * as db from "./db.js";
 import {mem} from "./db.js";
-import {btn, closable, dialog, fatal, enter, o, onClick, say, warn} from "./ui.js";
+import {btn, closable, d, dialog, fatal, enter, o, onClick, say, warn} from "./ui.js";
 
 /// isPersistSupported
 
@@ -54,12 +54,12 @@ export const onLocalData = async () => {
   const action = await dialog(
     closable("Local data"),
     persisted ? [
-      o("", "Good news: your web browser has agreed not to delete your local data."),
-      o("", "However, to be safe, use the menu to backup or sync your data."),
+      d("Good news: your web browser has agreed not to delete your local data."),
+      d("However, to be safe, use the menu to backup or sync your data."),
     ] : [
-      o("", "Bad news: your web browser plans to delete your local data."),
-      o("", 'To avoid this, click "Install app" or "Add to Home Screen" in the browser menu, and open the installed app.'),
-      o("",
+      d("Bad news: your web browser plans to delete your local data."),
+      d('To avoid this, click "Install app" or "Add to Home Screen" in the browser menu, and open the installed app.'),
+      d(
         'If you still see this warning, please request "Notification" permission ',
         o("a", {
           href: "https://web.dev/articles/persistent-storage#how_is_permission_granted",
@@ -75,8 +75,8 @@ export const onLocalData = async () => {
     ],
     o(".hr"),
     o("b", "DANGER ZONE"),
-    o("", "If you remove this web app from the home screen, your local data may be deleted or kept. This depends on your web browser and OS."),
-    o("", "If you use the button below, there is no way back, unless you have a backup file, or a recent sync, or another device with this data."),
+    d("If you remove this web app from the home screen, your local data may be deleted or kept. This depends on your web browser and OS."),
+    d("If you use the button below, there is no way back, unless you have a backup file, or a recent sync, or another device with this data."),
     btn(
       "delete_forever",
       "Delete your local data",

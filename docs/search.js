@@ -20,7 +20,7 @@ import * as db from "./db.js";
 import {mem} from "./db.js";
 import {isDateTag, openScreen, screenTypes} from "./nav.js";
 import {getQueryFromSel} from "./sel.js";
-import {hide, ib, o, on, onClick, ui} from "./ui.js";
+import {hide, ib, ic, o, on, onClick, ui} from "./ui.js";
 
 /// addToRecentTags
 
@@ -44,7 +44,7 @@ export const initSearchUI = () => {
   ui.found = o(".items");
 
   ui.search = o(".search",
-    o(".icon", "search"),
+    ic("search"),
     ui.searchInput,
     ib("close", "x", onClearOrBack),
     ui.found,
@@ -100,7 +100,7 @@ const onSearchInput = () => {
 
   } else {
     items.push(o(".item header",
-      o(".icon", "history"),
+      ic("history"),
       "Recent",
     ));
 
@@ -138,7 +138,7 @@ const onSearchInput = () => {
 
 const addHeader = (items, icon, text) => {
   items.push(o(".item header",
-    o(".icon", icon),
+    ic(icon),
     text,
   ));
 };

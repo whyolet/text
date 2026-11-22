@@ -80,6 +80,12 @@ export const o = (tag_cls, ...kids) => {
   return el;
 };
 
+/// div and icon
+
+export const d = (...kids) => o("", ...kids);
+
+export const ic = (name) => o(".icon", name);
+
 /// UI elements and data.
 
 export const ui = {
@@ -444,7 +450,7 @@ export const btn = (icon, text, getResult, closer) => {
     ".rounded button" + (
       closer ? " closer" : ""
     ),
-    icon ? o(".icon", icon) : null,
+    icon ? ic(icon) : null,
     icon ? ` ${text}` : text,
   );
   onClick(el, () => reply(getResult()));
@@ -517,9 +523,7 @@ const getItem = (option) => {
       ".item button" + (
         option.closer ? " closer" : ""
       ),
-      option.icon ?
-        o(".icon", option.icon)
-        : null,
+      option.icon ? ic(option.icon) : null,
       option.text,
     );
 };

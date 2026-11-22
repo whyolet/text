@@ -21,7 +21,7 @@ import {mem} from "./db.js";
 import {hideAtticForms} from "./nav.js";
 import {save} from "./page.js";
 import {getSel} from "./sel.js";
-import {choose, enter, getInt, ib, isHidden, hide, show, isCollapsed, collapse, expand, o, on, toast, ui} from "./ui.js";
+import {choose, enter, getInt, ib, ic, isHidden, hide, show, isCollapsed, collapse, expand, o, on, toast, ui} from "./ui.js";
 
 /// initFontUI
 
@@ -99,7 +99,7 @@ Customize...,,
       if (isCurrent) found = true;
 
       const item = o(".item button",
-        o(".icon", isCurrent ? "radio_button_checked" : "radio_button_unchecked"),
+        ic(isCurrent ? "radio_button_checked" : "radio_button_unchecked"),
         head,
         " ",
         o("span.active", tail),
