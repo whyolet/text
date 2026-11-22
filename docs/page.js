@@ -71,6 +71,7 @@ export const initPageUI = () => {
 
     ib("calendar_month", "g", onOpenDateOrToday, {
       longAction: onOpenDate,
+      longNeedsUserActivation: true,
     }),  // Go to date
     ib("search", "F", onSearch, {
       focused: true,
@@ -93,6 +94,7 @@ export const initPageUI = () => {
     }),
     ib("send", "n", onMoveToNext, {
       longAction: onMoveToDate,
+      longNeedsUserActivation: true,
     }),
     ib("south", "d", onMoveDown, {
       longAction: onMoveToBottom,

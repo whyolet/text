@@ -111,8 +111,13 @@ export const onTricks = async () => await say(
     ),
     d(
       d(ic("send")),
-      dd("Tap", "Send to the next day"),
-      dd("Hold", "Send to selected date"),
+      dd("Tap", "Move to the next day"),
+      dd("Hold", "Move to selected date"),
+    ),
+    d(
+      d(ic("calendar_month")),
+      dd("Tap", "Open today or selected date"),
+      dd("Hold", "Open selected date"),
     ),
     d(
       d(ic("variables")),

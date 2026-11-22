@@ -156,6 +156,7 @@ export const ib = (
     withoutFocus, // If focus should not be requested.
     longAction, // Different action on long click.
     longStart, // On start of long click.
+    longNeedsUserActivation,
   } = props ?? {};
 
   const el = o(
@@ -171,11 +172,16 @@ export const ib = (
     icon,
   );
 
-  let timerId, rect, isActive;
+  let isActive, rect, longWaitsUserActivation, timerId;
 
   const startClick = (event) => {
     event.preventDefault();  // To keep focus on input after `pointerup`.
-    if (event.button || !event.isPrimary) return;
+
+    if (
+      event.button ||
+      !event.isPrimary ||
+      !ui.isActive
+    ) return;
 
     const r = el.getBoundingClientRect();
     rect = {
@@ -186,12 +192,17 @@ export const ib = (
     };
 
     isActive = true;
+    longWaitsUserActivation = false;
     clearTimeout(timerId);
     timerId = setTimeout(onTimer, 500);
   };
 
   const moveClick = (event) => {
-    if (!isActive || !rect || !event.isPrimary) return;
+    if (
+      !event.isPrimary ||
+      !ui.isActive ||
+      !isActive
+    ) return;
 
     const {
       clientX: x,
@@ -209,18 +220,37 @@ export const ib = (
   };
 
   const cancelClick = (event) => {
-    if (!event.isPrimary) return;
+    if (
+      !event.isPrimary ||
+      !ui.isActive ||
+      !isActive
+    ) return;
 
     isActive = false;
     clearTimeout(timerId);
   };
 
   const onTimer = async () => {
-    if (!isActive) return;
+    if (
+      !ui.isActive ||
+      !isActive
+    ) return;
+
+    if (
+      longNeedsUserActivation &&
+      navigator.userActivation &&
+      !navigator.userActivation.isActive
+    ) {
+      longWaitsUserActivation = true;
+      navigator.vibrate?.(100);
+      return;
+    }
 
     isActive = false;
-    if (!ui.isActive) return;
+    await doLong();
+  };
 
+  const doLong = async () => {
     await start();
     if (longStart) await longStart();
     await (longAction ?? action)();
@@ -234,11 +264,19 @@ export const ib = (
   };
 
   const endClick = async (event) => {
-    if (!isActive || !event.isPrimary) return;
+    if (
+      !event.isPrimary ||
+      !ui.isActive ||
+      !isActive
+    ) return;
 
     isActive = false;
     clearTimeout(timerId);
-    if (!ui.isActive) return;
+
+    if (longWaitsUserActivation) {
+      await doLong();
+      return;
+    }
 
     await start();
     await action();
