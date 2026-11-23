@@ -198,6 +198,13 @@ a,
   border-radius: var(--icon);
 }
 
+.button.icon {
+  width: var(--icon);
+  height: var(--icon);
+  text-align: center;
+  line-height: var(--icon);
+}
+
 .button.rounded {
   padding: var(--gap);
 }
